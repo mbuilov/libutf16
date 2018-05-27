@@ -6,8 +6,10 @@
 
 /* utf8_to_utf16.c */
 
-#include <stddef.h>
-#include <stdint.h>
+#include <stddef.h> /* for size_t */
+#ifndef _MSC_VER
+#include <stdint.h> /* for uint16_t */
+#endif
 #include "sal_defs.h"
 #include "libutf16/utf8_to_utf16.h"
 
