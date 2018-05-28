@@ -11,7 +11,11 @@
 
 #include "utf16_char.h"
 
-#ifndef SAL_DEFS_H_INCLUDED
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Restrict
 #endif
 
@@ -132,6 +136,10 @@ size_t utf16_to_utf8_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *const
 
 #ifndef SAL_DEFS_H_INCLUDED
 #undef A_Restrict
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* UTF16_TO_UTF8_H_INCLUDED */
