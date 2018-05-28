@@ -506,128 +506,122 @@ size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *con
 A_Use_decl_annotations
 size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n)
 {
-	if (n) {
-		/* unsigned integer type must be at least of 32 bits */
-		utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf8_char_t *const qe = q + n;
-		do {
-			unsigned a = q[0];
-			if (a >= 0x80) {
-				unsigned r;
-				if (a >= 0xE0) {
-					if (a >= 0xF0) {
-						if (a >= 0xF8)
-							return 0; /* expecting max 4 utf8 bytes for a unicode code point */
-						if ((size_t)(qe - q) < 4)
-							return 0; /* incomplete utf8 character */
-						r = q[1];
-						if (0x80 != (r & 0xC0))
-							return 0; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
-						r = q[2];
-						if (0x80 != (r & 0xC0))
-							return 0; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
-						r = q[3];
-						if (0x80 != (r & 0xC0))
-							return 0; /* incomplete utf8 character */
-						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
-						if (0x3600000 != (a & 0x3F00000))
-							return 0; /* bad utf8 character */
-						*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-						a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
-						q += 4;
-					}
-					else {
-						if ((size_t)(qe - q) < 3)
-							return 0; /* incomplete utf8 character */
-						r = q[1];
-						if (0x80 != (r & 0xC0))
-							return 0; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
-						r = q[2];
-						if (0x80 != (r & 0xC0))
-							return 0; /* incomplete utf8 character */
-						a = (a << 6) ^ r ^ 0xE2080;
-						/* must not begin or end a surrogate pair */
-						if (!a ||
-							0xD800 == (a & 0xFC00) ||
-							0xDC00 == (a & 0xFC00))
-						{
-							return 0; /* overlong/bad utf8 character */
-						}
-						q += 3;
-					}
-				}
-				else if (a >= 0xC0) {
-					if ((size_t)(qe - q) < 2)
+	/* unsigned integer type must be at least of 32 bits */
+	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	const utf8_char_t *const qe = q + n;
+	while (q != qe) {
+		unsigned a = q[0];
+		if (a >= 0x80) {
+			unsigned r;
+			if (a >= 0xE0) {
+				if (a >= 0xF0) {
+					if (a >= 0xF8)
+						return 0; /* expecting max 4 utf8 bytes for a unicode code point */
+					if ((size_t)(qe - q) < 4)
 						return 0; /* incomplete utf8 character */
 					r = q[1];
 					if (0x80 != (r & 0xC0))
 						return 0; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0x3080;
-					if (!a)
-						return 0; /* overlong utf8 character */
-					q += 2;
+					a = (a << 6) ^ r;
+					r = q[2];
+					if (0x80 != (r & 0xC0))
+						return 0; /* incomplete utf8 character */
+					a = (a << 6) ^ r;
+					r = q[3];
+					if (0x80 != (r & 0xC0))
+						return 0; /* incomplete utf8 character */
+					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+					if (0x3600000 != (a & 0x3F00000))
+						return 0; /* bad utf8 character */
+					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
+					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					q += 4;
 				}
-				else
-					return 0; /* not expecting 10xxxxxx */
+				else {
+					if ((size_t)(qe - q) < 3)
+						return 0; /* incomplete utf8 character */
+					r = q[1];
+					if (0x80 != (r & 0xC0))
+						return 0; /* incomplete utf8 character */
+					a = (a << 6) ^ r;
+					r = q[2];
+					if (0x80 != (r & 0xC0))
+						return 0; /* incomplete utf8 character */
+					a = (a << 6) ^ r ^ 0xE2080;
+					/* must not begin or end a surrogate pair */
+					if (!a ||
+						0xD800 == (a & 0xFC00) ||
+						0xDC00 == (a & 0xFC00))
+					{
+						return 0; /* overlong/bad utf8 character */
+					}
+					q += 3;
+				}
+			}
+			else if (a >= 0xC0) {
+				if ((size_t)(qe - q) < 2)
+					return 0; /* incomplete utf8 character */
+				r = q[1];
+				if (0x80 != (r & 0xC0))
+					return 0; /* incomplete utf8 character */
+				a = (a << 6) ^ r ^ 0x3080;
+				if (!a)
+					return 0; /* overlong utf8 character */
+				q += 2;
 			}
 			else
-				q++;
-			*b++ = (utf16_char_t)a;
-		} while (q != qe);
-		return (size_t)(b - buf); /* ok, >0 */
+				return 0; /* not expecting 10xxxxxx */
+		}
+		else
+			q++;
+		*b++ = (utf16_char_t)a;
 	}
-	return 0; /* n is zero */
+	return (size_t)(b - buf); /* ok, >0 if n > 0 */
 }
 
 A_Use_decl_annotations
 size_t utf8_to_utf16_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n)
 {
-	if (n) {
-		/* unsigned integer type must be at least of 32 bits */
-		utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf8_char_t *const qe = q + n;
-		do {
-			unsigned a = q[0];
-			if (a >= 0x80) {
-				unsigned r;
-				if (a >= 0xE0) {
-					if (a >= 0xF0) {
-						r = q[1];
-						a = (a << 6) ^ r;
-						r = q[2];
-						a = (a << 6) ^ r;
-						r = q[3];
-						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
-						*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-						a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
-						q += 4;
-					}
-					else {
-						r = q[1];
-						a = (a << 6) ^ r;
-						r = q[2];
-						a = (a << 6) ^ r ^ 0xE2080;
-						q += 3;
-					}
+	/* unsigned integer type must be at least of 32 bits */
+	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	const utf8_char_t *const qe = q + n;
+	while (q != qe) {
+		unsigned a = q[0];
+		if (a >= 0x80) {
+			unsigned r;
+			if (a >= 0xE0) {
+				if (a >= 0xF0) {
+					r = q[1];
+					a = (a << 6) ^ r;
+					r = q[2];
+					a = (a << 6) ^ r;
+					r = q[3];
+					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
+					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					q += 4;
 				}
 				else {
 					r = q[1];
-					a = (a << 6) ^ r ^ 0x3080;
-					q += 2;
+					a = (a << 6) ^ r;
+					r = q[2];
+					a = (a << 6) ^ r ^ 0xE2080;
+					q += 3;
 				}
 			}
-			else
-				q++;
-			*b++ = (utf16_char_t)a;
-		} while (q != qe);
-		return (size_t)(b - buf); /* ok, >0 */
+			else {
+				r = q[1];
+				a = (a << 6) ^ r ^ 0x3080;
+				q += 2;
+			}
+		}
+		else
+			q++;
+		*b++ = (utf16_char_t)a;
 	}
-	return 0; /* n is zero */
+	return (size_t)(b - buf); /* ok, >0 if n > 0 */
 }

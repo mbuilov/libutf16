@@ -79,8 +79,7 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 A_Check_return
 A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
-A_Success(return)
-A_When(n, A_At(w, A_Inout) A_At(*w, A_In_reads(n)))
+A_At(w, A_Inout) A_At(*w, A_In_reads(n))
 A_When(n && sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
 #endif
 size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const size_t n);
@@ -95,7 +94,7 @@ A_Check_return
 A_Nonnull_all_args
 A_Success(return)
 A_At(w, A_In_z)
-A_At(buf, A_Post_z A_Post_readable_size(return))
+A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
 #endif
 size_t utf16_to_utf8_z_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf);
 
@@ -104,7 +103,7 @@ size_t utf16_to_utf8_z_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t 
 A_Nonnull_all_args
 A_Ret_range(>,0)
 A_At(w, A_In_z)
-A_At(buf, A_Post_z A_Post_readable_size(return))
+A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
 #endif
 size_t utf16_to_utf8_z_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf);
 
@@ -118,9 +117,8 @@ size_t utf16_to_utf8_z_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *con
 A_Check_return
 A_Nonnull_all_args
 A_When(!n, A_Ret_range(==,0))
-A_Success(return)
-A_When(n, A_At(w, A_In_reads(n)))
-A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
+A_At(w, A_In_reads(n))
+A_At(buf, A_Out A_Post_readable_size(return))
 #endif
 size_t utf16_to_utf8_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf, const size_t n);
 
@@ -129,8 +127,8 @@ size_t utf16_to_utf8_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t *c
 A_Nonnull_all_args
 A_When(!n, A_Ret_range(==,0))
 A_When(n, A_Ret_range(>,0))
-A_When(n, A_At(w, A_In_reads(n)))
-A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
+A_At(w, A_In_reads(n))
+A_At(buf, A_Out A_Post_readable_size(return))
 #endif
 size_t utf16_to_utf8_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf, const size_t n);
 

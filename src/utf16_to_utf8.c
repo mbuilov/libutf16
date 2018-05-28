@@ -346,70 +346,64 @@ size_t utf16_to_utf8_z_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *con
 A_Use_decl_annotations
 size_t utf16_to_utf8_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf, const size_t n)
 {
-	if (n) {
-		/* unsigned integer type must be at least of 32 bits */
-		utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf16_char_t *const we = w + n;
-		do {
-			unsigned c = *w++;
-			if (c >= 0x80) {
-				if (c >= 0x800) {
-					if (0xD800 == (c & 0xFC00)) {
-						unsigned r = (w != we) ? *w : 0u;
-						if (0xDC00 != (r & 0xFC00))
-							return 0; /* bad utf16 surrogate pair: no lower surrogate */
-						w++;
-						c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
-						*b++ = (utf8_char_t)(c >> 18);
-						*b++ = (utf8_char_t)(((c >> 12) | 0x80) & 0xBF);
-					}
-					else if (0xDC00 == (c & 0xFC00))
-						return 0; /* bad utf16 surrogate pair: no high surrogate */
-					else
-						*b++ = (utf8_char_t)((c >> 12) | 0xE0);
-					*b++ = (utf8_char_t)(((c >> 6) | 0x80) & 0xBF);
+	/* unsigned integer type must be at least of 32 bits */
+	utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	const utf16_char_t *const we = w + n;
+	while (w != we) {
+		unsigned c = *w++;
+		if (c >= 0x80) {
+			if (c >= 0x800) {
+				if (0xD800 == (c & 0xFC00)) {
+					unsigned r = (w != we) ? *w : 0u;
+					if (0xDC00 != (r & 0xFC00))
+						return 0; /* bad utf16 surrogate pair: no lower surrogate */
+					w++;
+					c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
+					*b++ = (utf8_char_t)(c >> 18);
+					*b++ = (utf8_char_t)(((c >> 12) | 0x80) & 0xBF);
 				}
+				else if (0xDC00 == (c & 0xFC00))
+					return 0; /* bad utf16 surrogate pair: no high surrogate */
 				else
-					*b++ = (utf8_char_t)((c >> 6) | 0xC0);
-				*b++ = (utf8_char_t)((c | 0x80) & 0xBF);
+					*b++ = (utf8_char_t)((c >> 12) | 0xE0);
+				*b++ = (utf8_char_t)(((c >> 6) | 0x80) & 0xBF);
 			}
 			else
-				*b++ = (utf8_char_t)c;
-		} while (w != we);
-		return (size_t)(b - buf); /* ok, >0 */
+				*b++ = (utf8_char_t)((c >> 6) | 0xC0);
+			*b++ = (utf8_char_t)((c | 0x80) & 0xBF);
+		}
+		else
+			*b++ = (utf8_char_t)c;
 	}
-	return 0; /* n is zero */
+	return (size_t)(b - buf); /* ok, >0 if n > 0 */
 }
 
 A_Use_decl_annotations
 size_t utf16_to_utf8_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *const A_Restrict buf, const size_t n)
 {
-	if (n) {
-		/* unsigned integer type must be at least of 32 bits */
-		utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf16_char_t *const we = w + n;
-		do {
-			unsigned c = *w++;
-			if (c >= 0x80) {
-				if (c >= 0x800) {
-					if (0xD800 == (c & 0xFC00)) {
-						unsigned r = *w++;
-						c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
-						*b++ = (utf8_char_t)(c >> 18);
-						*b++ = (utf8_char_t)(((c >> 12) | 0x80) & 0xBF);
-					}
-					else
-						*b++ = (utf8_char_t)((c >> 12) | 0xE0);
-					*b++ = (utf8_char_t)(((c >> 6) | 0x80) & 0xBF);
+	/* unsigned integer type must be at least of 32 bits */
+	utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	const utf16_char_t *const we = w + n;
+	while (w != we) {
+		unsigned c = *w++;
+		if (c >= 0x80) {
+			if (c >= 0x800) {
+				if (0xD800 == (c & 0xFC00)) {
+					unsigned r = *w++;
+					c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
+					*b++ = (utf8_char_t)(c >> 18);
+					*b++ = (utf8_char_t)(((c >> 12) | 0x80) & 0xBF);
 				}
 				else
-					*b++ = (utf8_char_t)((c >> 6) | 0xC0);
-				*b++ = (utf8_char_t)((c | 0x80) & 0xBF);
+					*b++ = (utf8_char_t)((c >> 12) | 0xE0);
+				*b++ = (utf8_char_t)(((c >> 6) | 0x80) & 0xBF);
 			}
 			else
-				*b++ = (utf8_char_t)c;
-		} while (w != we);
-		return (size_t)(b - buf); /* ok, >0 */
+				*b++ = (utf8_char_t)((c >> 6) | 0xC0);
+			*b++ = (utf8_char_t)((c | 0x80) & 0xBF);
+		}
+		else
+			*b++ = (utf8_char_t)c;
 	}
-	return 0; /* n is zero */
+	return (size_t)(b - buf); /* ok, >0 if n > 0 */
 }
