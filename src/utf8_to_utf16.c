@@ -10,8 +10,12 @@
 #ifndef _MSC_VER
 #include <stdint.h> /* for uint16_t */
 #endif
-#include "sal_defs.h"
 #include "libutf16/utf8_to_utf16.h"
+
+#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+#define A_Use_decl_annotations
+#define A_Restrict
+#endif
 
 A_Use_decl_annotations
 size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz)
