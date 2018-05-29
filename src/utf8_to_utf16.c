@@ -60,7 +60,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 							goto small_buf; /* too small output buffer */
 						}
 						*d++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-						a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+						a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					}
 					else {
 						r = s[1];
@@ -240,7 +240,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 								goto small_buf; /* too small output buffer */
 							}
 							*d++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-							a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+							a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 						}
 						else {
 							if ((size_t)(se - s) < 3)
@@ -412,7 +412,7 @@ size_t utf8_to_utf16_z_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t 
 					if (0x3600000 != (a & 0x3F00000))
 						return 0; /* bad utf8 character */
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
@@ -464,32 +464,27 @@ size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *con
 	for (;;) {
 		unsigned a = q[0];
 		if (a >= 0x80) {
-			unsigned r;
-			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r;
+			unsigned r = q[1];
+			a = (a << 6) ^ r;
+			if (a >= (0xE0 << 6)) {
+				r = q[2];
+				a = (a << 6) ^ r;
+				if (a >= (0xF0 << 12)) {
 					r = q[3];
 					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
 					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
 					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
-					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r ^ 0xE2080;
+					a ^= 0xE2080;
 					q += 3;
 				}
 			}
 			else {
-				r = q[1];
-				a = (a << 6) ^ r ^ 0x3080;
+				a ^= 0x3080;
 				q += 2;
 			}
 		}
@@ -536,7 +531,7 @@ size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *c
 					if (0x3600000 != (a & 0x3F00000))
 						return 0; /* bad utf8 character */
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
@@ -590,32 +585,27 @@ size_t utf8_to_utf16_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const
 	while (q != qe) {
 		unsigned a = q[0];
 		if (a >= 0x80) {
-			unsigned r;
-			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r;
+			unsigned r = q[1];
+			a = (a << 6) ^ r;
+			if (a >= (0xE0 << 6)) {
+				r = q[2];
+				a = (a << 6) ^ r;
+				if (a >= (0xF0 << 12)) {
 					r = q[3];
 					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
 					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
 					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
-					r = q[1];
-					a = (a << 6) ^ r;
-					r = q[2];
-					a = (a << 6) ^ r ^ 0xE2080;
+					a ^= 0xE2080;
 					q += 3;
 				}
 			}
 			else {
-				r = q[1];
-				a = (a << 6) ^ r ^ 0x3080;
+				a ^= 0x3080;
 				q += 2;
 			}
 		}
