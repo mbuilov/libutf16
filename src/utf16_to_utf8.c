@@ -47,7 +47,7 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 						c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
 						d += 4;
 						d[-4] = (utf8_char_t)(c >> 18);
-						c = (c & 0x3FFFF) ^ 0x60000;
+						c = (c & 0x3FFFF) | 0x80000;
 					}
 					else if (0xDC00 == (c & 0xFC00)) {
 						*w = s - 1; /* (*w) != 0 */
@@ -58,19 +58,23 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 						m = 2;
 						break; /* too small output buffer */
 					}
-					else
+					else {
 						d += 3;
-					d[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-					c = (c & 0xFFF) ^ 0x1000;
+						c |= 0xE0000;
+					}
+					d[-3] = (utf8_char_t)(c >> 12);
+					c = (c & 0xFFF) | 0x2000;
 				}
 				else if ((size_t)(e - d) < 2) {
 					m = 1;
 					break; /* too small output buffer */
 				}
-				else
+				else {
 					d += 2;
-				d[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-				c = (c & 0x3F) ^ 0x80;
+					c |= 0x3000;
+				}
+				d[-2] = (utf8_char_t)(c >> 6);
+				c = (c & 0x3F) | 0x80;
 			}
 			else
 				d++;
@@ -179,7 +183,7 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 							c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
 							d += 4;
 							d[-4] = (utf8_char_t)(c >> 18);
-							c = (c & 0x3FFFF) ^ 0x60000;
+							c = (c & 0x3FFFF) | 0x80000;
 						}
 						else if (0xDC00 == (c & 0xFC00)) {
 							*w = s - 1; /* (*w) < se */
@@ -190,19 +194,23 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 							m = 2;
 							break; /* too small output buffer */
 						}
-						else
+						else {
 							d += 3;
-						d[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-						c = (c & 0xFFF) ^ 0x1000;
+							c |= 0xE0000;
+						}
+						d[-3] = (utf8_char_t)(c >> 12);
+						c = (c & 0xFFF) | 0x2000;
 					}
 					else if ((size_t)(e - d) < 2) {
 						m = 1;
 						break; /* too small output buffer */
 					}
-					else
+					else {
 						d += 2;
-					d[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-					c = (c & 0x3F) ^ 0x80;
+						c |= 0x3000;
+					}
+					d[-2] = (utf8_char_t)(c >> 6);
+					c = (c & 0x3F) | 0x80;
 				}
 				else
 					d++;
@@ -296,19 +304,23 @@ size_t utf16_to_utf8_z_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t 
 					c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) ^ 0x60000;
+					c = (c & 0x3FFFF) | 0x80000;
 				}
 				else if (0xDC00 == (c & 0xFC00))
 					return 0; /* bad utf16 surrogate pair: no high surrogate */
-				else
+				else {
 					b += 3;
-				b[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-				c = (c & 0xFFF) ^ 0x1000;
+					c |= 0xE0000;
+				}
+				b[-3] = (utf8_char_t)(c >> 12);
+				c = (c & 0xFFF) | 0x2000;
 			}
-			else
+			else {
 				b += 2;
-			b[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-			c = (c & 0x3F) ^ 0x80;
+				c |= 0x3000;
+			}
+			b[-2] = (utf8_char_t)(c >> 6);
+			c = (c & 0x3F) | 0x80;
 		}
 		else
 			b++;
@@ -330,20 +342,24 @@ size_t utf16_to_utf8_z_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *con
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = ((c << 10) ^ (unsigned)(*w++) ^ 0xA0DC00) + 0x10000;
+					c = ((c << 10) ^ (unsigned)*w++ ^ 0xA0DC00) + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) ^ 0x60000;
+					c = (c & 0x3FFFF) | 0x80000;
 				}
-				else
+				else {
 					b += 3;
-				b[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-				c = (c & 0xFFF) ^ 0x1000;
+					c |= 0xE0000;
+				}
+				b[-3] = (utf8_char_t)(c >> 12);
+				c = (c & 0xFFF) | 0x2000;
 			}
-			else
+			else {
 				b += 2;
-			b[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-			c = (c & 0x3F) ^ 0x80;
+				c |= 0x3000;
+			}
+			b[-2] = (utf8_char_t)(c >> 6);
+			c = (c & 0x3F) | 0x80;
 		}
 		else
 			b++;
@@ -373,19 +389,23 @@ size_t utf16_to_utf8_unsafe_out(const utf16_char_t *A_Restrict w, utf8_char_t *c
 					c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) ^ 0x60000;
+					c = (c & 0x3FFFF) | 0x80000;
 				}
 				else if (0xDC00 == (c & 0xFC00))
 					return 0; /* bad utf16 surrogate pair: no high surrogate */
-				else
+				else {
 					b += 3;
-				b[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-				c = (c & 0xFFF) ^ 0x1000;
+					c |= 0xE0000;
+				}
+				b[-3] = (utf8_char_t)(c >> 12);
+				c = (c & 0xFFF) | 0x2000;
 			}
-			else
+			else {
 				b += 2;
-			b[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-			c = (c & 0x3F) ^ 0x80;
+				c |= 0x3000;
+			}
+			b[-2] = (utf8_char_t)(c >> 6);
+			c = (c & 0x3F) | 0x80;
 		}
 		else
 			b++;
@@ -405,20 +425,24 @@ size_t utf16_to_utf8_unsafe(const utf16_char_t *A_Restrict w, utf8_char_t *const
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = ((c << 10) ^ (unsigned)(*w++) ^ 0xA0DC00) + 0x10000;
+					c = ((c << 10) ^ (unsigned)*w++ ^ 0xA0DC00) + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) ^ 0x60000;
+					c = (c & 0x3FFFF) | 0x80000;
 				}
-				else
+				else {
 					b += 3;
-				b[-3] = (utf8_char_t)((c ^ 0xE0000) >> 12);
-				c = (c & 0xFFF) ^ 0x1000;
+					c |= 0xE0000;
+				}
+				b[-3] = (utf8_char_t)(c >> 12);
+				c = (c & 0xFFF) | 0x2000;
 			}
-			else
+			else {
 				b += 2;
-			b[-2] = (utf8_char_t)((c ^ 0x3000) >> 6);
-			c = (c & 0x3F) ^ 0x80;
+				c |= 0x3000;
+			}
+			b[-2] = (utf8_char_t)(c >> 6);
+			c = (c & 0x3F) | 0x80;
 		}
 		else
 			b++;
