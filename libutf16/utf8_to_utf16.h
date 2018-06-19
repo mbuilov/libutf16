@@ -26,13 +26,13 @@ extern "C" {
   sz - free space in output buffer, in utf16_char_t's, if zero - output buffer is not used.
  returns number of stored utf16_char_t's, including terminating 0:
   0     - if utf8 string is invalid,
-  <= sz - 0-terminated utf16 string was successfully stored in output buffer,
+  <= sz - 0-terminated utf16 string was successfully stored in the output buffer,
   > sz  - output buffer is too small, return value is the required buffer size to store
    whole converted utf16 0-terminated string, including the part that is already converted
-   and stored in output buffer, including 0-terminator, in utf16_char_t's;
+   and stored in the output buffer, including 0-terminator, in utf16_char_t's;
  - on success:
   (*q) - points beyond the 0-terminator of input utf8 string,
-  (*b) - points beyond the 0-terminator stored in output buffer;
+  (*b) - points beyond the 0-terminator stored in the output buffer;
  - if output buffer is too small:
   (*q) - if sz == 0, not changed, else - points beyond the last converted (non-0) utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored (non-0) utf16_char_utf16_char_t;
@@ -44,9 +44,10 @@ extern "C" {
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(1)
-A_Success(return)
-A_At(q, A_Inout) A_At(*q, A_In_z)
+A_At(q, A_Inout)
+A_At(*q, A_In_z)
 A_When(sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
+A_When(sz && return && return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
 #endif
 size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz);
 
@@ -63,7 +64,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
    utf16 string, including the part that is already converted and stored in the output buffer, in utf16_char_t's;
  - on success:
   (*q) - points beyond the last source utf8_char_t of input string,
-  (*b) - points beyond the last converted utf16_char_t stored in output buffer;
+  (*b) - points beyond the last converted utf16_char_t stored in the output buffer;
  - if output buffer is too small:
   (*q) - if sz == 0, not changed, else - points beyond the last converted utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored utf16_char_t;
@@ -77,8 +78,10 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 A_Check_return
 A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
-A_At(q, A_Inout) A_At(*q, A_In_reads(n))
+A_At(q, A_Inout)
+A_At(*q, A_In_reads(n))
 A_When(n && sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
+A_When(n && sz && return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
 #endif
 size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const size_t n);
 
