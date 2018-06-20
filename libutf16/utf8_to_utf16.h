@@ -44,10 +44,11 @@ extern "C" {
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(1)
-A_At(q, A_Inout)
+A_At(q, A_Always(A_Inout))
 A_At(*q, A_In_z)
-A_When(sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
-A_When(sz && return && return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
+A_When(sz, A_At(b, A_Always(A_Out)) A_At(*b, A_Writable_elements(sz)))
+A_Success(return)
+A_When(return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
 #endif
 size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz);
 
@@ -78,10 +79,11 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 A_Check_return
 A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
-A_At(q, A_Inout)
+A_At(q, A_Always(A_Inout))
 A_At(*q, A_In_reads(n))
-A_When(n && sz, A_At(b, A_Notnull) A_At(*b, A_Writable_elements(sz)))
-A_When(n && sz && return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
+A_When(n && sz, A_At(b, A_Always(A_Out)) A_At(*b, A_Writable_elements(sz)))
+A_Success(return)
+A_When(return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
 #endif
 size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const size_t n);
 
