@@ -37,16 +37,17 @@ extern "C" {
   (*q) - if sz == 0, not changed, else - points beyond the last converted (non-0) utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored (non-0) utf16_char_utf16_char_t;
  - if input utf8 string is invalid:
-  (*q) - points beyond the last valid utf8_char_t, if output buffer is too small,
-   it may be different from the last successfully converted utf8_char_t,
-   the last valid utf8_char_t is _not_ 0;
-  (*b) - if sz > 0, points beyond the last stored (non-0) utf16_char_t */
+  (*q) - points beyond the last valid utf8_char_t,
+   . if output buffer is too small, the last valid utf8_char_t may be beyond last converted one,
+   . the last valid utf8_char_t is _not_ 0;
+  (*b) - if sz > 0, points beyond the last successfully converted and stored (non-0) utf16_char_t */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(1)
 A_At(q, A_Always(A_Inout))
 A_At(*q, A_In_z)
-A_When(sz, A_At(b, A_Always(A_Out)) A_At(*b, A_Writable_elements(sz)))
+A_When(sz, A_At(b, A_Always(A_Out)))
+A_When(sz, A_At(*b, A_Writable_elements(sz)) A_Always(A_Notvalid))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
 #endif
@@ -70,9 +71,9 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
   (*q) - if sz == 0, not changed, else - points beyond the last converted utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored utf16_char_t;
  - if input utf8 string is invalid:
-  (*q) - points beyond the last valid utf8_char_t, if output buffer is too small,
-   it may be different from the last successfully converted utf8_char_t,
-   the last valid utf8_char_t is _not_ the last character of utf8 string;
+  (*q) - points beyond the last valid utf8_char_t,
+   . if output buffer is too small, the last valid utf8_char_t may be beyond last converted one,
+   . the last valid utf8_char_t is _not_ the last character of utf8 string;
   (*b) - if sz > 0, points beyond the last successfully converted and stored utf16_char_t */
 /* Note: zero utf8_char_t is not treated specially, i.e. conversion do not stops */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -81,7 +82,8 @@ A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
 A_At(q, A_Always(A_Inout))
 A_At(*q, A_In_reads(n))
-A_When(n && sz, A_At(b, A_Always(A_Out)) A_At(*b, A_Writable_elements(sz)))
+A_When(n && sz, A_At(b, A_Always(A_Out)))
+A_When(n && sz, A_At(*b, A_Writable_elements(sz)) A_Always(A_Notvalid))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
 #endif
