@@ -30,13 +30,13 @@ extern "C" {
   > sz  - output buffer is too small, return value is the required buffer size to store
    whole converted utf16 0-terminated string, including the part that is already converted
    and stored in the output buffer, including 0-terminator, in utf16_char_t's;
- - on success:
+ - on success (0 < return <= sz):
   (*q) - points beyond the 0-terminator of input utf8 string,
   (*b) - points beyond the 0-terminator stored in the output buffer;
- - if output buffer is too small:
+ - if output buffer is too small (return > sz):
   (*q) - if sz == 0, not changed, else - points beyond the last converted (non-0) utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored (non-0) utf16_char_utf16_char_t;
- - if input utf8 string is invalid:
+ - if input utf8 string is invalid (return == 0):
   (*q) - points beyond the last valid utf8_char_t,
    . if output buffer is too small, the last valid utf8_char_t may be beyond last converted one,
    . the last valid utf8_char_t is _not_ 0;
@@ -64,13 +64,13 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
   <= sz - all 'n' utf8_char_t's were successfully converted to utf16 ones and stored in the output buffer,
   > sz  - output buffer is too small, return value is the required buffer size to store whole converted
    utf16 string, including the part that is already converted and stored in the output buffer, in utf16_char_t's;
- - on success:
+ - on success (0 < return <= sz):
   (*q) - points beyond the last source utf8_char_t of input string,
   (*b) - points beyond the last converted utf16_char_t stored in the output buffer;
- - if output buffer is too small:
+ - if output buffer is too small (return > sz):
   (*q) - if sz == 0, not changed, else - points beyond the last converted utf8_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored utf16_char_t;
- - if input utf8 string is invalid:
+ - if input utf8 string is invalid (return == 0):
   (*q) - points beyond the last valid utf8_char_t,
    . if output buffer is too small, the last valid utf8_char_t may be beyond last converted one,
    . the last valid utf8_char_t is _not_ the last character of utf8 string;

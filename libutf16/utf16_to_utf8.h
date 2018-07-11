@@ -30,13 +30,13 @@ extern "C" {
   > sz  - output buffer is too small, return value is the required buffer size to store
    whole converted utf8 0-terminated string, including the part that is already converted
    and stored in the output buffer, including 0-terminator, in utf8_char_t's;
- - on success:
+ - on success (0 < return <= sz):
   (*w) - points beyond the 0-terminator of input utf16 string,
   (*b) - points beyond the 0-terminator stored in the output buffer;
- - if output buffer is too small:
+ - if output buffer is too small (return > sz):
   (*w) - if sz == 0, not changed, else - points beyond the last converted (non-0) utf16_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored (non-0) utf8_char_t;
- - if input utf16 string is invalid or too long:
+ - if input utf16 string is invalid or too long (return == 0):
   (*w) - points beyond the last valid utf16_char_t,
    . if output buffer is too small, the last valid utf16_char_t may be beyond last converted one,
    . if input utf16 string is too long, the last valid utf16_char_t is the 0-terminator,
@@ -65,13 +65,13 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
   <= sz - all 'n' utf16_char_t's were successfully converted to utf8 ones and stored in the output buffer,
   > sz  - output buffer is too small, return value is the required buffer size to store whole converted
    utf8 string, including the part that is already converted and stored in the output buffer, in utf8_char_t's;
- - on success:
+ - on success (0 < return <= sz):
   (*w) - points beyond the last source utf16_char_t of input string,
   (*b) - points beyond the last converted utf8_char_t stored in the output buffer;
- - if output buffer is too small:
+ - if output buffer is too small (return > sz):
   (*w) - if sz == 0, not changed, else - points beyond the last converted utf16_char_t,
   (*b) - if sz == 0, not changed, else - points beyond the last stored utf8_char_t;
- - if input utf16 string is invalid or too long:
+ - if input utf16 string is invalid or too long (return == 0):
   (*w) - points beyond the last valid utf16_char_t,
    . if output buffer is too small, the last valid utf16_char_t may be beyond last converted one,
    . if input utf16 string is too long, the last valid utf16_char_t is the last character of utf16 string,
