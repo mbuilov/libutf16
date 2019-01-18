@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-8 -> UTF-16 characters conversion
-* Copyright (C) 2018 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -46,12 +46,29 @@ A_Check_return
 A_Nonnull_arg(1)
 A_At(q, A_Always(A_Inout))
 A_At(*q, A_In_z)
-A_When(sz, A_At(b, A_Always(A_Out)))
-A_When(sz, A_At(*b, A_Writable_elements(sz)) A_Always(A_Notvalid))
+A_When(!sz, A_Post_satisfies(*q == A_Old(*q)))
+A_When(!sz, A_At(b, A_Maybenull))
+A_When(sz, A_At(b, A_Always(A_Outptr)))
+A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
 #endif
-size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz);
+size_t utf8_to_utf16_z(
+	const utf8_char_t **const q/*in,out,!=NULL*/,
+	utf16_char_t **const b/*in,out,!=NULL if sz>0*/,
+	size_t sz/*0?*/);
+
+/* determine the size (in utf16_char_t's) of resulting converted from
+  utf8 to utf16 0-terminated string, including terminating 0,
+ input:
+  q  - address of the pointer to the beginning of input 0-terminated utf8 string.
+ returns non-zero on success:
+  (*q) - not changed,
+ returns 0 on error:
+  utf8 string is invalid,
+  (*q) - points beyond the last valid utf8_char_t,
+   . the last valid utf8_char_t is _not_ 0 */
+#define utf8_to_utf16_z_size(q/*in,out,!=NULL*/) utf8_to_utf16_z(q, NULL, 0)
 
 /* convert 'n' utf8_char_t's to utf16 ones,
  input:
@@ -80,14 +97,34 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 A_Check_return
 A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
-A_At(q, A_Always(A_Inout))
-A_At(*q, A_In_reads(n))
-A_When(n && sz, A_At(b, A_Always(A_Out)))
-A_When(n && sz, A_At(*b, A_Writable_elements(sz)) A_Always(A_Notvalid))
+A_When(!n, A_At(q, A_Maybenull))
+A_When(n, A_At(q, A_Always(A_Inout)))
+A_When(n, A_At(*q, A_In_reads(n)))
+A_When(n && !sz, A_Post_satisfies(*q == A_Old(*q)))
+A_When(!sz || !n, A_At(b, A_Maybenull))
+A_When(n && sz, A_At(b, A_Always(A_Outptr)))
+A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
 #endif
-size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const size_t n);
+size_t utf8_to_utf16(
+	const utf8_char_t **const q/*in,out,!=NULL if n>0*/,
+	utf16_char_t **const b/*in,out,!=NULL if n>0 && sz>0*/,
+	size_t sz/*0?*/,
+	const size_t n/*0?*/);
+
+/* determine the size (in utf16_char_t's) of resulting buffer needed for converting 'n' utf8_char_t's to utf16 ones,
+ input:
+  q  - address of the pointer to the beginning of input utf8 string,
+  n  - number of utf8_char_t's to convert, if zero - input buffer is not used.
+ returns non-zero on success:
+   (*q) - not changed,
+ returns 0 if 'n' is zero or there is an error:
+  utf8 string is invalid,
+  (*q) - points beyond the last valid utf8_char_t,
+   . the last valid utf8_char_t is _not_ the last character of utf8 string */
+/* Note: zero utf8_char_t is not treated specially, i.e. conversion do not stops */
+#define utf8_to_utf16_size(q/*in,out,!=NULL if n>0*/, n/*0?*/) utf8_to_utf16(q, NULL, 0, n)
 
 /* convert utf8 0-terminated string to utf16 0-terminated one,
   do not check if there is enough space in output buffer, assume it is large enough.
@@ -101,7 +138,9 @@ A_Success(return)
 A_At(q, A_In_z)
 A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
 #endif
-size_t utf8_to_utf16_z_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf);
+size_t utf8_to_utf16_z_unsafe_out(
+	const utf8_char_t *A_Restrict q/*!=NULL,0-terminated*/,
+	utf16_char_t buf[]/*out,!=NULL*/);
 
 /* same as utf8_to_utf16_z_unsafe_out(), but also do not check that input utf8 string is valid */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -110,7 +149,9 @@ A_Ret_range(>,0)
 A_At(q, A_In_z)
 A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
 #endif
-size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf);
+size_t utf8_to_utf16_z_unsafe(
+	const utf8_char_t *A_Restrict q/*!=NULL,0-terminated*/,
+	utf16_char_t buf[]/*out,!=NULL*/);
 
 /* convert 'n' utf8_char_t's to utf16 ones (if 'n' is zero - input and output buffers are not used),
   do not check if there is enough space in output buffer, assume it is large enough.
@@ -122,20 +163,30 @@ size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *con
 A_Check_return
 A_Nonnull_all_args
 A_When(!n, A_Ret_range(==,0))
-A_At(q, A_In_reads(n))
-A_At(buf, A_Out A_Post_readable_size(return))
+A_When(!n, A_At(q, A_Maybenull))
+A_When(!n, A_At(buf, A_Maybenull))
+A_When(n, A_At(q, A_In_reads(n)))
+A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
 #endif
-size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n);
+size_t utf8_to_utf16_unsafe_out(
+	const utf8_char_t *A_Restrict q/*!=NULL if n>0*/,
+	utf16_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
+	const size_t n/*0?*/);
 
 /* same as utf8_to_utf16_unsafe_out(), but also do not check that input utf8 string is valid */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
 A_When(!n, A_Ret_range(==,0))
+A_When(!n, A_At(q, A_Maybenull))
+A_When(!n, A_At(buf, A_Maybenull))
 A_When(n, A_Ret_range(>,0))
-A_At(q, A_In_reads(n))
-A_At(buf, A_Out A_Post_readable_size(return))
+A_When(n, A_At(q, A_In_reads(n)))
+A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
 #endif
-size_t utf8_to_utf16_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n);
+size_t utf8_to_utf16_unsafe(
+	const utf8_char_t *A_Restrict q/*!=NULL if n>0*/,
+	utf16_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
+	const size_t n/*0?*/);
 
 #ifndef SAL_DEFS_H_INCLUDED
 #undef A_Restrict

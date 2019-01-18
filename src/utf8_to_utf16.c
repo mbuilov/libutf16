@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-8 -> UTF-16 characters conversion
-* Copyright (C) 2018 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -383,7 +383,7 @@ bad_utf8_s:
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_z_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf)
+size_t utf8_to_utf16_z_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -457,7 +457,7 @@ size_t utf8_to_utf16_z_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t 
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf)
+size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -499,7 +499,7 @@ size_t utf8_to_utf16_z_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *con
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n)
+size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t buf[], const size_t n)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -577,7 +577,7 @@ size_t utf8_to_utf16_unsafe_out(const utf8_char_t *A_Restrict q, utf16_char_t *c
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t *const A_Restrict buf, const size_t n)
+size_t utf8_to_utf16_unsafe(const utf8_char_t *A_Restrict q, utf16_char_t buf[], const size_t n)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
