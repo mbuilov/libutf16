@@ -146,7 +146,8 @@ size_t utf16_to_utf8_z_unsafe_out(
 	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
 	utf8_char_t buf[]/*out,!=NULL*/);
 
-/* same as utf16_to_utf8_z_unsafe_out(), but also do not check that input utf16 string is valid */
+/* same as utf16_to_utf8_z_unsafe_out(), but also do not check that input utf16 string is valid:
+  returns non-zero stored utf8 string length, including 0-terminator, in utf8_char_t's */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
 A_Ret_range(>,0)
@@ -177,7 +178,8 @@ size_t utf16_to_utf8_unsafe_out(
 	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
 	const size_t n/*0?*/);
 
-/* same as utf16_to_utf8_unsafe_out(), but also do not check that input utf16 string is valid */
+/* same as utf16_to_utf8_unsafe_out(), but also do not check that input utf16 string is valid:
+  returns number of stored utf8_char_t's */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
 A_When(!n, A_Ret_range(==,0))
@@ -189,6 +191,53 @@ A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
 #endif
 size_t utf16_to_utf8_unsafe(
 	const utf16_char_t *A_Restrict w/*!=NULL if n>0*/,
+	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
+	const size_t n/*0?*/);
+
+/* same as utf16_to_utf8_z_unsafe_out(), but return pointer beyond the last valid utf16_char_t:
+ - if input utf16 string is valid, the last valid utf16_char_t is the 0-terminator,
+ - if input utf16 string is invalid, the last valid utf16_char_t is _not_ 0 */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_all_args
+A_Ret_never_null
+A_Success(return != w && !return[-1])
+A_At(w, A_In_z)
+A_At(buf, A_Out A_Post_z)
+#endif
+const utf16_char_t *utf16_to_utf8_z_unsafe_out_r(
+	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
+	utf8_char_t buf[]/*out,!=NULL*/);
+
+/* same as utf16_to_utf8_z_unsafe_out_r(), but also do not check that input utf16 string is valid:
+  returns pointer beyond 0-terminator */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_all_args
+A_Ret_never_null
+A_Post_satisfies(return != w && !return[-1])
+A_At(w, A_In_z)
+A_At(buf, A_Out A_Post_z)
+#endif
+const utf16_char_t *utf16_to_utf8_z_unsafe_r(
+	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
+	utf8_char_t buf[]/*out,!=NULL*/);
+
+/* same as utf16_to_utf8_unsafe_out(), but return pointer beyond the last valid utf16_char_t:
+ - if input utf16 string is valid or 'n' is zero, returns 'w+n',
+ - if input utf16 string is invalid, returned pointer != 'w+n' */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_all_args
+A_When(!n, A_Ret_range(==,w))
+A_When(!n, A_At(w, A_Maybenull))
+A_When(!n, A_At(buf, A_Maybenull))
+A_Success(return == w + n)
+A_When(n, A_At(w, A_In_reads(n)))
+A_When(n, A_At(buf, A_Out))
+#endif
+const utf16_char_t *utf16_to_utf8_unsafe_out_r(
+	const utf16_char_t *A_Restrict w/*!=NUL if n>0*/,
 	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
 	const size_t n/*0?*/);
 
