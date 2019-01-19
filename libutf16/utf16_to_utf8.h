@@ -34,14 +34,14 @@ extern "C" {
   (*w) - points beyond the 0-terminator of input utf16 string,
   (*b) - points beyond the 0-terminator stored in the output buffer;
  - if output buffer is too small (return > sz):
-  (*w) - if sz == 0, not changed, else - points beyond the last converted (non-0) utf16_char_t,
-  (*b) - if sz == 0, not changed, else - points beyond the last stored (non-0) utf8_char_t;
+  (*w) - if sz == 0, not changed, else - points beyond last converted (non-0) utf16_char_t,
+  (*b) - if sz == 0, not changed, else - points beyond last stored (non-0) utf8_char_t;
  - if input utf16 string is invalid or too long (return == 0):
-  (*w) - points beyond the last valid utf16_char_t,
-   . if output buffer is too small, the last valid utf16_char_t may be beyond last converted one,
-   . if input utf16 string is too long, the last valid utf16_char_t is the 0-terminator,
-   . if input utf16 string is invalid, the last valid utf16_char_t is _not_ 0;
-  (*b) - if sz > 0, points beyond the last successfully converted and stored (non-0) utf8_char_t */
+  (*w) - points beyond last valid utf16_char_t,
+   . if output buffer is too small, last valid utf16_char_t may be beyond last converted one,
+   . if input utf16 string is too long, last valid utf16_char_t is the 0-terminator,
+   . if input utf16 string is invalid, last valid utf16_char_t is _not_ 0;
+  (*b) - if sz > 0, points beyond last successfully converted and stored (non-0) utf8_char_t */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(1)
@@ -62,14 +62,14 @@ size_t utf16_to_utf8_z(
 /* determine the size (in utf8_char_t's) of resulting converted from
   utf16 to utf8 0-terminated string, including terminating 0,
  input:
-  w  - address of the pointer to the beginning of input 0-terminated utf16 string.
+  w - address of the pointer to the beginning of input 0-terminated utf16 string.
  returns non-zero on success:
-  (*w) - not changed,
+  (*w) - not changed;
  returns 0 on error:
   utf16 string is invalid or too long,
-  (*w) - points beyond the last valid utf16_char_t,
-   . if input utf16 string is too long, the last valid utf16_char_t is the 0-terminator,
-   . if input utf16 string is invalid, the last valid utf16_char_t is _not_ 0 */
+  (*w) - points beyond last valid utf16_char_t,
+   . if input utf16 string is too long, last valid utf16_char_t is the 0-terminator,
+   . if input utf16 string is invalid, last valid utf16_char_t is _not_ 0 */
 #define utf16_to_utf8_z_size(w/*in,out,!=NULL*/) utf16_to_utf8_z(w, NULL, 0)
 
 /* convert 'n' utf16_char_t's to utf8 ones,
@@ -84,21 +84,20 @@ size_t utf16_to_utf8_z(
   > sz  - output buffer is too small, return value is the required buffer size to store whole converted
    utf8 string, including the part that is already converted and stored in the output buffer, in utf8_char_t's;
  - on success (0 < return <= sz):
-  (*w) - points beyond the last source utf16_char_t of input string,
-  (*b) - points beyond the last converted utf8_char_t stored in the output buffer;
+  (*w) - points beyond last source utf16_char_t of input string,
+  (*b) - points beyond last converted utf8_char_t stored in the output buffer;
  - if output buffer is too small (return > sz):
-  (*w) - if sz == 0, not changed, else - points beyond the last converted utf16_char_t,
-  (*b) - if sz == 0, not changed, else - points beyond the last stored utf8_char_t;
+  (*w) - if sz == 0, not changed, else - points beyond last converted utf16_char_t,
+  (*b) - if sz == 0, not changed, else - points beyond last stored utf8_char_t;
  - if input utf16 string is invalid or too long (return == 0):
-  (*w) - points beyond the last valid utf16_char_t,
-   . if output buffer is too small, the last valid utf16_char_t may be beyond last converted one,
-   . if input utf16 string is too long, the last valid utf16_char_t is the last character of utf16 string,
-   . if input utf16 string is invalid, the last valid utf16_char_t is _not_ the last character of utf16 string;
-  (*b) - if sz > 0, points beyond the last successfully converted and stored utf8_char_t */
+  (*w) - points beyond last valid utf16_char_t,
+   . if output buffer is too small, last valid utf16_char_t may be beyond last converted one,
+   . if input utf16 string is too long, last valid utf16_char_t is the last character of utf16 string,
+   . if input utf16 string is invalid, last valid utf16_char_t is _not_ the last character of utf16 string;
+  (*b) - if sz > 0, points beyond last successfully converted and stored utf8_char_t */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
-A_Nonnull_arg(1)
 A_When(!n, A_Ret_range(==,0))
 A_When(!n, A_At(w, A_Maybenull))
 A_When(n, A_At(w, A_Always(A_Inout)))
@@ -118,128 +117,46 @@ size_t utf16_to_utf8(
 
 /* determine the size (in utf8_char_t's) of resulting buffer needed for converting 'n' utf16_char_t's to utf8 ones,
  input:
-  w  - address of the pointer to the beginning of input utf16 string,
-  n  - number of utf16_char_t's to convert, if zero - input buffer is not used.
+  w - address of the pointer to the beginning of input utf16 string,
+  n - number of utf16_char_t's to convert, if zero - input buffer is not used.
  returns non-zero on success:
-   (*w) - not changed,
+  (*w) - not changed;
  returns 0 if 'n' is zero or there is an error:
   utf16 string is invalid or too long,
-  (*w) - points beyond the last valid utf16_char_t,
-   . if input utf16 string is too long, the last valid utf16_char_t is the last character of utf16 string,
-   . if input utf16 string is invalid, the last valid utf16_char_t is _not_ the last character of utf16 string */
+  (*w) - points beyond last valid utf16_char_t,
+   . if input utf16 string is too long, last valid utf16_char_t is the last character of utf16 string,
+   . if input utf16 string is invalid, last valid utf16_char_t is _not_ the last character of utf16 string */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
 #define utf16_to_utf8_size(w/*in,out,!=NULL if n>0*/, n/*0?*/) utf16_to_utf8(w, NULL, 0, n)
 
-/* convert utf16 0-terminated string to utf8 0-terminated one,
-  do not check if there is enough space in output buffer, assume it is large enough.
- returns number of stored utf8_char_t's, including terminating 0:
-  0    - if utf16 string is invalid,
-  else - stored utf8 string length, including 0-terminator, in utf8_char_t's */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_Success(return)
-A_At(w, A_In_z)
-A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
-#endif
-size_t utf16_to_utf8_z_unsafe_out(
-	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
-	utf8_char_t buf[]/*out,!=NULL*/);
-
-/* same as utf16_to_utf8_z_unsafe_out(), but also do not check that input utf16 string is valid:
-  returns non-zero stored utf8 string length, including 0-terminator, in utf8_char_t's */
+/* for converting remaining part of the source utf16 0-terminating string after calling utf16_to_utf8_z():
+  - assume source string is valid,
+  - do not check if there is enough space in output buffer, assume it is large enough.
+ returns pointer beyond last converted source 0-terminator */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Nonnull_all_args
-A_Ret_range(>,0)
+A_Ret_never_null
 A_At(w, A_In_z)
-A_At(buf, A_Out A_Post_z A_Post_readable_size(return))
+A_At(buf, A_Out A_Post_z)
 #endif
-size_t utf16_to_utf8_z_unsafe(
-	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
+const utf16_char_t *utf16_to_utf8_z_remaining(
+	const utf16_char_t *w/*!=NULL,0-terminated*/,
 	utf8_char_t buf[]/*out,!=NULL*/);
 
-/* convert 'n' utf16_char_t's to utf8 ones, (if 'n' is zero - input and output buffers are not used),
-  do not check if there is enough space in output buffer, assume it is large enough.
- returns number of stored utf8_char_t's:
-  0    - if 'n' is zero or an invalid utf16 character is encountered,
-  else - number of stored utf8_char_t's */
+/* for converting remaining part of the source utf16 string after calling utf16_to_utf8():
+  - assume source string is valid and 'n' is not zero,
+  - do not check if there is enough space in output buffer, assume it is large enough */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
 A_Nonnull_all_args
-A_When(!n, A_Ret_range(==,0))
-A_When(!n, A_At(w, A_Maybenull))
-A_When(!n, A_At(buf, A_Maybenull))
-A_When(n, A_At(w, A_In_reads(n)))
-A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
+A_At(w, A_In_reads(n))
+A_At(buf, A_Out)
+A_At(n, A_In_range(>,0))
 #endif
-size_t utf16_to_utf8_unsafe_out(
-	const utf16_char_t *A_Restrict w/*!=NULL if n>0*/,
-	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
-	const size_t n/*0?*/);
-
-/* same as utf16_to_utf8_unsafe_out(), but also do not check that input utf16 string is valid:
-  returns number of stored utf8_char_t's */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_When(!n, A_Ret_range(==,0))
-A_When(!n, A_At(w, A_Maybenull))
-A_When(!n, A_At(buf, A_Maybenull))
-A_When(n, A_Ret_range(>,0))
-A_When(n, A_At(w, A_In_reads(n)))
-A_When(n, A_At(buf, A_Out A_Post_readable_size(return)))
-#endif
-size_t utf16_to_utf8_unsafe(
-	const utf16_char_t *A_Restrict w/*!=NULL if n>0*/,
-	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
-	const size_t n/*0?*/);
-
-/* same as utf16_to_utf8_z_unsafe_out(), but return pointer beyond the last valid utf16_char_t:
- - if input utf16 string is valid, the last valid utf16_char_t is the 0-terminator,
- - if input utf16 string is invalid, the last valid utf16_char_t is _not_ 0 */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_Ret_never_null
-A_Success(return != w && !return[-1])
-A_At(w, A_In_z)
-A_At(buf, A_Out A_Post_z)
-#endif
-const utf16_char_t *utf16_to_utf8_z_unsafe_out_r(
-	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
-	utf8_char_t buf[]/*out,!=NULL*/);
-
-/* same as utf16_to_utf8_z_unsafe_out_r(), but also do not check that input utf16 string is valid:
-  returns pointer beyond 0-terminator */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_Ret_never_null
-A_Post_satisfies(return != w && !return[-1])
-A_At(w, A_In_z)
-A_At(buf, A_Out A_Post_z)
-#endif
-const utf16_char_t *utf16_to_utf8_z_unsafe_r(
-	const utf16_char_t *A_Restrict w/*!=NULL,0-terminated*/,
-	utf8_char_t buf[]/*out,!=NULL*/);
-
-/* same as utf16_to_utf8_unsafe_out(), but return pointer beyond the last valid utf16_char_t:
- - if input utf16 string is valid or 'n' is zero, returns 'w+n',
- - if input utf16 string is invalid, returned pointer != 'w+n' */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_When(!n, A_Ret_range(==,w))
-A_When(!n, A_At(w, A_Maybenull))
-A_When(!n, A_At(buf, A_Maybenull))
-A_Success(return == w + n)
-A_When(n, A_At(w, A_In_reads(n)))
-A_When(n, A_At(buf, A_Out))
-#endif
-const utf16_char_t *utf16_to_utf8_unsafe_out_r(
-	const utf16_char_t *A_Restrict w/*!=NUL if n>0*/,
-	utf8_char_t buf[/*n*/]/*out,!=NULL if n>0*/,
-	const size_t n/*0?*/);
+void utf16_to_utf8_remaining(
+	const utf16_char_t *w/*!=NULL*/,
+	utf8_char_t buf[]/*out,!=NULL*/,
+	const size_t n/*>0*/);
 
 #ifndef SAL_DEFS_H_INCLUDED
 #undef A_Restrict
