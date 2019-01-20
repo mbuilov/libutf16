@@ -383,7 +383,7 @@ bad_utf8_s:
 }
 
 A_Use_decl_annotations
-const utf8_char_t *utf8_to_utf16_z_remaining(const utf8_char_t *q, utf16_char_t buf[])
+const utf8_char_t *utf8_to_utf16_z_unsafe(const utf8_char_t *q, utf16_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -425,7 +425,7 @@ const utf8_char_t *utf8_to_utf16_z_remaining(const utf8_char_t *q, utf16_char_t 
 }
 
 A_Use_decl_annotations
-void utf8_to_utf16_remaining(const utf8_char_t *q, utf16_char_t buf[], const size_t n)
+void utf8_to_utf16_unsafe(const utf8_char_t *q, utf16_char_t buf[], const size_t n)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);

@@ -139,7 +139,7 @@ A_Ret_never_null
 A_At(w, A_In_z)
 A_At(buf, A_Out A_Post_z)
 #endif
-const utf16_char_t *utf16_to_utf8_z_remaining(
+const utf16_char_t *utf16_to_utf8_z_unsafe(
 	const utf16_char_t *w/*!=NULL,0-terminated*/,
 	utf8_char_t buf[]/*out,!=NULL*/);
 
@@ -153,7 +153,7 @@ A_At(w, A_In_reads(n))
 A_At(buf, A_Out)
 A_At(n, A_In_range(>,0))
 #endif
-void utf16_to_utf8_remaining(
+void utf16_to_utf8_unsafe(
 	const utf16_char_t *w/*!=NULL*/,
 	utf8_char_t buf[]/*out,!=NULL*/,
 	const size_t n/*>0*/);
