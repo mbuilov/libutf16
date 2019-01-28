@@ -46,13 +46,13 @@ extern "C" {
 A_Check_return
 A_Nonnull_arg(1)
 A_At(w, A_Always(A_Inout))
-A_At(*w, A_In_z)
-A_When(!sz, A_Post_satisfies(*w == A_Old(*w)))
+A_At(*w, A_In_z A_Always(A_Post_notnull))
+A_When(!sz, A_Unchanged(*w) A_At(*w, A_Post_z))
 A_When(!sz, A_At(b, A_Maybenull))
 A_When(sz, A_At(b, A_Always(A_Outptr)))
 A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
-A_When(return <= sz, A_At(A_Old(*b), A_Post_z A_Post_readable_size(return)))
+A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_z A_Post_readable_size(return)))
 #endif
 size_t utf16_to_utf8_z(
 	const utf16_char_t **const w/*in,out,!=NULL*/,
@@ -101,13 +101,13 @@ A_Check_return
 A_When(!n, A_Ret_range(==,0))
 A_When(!n, A_At(w, A_Maybenull))
 A_When(n, A_At(w, A_Always(A_Inout)))
-A_When(n, A_At(*w, A_In_reads(n)))
-A_When(n && !sz, A_Post_satisfies(*w == A_Old(*w)))
+A_When(n, A_At(*w, A_In_reads(n) A_Always(A_Post_notnull)))
+A_When(n && !sz, A_Unchanged(*w))
 A_When(!sz || !n, A_At(b, A_Maybenull))
 A_When(n && sz, A_At(b, A_Always(A_Outptr)))
 A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
-A_When(return <= sz, A_At(A_Old(*b), A_Post_readable_size(return)))
+A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_readable_size(return)))
 #endif
 size_t utf16_to_utf8(
 	const utf16_char_t **const w/*in,out,!=NULL if n>0*/,
