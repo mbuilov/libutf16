@@ -47,7 +47,7 @@ A_Check_return
 A_Nonnull_arg(1)
 A_At(w, A_Always(A_Inout))
 A_At(*w, A_In_z A_Always(A_Post_notnull))
-A_When(!sz, A_Unchanged(*w) A_At(*w, A_Post_z))
+A_When(!sz, A_Unchanged(*w))
 A_When(!sz, A_At(b, A_Maybenull))
 A_When(sz, A_At(b, A_Always(A_Outptr)))
 A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
