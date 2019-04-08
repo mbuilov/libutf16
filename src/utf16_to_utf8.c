@@ -25,13 +25,13 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 	const utf16_char_t *A_Restrict s = *w;
 	if (sz) {
 		utf8_char_t *A_Restrict d = *b;
-		utf8_char_t *const e = d + sz;
+		const utf8_char_t *const e = d + sz;
 		do {
 			unsigned c = *s++;
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (0xD800 == (c & 0xFC00)) {
-						unsigned r = *s;
+						const unsigned r = *s;
 						if (0xDC00 != (r & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							*b = d;
@@ -161,13 +161,13 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 		const utf16_char_t *const se = s + n;
 		if (sz) {
 			utf8_char_t *A_Restrict d = *b;
-			utf8_char_t *const e = d + sz;
+			const utf8_char_t *const e = d + sz;
 			do {
 				unsigned c = *s++;
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (0xD800 == (c & 0xFC00)) {
-							unsigned r = (s != se) ? *s : 0u;
+							const unsigned r = (s != se) ? *s : 0u;
 							if (0xDC00 != (r & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								*b = d;

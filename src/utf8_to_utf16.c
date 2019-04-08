@@ -28,7 +28,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 		t = s;
 	else {
 		utf16_char_t *A_Restrict d = *b;
-		utf16_char_t *const e = d + sz;
+		const utf16_char_t *const e = d + sz;
 		do {
 			unsigned a = s[0];
 			if (a >= 0x80) {
@@ -206,7 +206,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 			t = s;
 		else {
 			utf16_char_t *A_Restrict d = *b;
-			utf16_char_t *const e = d + sz;
+			const utf16_char_t *const e = d + sz;
 			do {
 				unsigned a = s[0];
 				if (a >= 0x80) {
