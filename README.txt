@@ -2,7 +2,7 @@ Description.
 small library for converting utf16 strings to utf8 and back.
 
 Author.
-Copyright (C) 2018 Michael M. Builov, https://github.com/mbuilov/libutf16
+Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
 
 License.
 Apache License v2.0, see LICENSE.TXT.
@@ -10,6 +10,11 @@ Apache License v2.0, see LICENSE.TXT.
 Optional dependencies.
 "sal_defs.h" from https://github.com/mbuilov/cmn_headers
 
+
+Note.
+The library do not performs endianess conversion of utf16-characters, assuming
+  UTF-16LE - on Little-endian platforms and
+  UTF-16BE - on Big-endian platforms.
 
 
 Building.
@@ -27,7 +32,7 @@ lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj
 
 
 
-May build with source annontations (restricted pointers, non-null attributes, etc.)
+Also, the library can be built with source annotations (restricted pointers, non-null attributes, etc.)
 
 gcc:
 gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf16_to_utf8.c
