@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-16 -> UTF-8 characters conversion
-* Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2020 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -21,7 +21,7 @@ A_Use_decl_annotations
 size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size_t sz)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf16_char_t *A_Restrict s = *w;
 	if (sz) {
 		utf8_char_t *A_Restrict d = *b;
@@ -156,7 +156,7 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
-		size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 		const utf16_char_t *A_Restrict s = *w;
 		const utf16_char_t *const se = s + n;
 		if (sz) {
@@ -291,7 +291,7 @@ A_Use_decl_annotations
 const utf16_char_t *utf16_to_utf8_z_unsafe(const utf16_char_t *w, utf8_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
 		unsigned c = *w++;
 		if (c >= 0x80) {
@@ -330,7 +330,7 @@ A_Use_decl_annotations
 void utf16_to_utf8_unsafe(const utf16_char_t *w, utf8_char_t buf[], const size_t n)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf8_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf16_char_t *const we = w + n;
 	do {
 		unsigned c = *w++;

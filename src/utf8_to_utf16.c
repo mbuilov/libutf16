@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-8 -> UTF-16 characters conversion
-* Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2020 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -21,7 +21,7 @@ A_Use_decl_annotations
 size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *A_Restrict s = *q;
 	const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 	if (!sz)
@@ -198,7 +198,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
-		size_t m = 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 		const utf8_char_t *A_Restrict s = *q;
 		const utf8_char_t *const se = s + n;
 		const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
@@ -386,7 +386,7 @@ A_Use_decl_annotations
 const utf8_char_t *utf8_to_utf16_z_unsafe(const utf8_char_t *q, utf16_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
 		unsigned a = q[0];
 		if (a >= 0x80) {
@@ -428,7 +428,7 @@ A_Use_decl_annotations
 void utf8_to_utf16_unsafe(const utf8_char_t *q, utf16_char_t buf[], const size_t n)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int(*)[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *const qe = q + n;
 	do {
 		unsigned a = q[0];
