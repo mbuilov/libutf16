@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 -> UTF-8 characters conversion
-* Copyright (C) 2018-2019 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2020 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
