@@ -15,10 +15,6 @@
 extern "C" {
 #endif
 
-#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define A_Restrict
-#endif
-
 /* convert utf16 0-terminated string to utf8 0-terminated one,
  input:
   w  - address of the pointer to the beginning of input 0-terminated utf16 string,
@@ -157,10 +153,6 @@ void utf16_to_utf8_unsafe(
 	const utf16_char_t *w/*!=NULL*/,
 	utf8_char_t buf[]/*out,!=NULL*/,
 	const size_t n/*>0*/);
-
-#ifndef SAL_DEFS_H_INCLUDED
-#undef A_Restrict
-#endif
 
 #ifdef __cplusplus
 }
