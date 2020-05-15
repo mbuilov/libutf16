@@ -121,7 +121,7 @@ size_t utf8_to_utf16(
 /* Note: zero utf8_char_t is not treated specially, i.e. conversion do not stops */
 #define utf8_to_utf16_size(q/*in,out,!=NULL if n>0*/, n/*0?*/) utf8_to_utf16(q, NULL, 0, n)
 
-/* for converting remaining part of the source utf8 0-terminating string after calling utf8_to_utf16_z():
+/* for converting remaining part of the source utf8 0-terminated string after calling utf8_to_utf16_z():
   - assume source string is valid,
   - do not check if there is enough space in output buffer, assume it is large enough.
  returns pointer beyond last converted source 0-terminator */
