@@ -1,0 +1,187 @@
+/**********************************************************************************
+* UTF-8 -> UTF-16 characters conversion
+* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
+
+/* utf8_to_utf16_one.c */
+
+#include <stddef.h> /* for size_t */
+#ifndef _MSC_VER
+#include <stdint.h> /* for uint16_t */
+#endif
+#include "libutf16/utf8_to_utf16_one.h"
+
+#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+#define A_Use_decl_annotations
+#endif
+
+/* returns:
+  (size_t)-1 - if s contains invalid utf8 byte sequence;
+  (size_t)-2 - if s is too short to read complete unicode character,
+               n bytes of s has been consumed, state has been updated;
+  >0         - number of bytes consumed from s, state contains read unicode character. */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_all_args
+A_At(s, A_In_reads(n))
+A_At(state, A_Inout)
+A_Success(return != (size_t)-1)
+#endif
+static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n, utf8_state_t *const state)
+{
+	if (!n)
+		return (size_t)-2;
+	{
+		unsigned a = *state, r;
+		const unsigned t = a >> 30;
+		a &= ~0xC0000000;
+		switch (t) {
+			case 1:
+				if (a >= 0xE0) {
+					if (a >= 0xF0)
+						goto c11;
+					goto c12;
+				}
+				goto c13;
+			case 2:
+				if (a >= (0xF0 << 6))
+					goto c21;
+				goto c22;
+			case 3:
+				goto c31;
+			default:
+				break;
+		}
+		a = *s;
+		if (a < 0x80) {
+			*state = a;
+			return 1;
+		}
+		if (a >= 0xE0) {
+			if (a >= 0xF0) {
+				if (a >= 0xF8)
+					return (size_t)-1; /* expecting max 4 utf8 bytes for a unicode code point */
+				if (!--n) {
+					*state = a | 0x40000000;
+					return (size_t)-2;
+				}
+				s++;
+c11:
+				r = *s;
+				if (0x80 != (r & 0xC0))
+					return (size_t)-1; /* incomplete utf8 character */
+				a = (a << 6) ^ r;
+				if (!--n) {
+					*state = a | 0x80000000;
+					return (size_t)-2;
+				}
+				s++;
+c21:
+				r = *s;
+				if (0x80 != (r & 0xC0))
+					return (size_t)-1; /* incomplete utf8 character */
+				a = (a << 6) ^ r;
+				if (!--n) {
+					*state = a | 0xC0000000;
+					return (size_t)-2;
+				}
+				s++;
+c31:
+				r = *s;
+				if (0x80 != (r & 0xC0))
+					return (size_t)-1; /* incomplete utf8 character */
+				a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
+				/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
+				 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+				if (0x3600000 != (a & 0x3F00000))
+					return (size_t)-1; /* bad utf8 character */
+				*state = a;
+				return 4 - t;
+			}
+			if (!--n) {
+				*state = a | 0x40000000;
+				return (size_t)-2;
+			}
+			s++;
+c12:
+			r = *s;
+			if (0x80 != (r & 0xC0))
+				return (size_t)-1; /* incomplete utf8 character */
+			a = (a << 6) ^ r;
+			if (!--n) {
+				*state = a | 0x80000000;
+				return (size_t)-2;
+			}
+			s++;
+c22:
+			r = *s;
+			if (0x80 != (r & 0xC0))
+				return (size_t)-1; /* incomplete utf8 character */
+			a = (a << 6) ^ r ^ 0xE2080;
+			/* must not begin or end a surrogate pair */
+			if (!a ||
+				0xD800 == (a & 0xFC00) ||
+				0xDC00 == (a & 0xFC00))
+			{
+				return (size_t)-1; /* overlong/bad utf8 character */
+			}
+			*state = a;
+			return 3 - t;
+		}
+		if (a >= 0xC0) {
+			if (!--n) {
+				*state = a | 0x40000000;
+				return (size_t)-2;
+			}
+			s++;
+c13:
+			r = *s;
+			if (0x80 != (r & 0xC0))
+				return (size_t)-1; /* incomplete utf8 character */
+			a = (a << 6) ^ r ^ 0x3080;
+			if (!a)
+				return (size_t)-1; /* overlong utf8 character */
+			*state = a;
+			return 2 - t;
+		}
+		return (size_t)-1; /* not expecting 10xxxxxx */
+	}
+}
+
+A_Use_decl_annotations
+size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+{
+	size_t r;
+	unsigned a = *ps;
+	if (0xDC00 == (a & 0xFC00))
+		r = a >> 29;
+	else {
+		r = utf8_read_one_internal(s, n, ps);
+		if (r >= (size_t)-2)
+			return r;
+		a = *ps;
+		if (0x3600000 == (a & 0x3F00000)) {
+			/* a == 000000110110xxxxxxxxxxxxxxxxxxxx */
+			*pw = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
+			a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
+			*ps = (unsigned)(r << 29) | a;            /* ???0000000000000110111bbcccccccc */
+			return (size_t)-3;
+		}
+	}
+	*ps = 0;
+	return (*pw = (utf16_char_t)(a & 0xFFFF)) == 0 ? 0 : r;
+}
+
+A_Use_decl_annotations
+size_t utf8_len_one(const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+{
+	size_t r = utf8_read_one_internal(s, n, ps);
+	if (r >= (size_t)-2)
+		return r;
+	{
+		unsigned a = *ps;
+		*ps = 0;
+		return a ? r : 0;
+	}
+}
