@@ -8,7 +8,7 @@
 
 #include <stddef.h> /* for size_t */
 #ifndef _MSC_VER
-#include <stdint.h> /* for uint16_t */
+#include <stdint.h> /* for uint16_t/uint32_t */
 #endif
 #include "libutf16/utf8_to_utf16_one.h"
 
@@ -19,7 +19,7 @@
 /* returns:
   (size_t)-1 - if s contains invalid utf8 byte sequence;
   (size_t)-2 - if s is too short to read complete unicode character,
-               n bytes of s has been consumed, state has been updated;
+               n bytes of s have been consumed, state has been updated;
   >0         - number of bytes consumed from s, state contains read unicode character. */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
@@ -28,12 +28,12 @@ A_At(s, A_In_reads(n))
 A_At(state, A_Inout)
 A_Success(return != (size_t)-1)
 #endif
-static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n, utf8_state_t *const state)
+static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n, unsigned *const state, unsigned a)
 {
 	if (!n)
 		return (size_t)-2;
 	{
-		unsigned a = *state, r;
+		unsigned r;
 		const unsigned t = a >> 30;
 		a &= ~0xC0000000;
 		switch (t) {
@@ -154,34 +154,48 @@ size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], size_t n
 {
 	size_t r;
 	unsigned a = *ps;
-	if (0xDC00 == (a & 0xFC00))
-		r = a >> 29;
-	else {
-		r = utf8_read_one_internal(s, n, ps);
-		if (r >= (size_t)-2)
-			return r;
-		a = *ps;
-		if (0x3600000 == (a & 0x3F00000)) {
-			/* a == 000000110110xxxxxxxxxxxxxxxxxxxx */
-			*pw = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
-			a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
-			*ps = (unsigned)(r << 29) | a;            /* ???0000000000000110111bbcccccccc */
-			return (size_t)-3;
-		}
+	if (a && a < 0x40000000) {
+		*pw = (utf16_char_t)a;
+		*ps = 0;
+		return (size_t)-3;
+	}
+	r = utf8_read_one_internal(s, n, &a, a);
+	if (r >= (size_t)-2) {
+		*ps = a;
+		return r;
+	}
+	if (a <= 0xFFFF) {
+		*ps = 0;
+		return (*pw = (utf16_char_t)a) == 0 ? 0 : r;
+	}
+	/* a == 110110xxxxxxxxxxxxxxxxxxxx */
+	*pw = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
+	*ps = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
+	return r;
+}
+
+A_Use_decl_annotations
+size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+{
+	unsigned a = *ps;
+	size_t r = utf8_read_one_internal(s, n, &a, a);
+	if (r >= (size_t)-2) {
+		*ps = a;
+		return r;
 	}
 	*ps = 0;
-	return (*pw = (utf16_char_t)(a & 0xFFFF)) == 0 ? 0 : r;
+	return (*pw = a) == 0 ? 0 : r;
 }
 
 A_Use_decl_annotations
 size_t utf8_len_one(const utf8_char_t s[], size_t n, utf8_state_t *const ps)
 {
-	size_t r = utf8_read_one_internal(s, n, ps);
-	if (r >= (size_t)-2)
+	unsigned a = *ps;
+	size_t r = utf8_read_one_internal(s, n, &a, a);
+	if (r >= (size_t)-2) {
+		*ps = a;
 		return r;
-	{
-		unsigned a = *ps;
-		*ps = 0;
-		return a ? r : 0;
 	}
+	*ps = 0;
+	return a ? r : 0;
 }
