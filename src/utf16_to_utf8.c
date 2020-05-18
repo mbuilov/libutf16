@@ -42,12 +42,17 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 							m = 3;
 							break; /* too small output buffer */
 						}
-						/* c is in range: 0xD800..0xDBFF, i.e.: 110110xxyyyyyyyy */
-						/* r is in range: 0xDC00..0xDFFF, i.e.: 110111aabbbbbbbb */
-						c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
+						/* 110110xxyyyyyyyy0000000000
+						  +          110111aabbbbbbbb
+						  -    1000001101110000000000
+						  +  100000000000000000000000
+						  ===========================
+						   111100xxyyyyyyyyaabbbbbbbb
+						  +         10000000000000000 */
+						c = (c << 10) + r - 0x20DC00 + 0x800000 + 0x10000;
 						d += 4;
 						d[-4] = (utf8_char_t)(c >> 18);
-						c = (c & 0x3FFFF) | 0x80000;
+						c = (c & 0x3FFFF) + 0x80000;
 					}
 					else if (0xDC00 == (c & 0xFC00)) {
 						*w = s - 1; /* (**w) != 0 */
@@ -60,10 +65,10 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 					}
 					else {
 						d += 3;
-						c |= 0xE0000;
+						c += 0xE0000;
 					}
 					d[-3] = (utf8_char_t)(c >> 12);
-					c = (c & 0xFFF) | 0x2000;
+					c = (c & 0xFFF) + 0x2000;
 				}
 				else if ((size_t)(e - d) < 2) {
 					m = 1;
@@ -71,10 +76,10 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 				}
 				else {
 					d += 2;
-					c |= 0x3000;
+					c += 0x3000;
 				}
 				d[-2] = (utf8_char_t)(c >> 6);
-				c = (c & 0x3F) | 0x80;
+				c = (c & 0x3F) + 0x80;
 			}
 			else
 				d++;
@@ -178,12 +183,10 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 								m = 3;
 								break; /* too small output buffer */
 							}
-							/* c is in range: 0xD800..0xDBFF, i.e.: 110110xxyyyyyyyy */
-							/* r is in range: 0xDC00..0xDFFF, i.e.: 110111aabbbbbbbb */
-							c = ((c << 10) ^ r ^ 0xA0DC00) + 0x10000;
+							c = (c << 10) + r - 0x20DC00 + 0x800000 + 0x10000;
 							d += 4;
 							d[-4] = (utf8_char_t)(c >> 18);
-							c = (c & 0x3FFFF) | 0x80000;
+							c = (c & 0x3FFFF) + 0x80000;
 						}
 						else if (0xDC00 == (c & 0xFC00)) {
 							*w = s - 1; /* (*w) < se */
@@ -196,10 +199,10 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 						}
 						else {
 							d += 3;
-							c |= 0xE0000;
+							c += 0xE0000;
 						}
 						d[-3] = (utf8_char_t)(c >> 12);
-						c = (c & 0xFFF) | 0x2000;
+						c = (c & 0xFFF) + 0x2000;
 					}
 					else if ((size_t)(e - d) < 2) {
 						m = 1;
@@ -207,10 +210,10 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 					}
 					else {
 						d += 2;
-						c |= 0x3000;
+						c += 0x3000;
 					}
 					d[-2] = (utf8_char_t)(c >> 6);
-					c = (c & 0x3F) | 0x80;
+					c = (c & 0x3F) + 0x80;
 				}
 				else
 					d++;
@@ -297,24 +300,24 @@ const utf16_char_t *utf16_to_utf8_z_unsafe(const utf16_char_t *w, utf8_char_t bu
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = ((c << 10) ^ (unsigned)*w++ ^ 0xA0DC00) + 0x10000;
+					c = (c << 10) + (unsigned)*w++ - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) | 0x80000;
+					c = (c & 0x3FFFF) + 0x80000;
 				}
 				else {
 					b += 3;
-					c |= 0xE0000;
+					c += 0xE0000;
 				}
 				b[-3] = (utf8_char_t)(c >> 12);
-				c = (c & 0xFFF) | 0x2000;
+				c = (c & 0xFFF) + 0x2000;
 			}
 			else {
 				b += 2;
-				c |= 0x3000;
+				c += 0x3000;
 			}
 			b[-2] = (utf8_char_t)(c >> 6);
-			c = (c & 0x3F) | 0x80;
+			c = (c & 0x3F) + 0x80;
 		}
 		else
 			b++;
@@ -337,24 +340,24 @@ void utf16_to_utf8_unsafe(const utf16_char_t *w, utf8_char_t buf[], const size_t
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = ((c << 10) ^ (unsigned)*w++ ^ 0xA0DC00) + 0x10000;
+					c = (c << 10) + (unsigned)*w++ - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
-					c = (c & 0x3FFFF) | 0x80000;
+					c = (c & 0x3FFFF) + 0x80000;
 				}
 				else {
 					b += 3;
-					c |= 0xE0000;
+					c += 0xE0000;
 				}
 				b[-3] = (utf8_char_t)(c >> 12);
-				c = (c & 0xFFF) | 0x2000;
+				c = (c & 0xFFF) + 0x2000;
 			}
 			else {
 				b += 2;
-				c |= 0x3000;
+				c += 0x3000;
 			}
 			b[-2] = (utf8_char_t)(c >> 6);
-			c = (c & 0x3F) | 0x80;
+			c = (c & 0x3F) + 0x80;
 		}
 		else
 			b++;
