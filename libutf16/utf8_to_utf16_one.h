@@ -11,21 +11,16 @@
 
 #include "utf16_char.h"
 
-/* maximum length of utf8-encoded unicode character in bytes */
-#define UTF8_MAX_LEN 4
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef unsigned int utf8_state_t;
 
 /* read one unicode character (code point) from utf8 string, returns:
   (size_t)-1 - if s contains invalid utf8 byte sequence;
   (size_t)-2 - if s is too short to read complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
-  (size_t)-3 - second part of utf16 surrogate pair of unicode character has been read,
+  (size_t)-3 - second part of utf16 surrogate pair of unicode character has been stored,
                no source bytes have been consumed;
   >0         - number of bytes consumed from s, state has been reset to zero,
                one utf16 character (or the first part of surrogate pair) has been read;
