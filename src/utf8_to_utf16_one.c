@@ -63,7 +63,7 @@ static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n, unsigned *c
 				if (a >= 0xF8)
 					return (size_t)-1; /* expecting max 4 utf8 bytes for a unicode code point */
 				if (!--n) {
-					*state = a | 0x40000000;
+					*state = a + 0x40000000;
 					return (size_t)-2;
 				}
 				s++;
@@ -71,9 +71,9 @@ c11:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = (a << 6) ^ r;
+				a = (a << 6) + r;
 				if (!--n) {
-					*state = a | 0x80000000;
+					*state = a + 0x80000000;
 					return (size_t)-2;
 				}
 				s++;
@@ -81,9 +81,9 @@ c21:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = (a << 6) ^ r;
+				a = (a << 6) + r;
 				if (!--n) {
-					*state = a | 0xC0000000;
+					*state = a + 0xC0000000;
 					return (size_t)-2;
 				}
 				s++;
@@ -91,16 +91,14 @@ c31:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-				/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-				 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+				a = (a << 6) + r - 0x682080 - 0x10000;
 				if (0x3600000 != (a & 0x3F00000))
 					return (size_t)-1; /* bad utf8 character */
 				*state = a;
 				return 4 - t;
 			}
 			if (!--n) {
-				*state = a | 0x40000000;
+				*state = a + 0x40000000;
 				return (size_t)-2;
 			}
 			s++;
@@ -108,9 +106,9 @@ c12:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) ^ r;
+			a = (a << 6) + r;
 			if (!--n) {
-				*state = a | 0x80000000;
+				*state = a + 0x80000000;
 				return (size_t)-2;
 			}
 			s++;
@@ -118,20 +116,21 @@ c22:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) ^ r ^ 0xE2080;
+			a = (a << 6) + r - 0xE2080;
 			/* must not begin or end a surrogate pair */
-			if (!a ||
-				0xD800 == (a & 0xFC00) ||
-				0xDC00 == (a & 0xFC00))
-			{
+			if (
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+				a < 0x800 ||
+#endif
+				(0xD800 <= a && a <= 0xDFFF)
+			)
 				return (size_t)-1; /* overlong/bad utf8 character */
-			}
 			*state = a;
 			return 3 - t;
 		}
 		if (a >= 0xC0) {
 			if (!--n) {
-				*state = a | 0x40000000;
+				*state = a + 0x40000000;
 				return (size_t)-2;
 			}
 			s++;
@@ -139,9 +138,11 @@ c13:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) ^ r ^ 0x3080;
-			if (!a)
+			a = (a << 6) + r - 0x3080;
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+			if (a < 0x80)
 				return (size_t)-1; /* overlong utf8 character */
+#endif
 			*state = a;
 			return 2 - t;
 		}
@@ -168,7 +169,6 @@ size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], size_t n
 		*ps = 0;
 		return (*pw = (utf16_char_t)a) == 0 ? 0 : r;
 	}
-	/* a == 110110xxxxxxxxxxxxxxxxxxxx */
 	*pw = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
 	*ps = (a & 0x3FF) + 0xDC00;    /* 110111bbcccccccc */
 	return r;
@@ -184,7 +184,10 @@ size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[], size_t n
 		return r;
 	}
 	*ps = 0;
-	return (*pw = a) == 0 ? 0 : r;
+	/* 110110aaaabbbbbbbbcccccccc
+	  -11011000000000000000000000
+	  +         10000000000000000 */
+	return (*pw = a - 0x3600000 + 0x10000) == 0 ? 0 : r;
 }
 
 A_Use_decl_annotations
