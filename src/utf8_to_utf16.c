@@ -40,17 +40,25 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[3];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+						/* 11110aaa000000000000000000
+						  +      10bbbbbb000000000000
+						  +            10cccccc000000
+						  +                  10dddddd
+						  -   11010000010000010000000
+						  ===========================
+						   11011aaabbbbbbccccccdddddd
+						  -         10000000000000000
+						  ===========================
+						   110110xxxxxxxxxxxxxxxxxxxx */
+						a = (a << 6) + r - 0x682080 - 0x10000;
 						if (0x3600000 != (a & 0x3F00000))
 							goto bad_utf8; /* bad utf8 character */
 						s += 4;
@@ -66,18 +74,19 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) ^ r ^ 0xE2080;
+						a = (a << 6) + r - 0xE2080;
 						/* must not begin or end a surrogate pair */
-						if (!a ||
-						    0xD800 == (a & 0xFC00) ||
-						    0xDC00 == (a & 0xFC00))
-						{
+						if (
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+							a < 0x800 ||
+#endif
+							(0xD800 <= a && a <= 0xDFFF)
+						)
 							goto bad_utf8; /* overlong/bad utf8 character */
-						}
 						s += 3;
 					}
 				}
@@ -85,9 +94,11 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0x3080;
-					if (!a)
+					a = (a << 6) + r - 0x3080;
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+					if (a < 0x80)
 						goto bad_utf8; /* overlong utf8 character */
+#endif
 					s += 2;
 				}
 				else
@@ -121,17 +132,15 @@ small_buf:
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
+					a = (a << 6) + r;
 					r = s[2];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
+					a = (a << 6) + r;
 					r = s[3];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+					a = (a << 6) + r - 0x682080 - 0x10000;
 					if (0x3600000 != (a & 0x3F00000))
 						goto bad_utf8_s; /* bad utf8 character */
 					s += 4;
@@ -141,18 +150,19 @@ small_buf:
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) ^ r;
+					a = (a << 6) + r;
 					r = s[2];
 					if (0x80 != (r & 0xC0))
 						 goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0xE2080;
+					a = (a << 6) + r - 0xE2080;
 					/* must not begin or end a surrogate pair */
-					if (!a ||
-						0xD800 == (a & 0xFC00) ||
-						0xDC00 == (a & 0xFC00))
-					{
+					if (
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+						a < 0x800 ||
+#endif
+						(0xD800 <= a && a <= 0xDFFF)
+					)
 						goto bad_utf8_s; /* overlong/bad utf8 character */
-					}
 					s += 3;
 					m += 2; /* + (3 utf8_char_t's - 1 utf16_char_t) */
 				}
@@ -161,9 +171,11 @@ small_buf:
 				r = s[1];
 				if (0x80 != (r & 0xC0))
 					goto bad_utf8_s; /* incomplete utf8 character */
-				a = (a << 6) ^ r ^ 0x3080;
-				if (!a)
+				a = (a << 6) + r - 0x3080;
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+				if (a < 0x80)
 					goto bad_utf8_s; /* overlong utf8 character */
+#endif
 				s += 2;
 				m++; /* + (2 utf8_char_t's - 1 utf16_char_t) */
 			}
@@ -220,17 +232,15 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 							r = s[1];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
-							a = (a << 6) ^ r;
+							a = (a << 6) + r;
 							r = s[2];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
-							a = (a << 6) ^ r;
+							a = (a << 6) + r;
 							r = s[3];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
-							a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-							/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-							 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+							a = (a << 6) + r - 0x682080 - 0x10000;
 							if (0x3600000 != (a & 0x3F00000))
 								goto bad_utf8; /* bad utf8 character */
 							s += 4;
@@ -248,18 +258,19 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 							r = s[1];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
-							a = (a << 6) ^ r;
+							a = (a << 6) + r;
 							r = s[2];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
-							a = (a << 6) ^ r ^ 0xE2080;
+							a = (a << 6) + r - 0xE2080;
 							/* must not begin or end a surrogate pair */
-							if (!a ||
-								0xD800 == (a & 0xFC00) ||
-								0xDC00 == (a & 0xFC00))
-							{
+							if (
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+								a < 0x800 ||
+#endif
+								(0xD800 <= a && a <= 0xDFFF)
+							)
 								goto bad_utf8; /* overlong/bad utf8 character */
-							}
 							s += 3;
 						}
 					}
@@ -269,9 +280,11 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) ^ r ^ 0x3080;
-						if (!a)
+						a = (a << 6) + r - 0x3080;
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+						if (a < 0x80)
 							goto bad_utf8; /* overlong utf8 character */
+#endif
 						s += 2;
 					}
 					else
@@ -307,17 +320,15 @@ small_buf:
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[3];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-						/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-						 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+						a = (a << 6) + r - 0x682080 - 0x10000;
 						if (0x3600000 != (a & 0x3F00000))
 							goto bad_utf8_s; /* bad utf8 character */
 						s += 4;
@@ -329,18 +340,19 @@ small_buf:
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) ^ r;
+						a = (a << 6) + r;
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							 goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) ^ r ^ 0xE2080;
+						a = (a << 6) + r - 0xE2080;
 						/* must not begin or end a surrogate pair */
-						if (!a ||
-							0xD800 == (a & 0xFC00) ||
-							0xDC00 == (a & 0xFC00))
-						{
+						if (
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+							a < 0x800 ||
+#endif
+							(0xD800 <= a && a <= 0xDFFF)
+						)
 							goto bad_utf8_s; /* overlong/bad utf8 character */
-						}
 						s += 3;
 						m += 2; /* + (3 utf8_char_t's - 1 utf16_char_t) */
 					}
@@ -351,9 +363,11 @@ small_buf:
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) ^ r ^ 0x3080;
-					if (!a)
+					a = (a << 6) + r - 0x3080;
+#ifdef LIBUTF16_NO_OVERLONG_UTF8
+					if (a < 0x80)
 						goto bad_utf8_s; /* overlong utf8 character */
+#endif
 					s += 2;
 					m++; /* + (2 utf8_char_t's - 1 utf16_char_t) */
 				}
@@ -391,26 +405,24 @@ const utf8_char_t *utf8_to_utf16_z_unsafe(const utf8_char_t *q, utf16_char_t buf
 		unsigned a = q[0];
 		if (a >= 0x80) {
 			unsigned r = q[1];
-			a = (a << 6) ^ r;
+			a = (a << 6) + r;
 			if (a >= (0xE0 << 6)) {
 				r = q[2];
-				a = (a << 6) ^ r;
+				a = (a << 6) + r;
 				if (a >= (0xF0 << 12)) {
 					r = q[3];
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+					a = (a << 6) + r - 0x682080 - 0x10000;
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
 					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
-					a ^= 0xE2080;
+					a -= 0xE2080;
 					q += 3;
 				}
 			}
 			else {
-				a ^= 0x3080;
+				a -= 0x3080;
 				q += 2;
 			}
 		}
@@ -438,32 +450,30 @@ void utf8_to_utf16_unsafe(const utf8_char_t *q, utf16_char_t buf[], const size_t
 			__assume(n > 1); /* assume input string is valid */
 #endif
 			r = q[1];
-			a = (a << 6) ^ r;
+			a = (a << 6) + r;
 			if (a >= (0xE0 << 6)) {
 #ifdef _MSC_VER
 				__assume(n > 2); /* assume input string is valid */
 #endif
 				r = q[2];
-				a = (a << 6) ^ r;
+				a = (a << 6) + r;
 				if (a >= (0xF0 << 12)) {
 #ifdef _MSC_VER
 					__assume(n > 3); /* assume input string is valid */
 #endif
 					r = q[3];
-					a = ((a << 6) ^ r ^ 0xA82080) - 0x10000;
-					/* a        = 11011aaaaabbbbbbbbcccccccc before substracting 0x10000,
-					 a must match 110110xxxxxxxxxxxxxxxxxxxx after  substracting 0x10000 */
+					a = (a << 6) + r - 0x682080 - 0x10000;
 					*b++ = (utf16_char_t)(a >> 10); /* 110110aaaabbbbbb */
 					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
-					a ^= 0xE2080;
+					a -= 0xE2080;
 					q += 3;
 				}
 			}
 			else {
-				a ^= 0x3080;
+				a -= 0x3080;
 				q += 2;
 			}
 		}
