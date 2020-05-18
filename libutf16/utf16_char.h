@@ -26,4 +26,25 @@ typedef uint32_t utf32_char_t;
 /* utf8 character - 8-bit unsigned integer */
 typedef unsigned char utf8_char_t;
 
+/* maximum length of utf8-encoded unicode character in bytes */
+#define UTF8_MAX_LEN 4
+
+/* utf8 <-> utf16 conversion state */
+typedef unsigned int utf8_state_t;
+
+/* check if given utf8_char_t completes a unicode character */
+#define utf8_is_one_byte(c) ((c) < 0x80)
+
+/* convert utf8_char_t of one-byte utf8-encoded unicode character to utf16-encoded unicode character */
+#define utf8_one_byte_to_utf16(c) ((utf16_char_t)(c))
+
+/* convert utf8_char_t of one-byte utf8-encoded unicode character to utf32-encoded unicode character */
+#define utf8_one_byte_to_utf32(c) ((utf32_char_t)(c))
+
+/* check if utf16_char_t is the first part of utf16-surrogate pair */
+#define utf16_is_surrogate1(c) (0xD800 == ((c) & 0xFC00))
+
+/* check if utf16_char_t is the second part of utf16-surrogate pair */
+#define utf16_is_surrogate2(c) (0xDC00 == ((c) & 0xFC00))
+
 #endif /* UTF16_CHAR_H_INCLUDED */
