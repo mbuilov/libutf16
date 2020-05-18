@@ -11,10 +11,11 @@ Optional dependencies.
 "sal_defs.h" from https://github.com/mbuilov/cmn_headers
 
 
-Note.
-The library do not performs endianess conversion of utf16-characters, assuming
+Notes.
+1) The library do not performs endianess conversion of utf16-characters, assuming
   UTF-16LE - on Little-endian platforms and
   UTF-16BE - on Big-endian platforms.
+2) Byte Order Marks (BOM) are not supported.
 
 
 Building.
@@ -24,13 +25,15 @@ for example gcc:
 gcc -g -O2 -I. -c ./src/utf16_to_utf8.c
 gcc -g -O2 -I. -c ./src/utf8_to_utf16.c
 gcc -g -O2 -I. -c ./src/utf8_to_utf16_one.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o
+gcc -g -O2 -I. -c ./src/utf16_to_utf8_one.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o
 
 or MSVC:
 cl /O2 /I. /c .\src\utf16_to_utf8.c
 cl /O2 /I. /c .\src\utf8_to_utf16.c
 cl /O2 /I. /c .\src\utf8_to_utf16_one.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj
+cl /O2 /I. /c .\src\utf16_to_utf8_one.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj
 
 
 
@@ -40,10 +43,12 @@ gcc:
 gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf16_to_utf8.c
 gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf8_to_utf16.c
 gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf8_to_utf16_one.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf16_to_utf8_one.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o
 
 MSVC:
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf16_to_utf8.c
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf8_to_utf16.c
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf8_to_utf16_one.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf16_to_utf8_one.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj
