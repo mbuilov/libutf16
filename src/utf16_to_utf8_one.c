@@ -16,10 +16,13 @@
 #define A_Use_decl_annotations
 #endif
 
+/* unsigned integer type must be at least of 32 bits */
+typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
+
 A_Use_decl_annotations
-size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], utf16_char_t w, utf8_state_t *const ps)
+size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t w, utf8_state_t *const ps)
 {
-	unsigned b = 0;
+	unsigned b;
 	unsigned c = w;
 	unsigned a = *ps;
 	if (a) {
@@ -29,7 +32,7 @@ size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], utf16_char_t w, utf8_state
 			return (size_t)-1;
 		*ps = 0;
 		c = (a << 10) + c - 0x20DC00 + 0x800000 + 0x10000;
-		b += 4;
+		b = 4;
 		s[b - 4] = (utf8_char_t)(c >> 18);
 		c = (c & 0x3FFFF) + 0x80000;
 		goto b3;
@@ -40,56 +43,58 @@ size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], utf16_char_t w, utf8_state
 				*ps = c;
 				return 0;
 			}
-			b += 3;
+			b = 3;
 			c += 0xE0000;
 b3:
 			s[b - 3] = (utf8_char_t)(c >> 12);
 			c = (c & 0xFFF) + 0x2000;
 		}
 		else {
-			b += 2;
+			b = 2;
 			c += 0x3000;
 		}
 		s[b - 2] = (utf8_char_t)(c >> 6);
 		c = (c & 0x3F) + 0x80;
 	}
 	else
-		b++;
+		b = 1;
 	s[b - 1] = (utf8_char_t)c;
 	return b;
 }
 
 A_Use_decl_annotations
-size_t utf32_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], utf32_char_t w)
+size_t utf32_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t w)
 {
-	unsigned b = 0;
+	unsigned b;
 	unsigned c = w;
 	if (c >= 0x80) {
 		if (c >= 0x800) {
-			if (c >= 0x10000) {
-				if (c >= 0x110000)
-					return (size_t)-1;
+			if (c > 0xFFFF) {
+				if (c > 0x10FFFF)
+					return (size_t)-1; /* out of range */
 				c += 0x3C00000;
-				b += 4;
+				b = 4;
 				s[b - 4] = (utf8_char_t)(c >> 18);
 				c = (c & 0x3FFFF) + 0x380000;
 			}
+			else if (0xD800 <= c && c <= 0xDFFF)
+				return (size_t)-1; /* must not be a surrogate */
 			else {
-				b += 3;
+				b = 3;
 				c += 0xE0000;
 			}
 			s[b - 3] = (utf8_char_t)(c >> 12);
 			c = (c & 0xFFF) + 0x2000;
 		}
 		else {
-			b += 2;
+			b = 2;
 			c += 0x3000;
 		}
 		s[b - 2] = (utf8_char_t)(c >> 6);
 		c = (c & 0x3F) + 0x80;
 	}
 	else
-		b++;
+		b = 1;
 	s[b - 1] = (utf8_char_t)c;
 	return b;
 }
