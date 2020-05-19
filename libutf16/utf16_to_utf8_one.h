@@ -33,7 +33,8 @@ size_t utf16_to_utf8_one(
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* write one unicode character (code point) to utf8 string, returns:
-  (size_t)-1 - if w is not a valid utf32 character (>= 0x110000),
+  (size_t)-1 - if w is not a valid utf32 character (unicode code point)
+               (> 0x10FFFF or from surrogate range 0xD800..0xDFFF),
   >0         - number of bytes stored to s. */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
