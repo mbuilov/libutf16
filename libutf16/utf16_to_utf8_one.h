@@ -29,7 +29,7 @@ A_Success(return <= UTF8_MAX_LEN)
 #endif
 size_t utf16_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
-	utf16_char_t w,
+	const utf16_char_t w,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* write one unicode character (code point) to utf8 string, returns:
@@ -44,7 +44,7 @@ A_Success(return <= UTF8_MAX_LEN)
 #endif
 size_t utf32_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
-	utf32_char_t w);
+	const utf32_char_t w);
 
 #ifdef __cplusplus
 }
