@@ -37,7 +37,7 @@ A_When(return < (size_t)-2, A_At(pw, A_Post_valid))
 size_t utf8_to_utf16_one(
 	utf16_char_t *const pw/*out,!=NULL*/,
 	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
-	size_t n/*>=0*/,
+	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from utf8 string, returns:
@@ -60,7 +60,7 @@ A_When(return < (size_t)-2, A_At(pw, A_Post_valid))
 size_t utf8_to_utf32_one(
 	utf32_char_t *const pw/*out,!=NULL*/,
 	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
-	size_t n/*>=0*/,
+	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* determine the length of one unicode character (code point) encoded in utf8 string, returns:
@@ -80,7 +80,7 @@ A_Success(return != (size_t)-1)
 #endif
 size_t utf8_len_one(
 	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
-	size_t n/*>=0*/,
+	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 #ifdef __cplusplus
