@@ -16,6 +16,9 @@
 #define A_Use_decl_annotations
 #endif
 
+/* unsigned integer type must be at least of 32 bits */
+typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
+
 /* returns:
   (size_t)-1 - if s contains invalid utf8 byte sequence;
   (size_t)-2 - if s is too short to read complete unicode character,
@@ -151,7 +154,7 @@ c13:
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], const size_t n, utf8_state_t *const ps)
 {
 	size_t r;
 	unsigned a = *ps;
@@ -175,7 +178,7 @@ size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[], size_t n
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[], const size_t n, utf8_state_t *const ps)
 {
 	unsigned a = *ps;
 	size_t r = utf8_read_one_internal(s, n, &a, a);
@@ -184,14 +187,17 @@ size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[], size_t n
 		return r;
 	}
 	*ps = 0;
-	/* 110110aaaabbbbbbbbcccccccc
-	  -11011000000000000000000000
-	  +         10000000000000000 */
-	return (*pw = a - 0x3600000 + 0x10000) == 0 ? 0 : r;
+	if (a > 0xFFFF) {
+		/* 110110aaaabbbbbbbbcccccccc
+		  -11011000000000000000000000
+		  +         10000000000000000 */
+		a = a - 0x3600000 + 0x10000;
+	}
+	return (*pw = a) == 0 ? 0 : r;
 }
 
 A_Use_decl_annotations
-size_t utf8_len_one(const utf8_char_t s[], size_t n, utf8_state_t *const ps)
+size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const ps)
 {
 	unsigned a = *ps;
 	size_t r = utf8_read_one_internal(s, n, &a, a);
