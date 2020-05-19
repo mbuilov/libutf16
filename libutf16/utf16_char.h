@@ -41,10 +41,13 @@ typedef unsigned int utf8_state_t;
 /* convert utf8_char_t of one-byte utf8-encoded unicode character to utf32-encoded unicode character */
 #define utf8_one_byte_to_utf32(c) ((utf32_char_t)(c))
 
-/* check if utf16_char_t is the first part of utf16-surrogate pair */
-#define utf16_is_surrogate1(c) (0xD800 == ((c) & 0xFC00))
+/* check if utf16_char_t is the high part of utf16-surrogate pair */
+#define utf16_is_high_surrogate(c) (0xD800 == ((c) & 0xFC00))
 
-/* check if utf16_char_t is the second part of utf16-surrogate pair */
-#define utf16_is_surrogate2(c) (0xDC00 == ((c) & 0xFC00))
+/* check if utf16_char_t is the low part of utf16-surrogate pair */
+#define utf16_is_low_surrogate(c) (0xDC00 == ((c) & 0xFC00))
+
+/* check if utf16_char_t is a part of utf16-surrogate pair */
+#define utf16_is_surrogate(c) (((unsigned)(c) - 0xD800) <= (0xDFFF - 0xD800))
 
 #endif /* UTF16_CHAR_H_INCLUDED */
