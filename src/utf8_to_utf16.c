@@ -7,7 +7,7 @@
 /* utf8_to_utf16.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <stdint.h> /* for uint16_t */
 #endif
 #include "libutf16/utf8_to_utf16.h"
@@ -15,6 +15,10 @@
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Use_decl_annotations
 #define A_Restrict
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
 
 A_Use_decl_annotations
@@ -35,12 +39,14 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 				unsigned r;
 				if (a >= 0xE0) {
 					if (a >= 0xF0) {
-						if (a >= 0xF8)
-							goto bad_utf8; /* expecting max 4 utf8 bytes for a unicode code point */
+						if (a & ~0xF4)
+							goto bad_utf8; /* unicode code point must be <= 0x10FFFF */
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r;
+						if (!(0x3C90 <= a && a <= 0x3D8F))
+							goto bad_utf8; /* overlong utf8 character/out of range */
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
@@ -48,19 +54,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 						r = s[3];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
-						/* 11110aaa000000000000000000
-						  +      10bbbbbb000000000000
-						  +            10cccccc000000
-						  +                  10dddddd
-						  -   11010000010000010000000
-						  ===========================
-						   11011aaabbbbbbccccccdddddd
-						  -         10000000000000000
-						  ===========================
-						   110110xxxxxxxxxxxxxxxxxxxx */
 						a = (a << 6) + r - 0x682080 - 0x10000;
-						if (0x3600000 != (a & 0x3F00000))
-							goto bad_utf8; /* bad utf8 character */
 						s += 4;
 						if ((size_t)(e - d) < 2) {
 							t = s - 4;
@@ -75,34 +69,24 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r;
+						if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+							goto bad_utf8; /* overlong utf8 character/surrogate */
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r - 0xE2080;
-						/* must not begin or end a surrogate pair */
-						if (
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-							a < 0x800 ||
-#endif
-							(0xD800 <= a && a <= 0xDFFF)
-						)
-							goto bad_utf8; /* overlong/bad utf8 character */
 						s += 3;
 					}
 				}
-				else if (a >= 0xC0) {
+				else if (a >= 0xC2) {
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8; /* incomplete utf8 character */
 					a = (a << 6) + r - 0x3080;
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-					if (a < 0x80)
-						goto bad_utf8; /* overlong utf8 character */
-#endif
 					s += 2;
 				}
 				else
-					goto bad_utf8; /* not expecting 10xxxxxx */
+					goto bad_utf8; /* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
 			}
 			else
 				s++;
@@ -127,22 +111,20 @@ small_buf:
 			unsigned r;
 			if (a >= 0xE0) {
 				if (a >= 0xF0) {
-					if (a >= 0xF8)
-						goto bad_utf8_s; /* expecting max 4 utf8 bytes for a unicode code point */
+					if (a & ~0xF4)
+						goto bad_utf8_s; /* unicode code point must be <= 0x10FFFF */
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) + r;
+					if (!(0x3C90 <= a && a <= 0x3D8F))
+						goto bad_utf8_s; /* overlong utf8 character/out of range */
 					r = s[2];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r;
 					r = s[3];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r - 0x682080 - 0x10000;
-					if (0x3600000 != (a & 0x3F00000))
-						goto bad_utf8_s; /* bad utf8 character */
 					s += 4;
 					m += 2; /* + (4 utf8_char_t's - 2 utf16_char_t's) */
 				}
@@ -151,36 +133,24 @@ small_buf:
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
 					a = (a << 6) + r;
+					if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+						goto bad_utf8_s; /* overlong utf8 character/surrogate */
 					r = s[2];
 					if (0x80 != (r & 0xC0))
-						 goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r - 0xE2080;
-					/* must not begin or end a surrogate pair */
-					if (
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-						a < 0x800 ||
-#endif
-						(0xD800 <= a && a <= 0xDFFF)
-					)
-						goto bad_utf8_s; /* overlong/bad utf8 character */
+						goto bad_utf8_s; /* incomplete utf8 character */
 					s += 3;
 					m += 2; /* + (3 utf8_char_t's - 1 utf16_char_t) */
 				}
 			}
-			else if (a >= 0xC0) {
+			else if (a >= 0xC2) {
 				r = s[1];
 				if (0x80 != (r & 0xC0))
 					goto bad_utf8_s; /* incomplete utf8 character */
-				a = (a << 6) + r - 0x3080;
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-				if (a < 0x80)
-					goto bad_utf8_s; /* overlong utf8 character */
-#endif
 				s += 2;
 				m++; /* + (2 utf8_char_t's - 1 utf16_char_t) */
 			}
 			else {
-				/* not expecting 10xxxxxx */
+				/* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
 bad_utf8_s:
 				*q = s; /* (*q) != 0 */
 				return 0; /* incomplete utf8 character */
@@ -225,14 +195,16 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 					unsigned r;
 					if (a >= 0xE0) {
 						if (a >= 0xF0) {
-							if (a >= 0xF8)
-								goto bad_utf8; /* expecting max 4 utf8 bytes for a unicode code point */
+							if (a & ~0xF4)
+								goto bad_utf8; /* unicode code point must be <= 0x10FFFF */
 							if ((size_t)(se - s) < 4)
 								goto bad_utf8; /* incomplete utf8 character */
 							r = s[1];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r;
+							if (!(0x3C90 <= a && a <= 0x3D8F))
+								goto bad_utf8; /* overlong utf8 character/out of range */
 							r = s[2];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
@@ -241,8 +213,6 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r - 0x682080 - 0x10000;
-							if (0x3600000 != (a & 0x3F00000))
-								goto bad_utf8; /* bad utf8 character */
 							s += 4;
 							if ((size_t)(e - d) < 2) {
 								t = s - 4;
@@ -259,36 +229,26 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r;
+							if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+								goto bad_utf8; /* overlong utf8 character/surrogate */
 							r = s[2];
 							if (0x80 != (r & 0xC0))
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r - 0xE2080;
-							/* must not begin or end a surrogate pair */
-							if (
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-								a < 0x800 ||
-#endif
-								(0xD800 <= a && a <= 0xDFFF)
-							)
-								goto bad_utf8; /* overlong/bad utf8 character */
 							s += 3;
 						}
 					}
-					else if (a >= 0xC0) {
+					else if (a >= 0xC2) {
 						if ((size_t)(se - s) < 2)
 							goto bad_utf8; /* incomplete utf8 character */
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r - 0x3080;
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-						if (a < 0x80)
-							goto bad_utf8; /* overlong utf8 character */
-#endif
 						s += 2;
 					}
 					else
-						goto bad_utf8; /* not expecting 10xxxxxx */
+						goto bad_utf8; /* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
 				}
 				else
 					s++;
@@ -313,24 +273,22 @@ small_buf:
 				unsigned r;
 				if (a >= 0xE0) {
 					if (a >= 0xF0) {
-						if (a >= 0xF8)
-							goto bad_utf8_s; /* expecting max 4 utf8 bytes for a unicode code point */
+						if (a & ~0xF4)
+							goto bad_utf8_s; /* unicode code point must be <= 0x10FFFF */
 						if ((size_t)(se - s) < 4)
 							goto bad_utf8_s; /* incomplete utf8 character */
 						r = s[1];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
 						a = (a << 6) + r;
+						if (!(0x3C90 <= a && a <= 0x3D8F))
+							goto bad_utf8_s; /* overlong utf8 character/out of range */
 						r = s[2];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) + r;
 						r = s[3];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) + r - 0x682080 - 0x10000;
-						if (0x3600000 != (a & 0x3F00000))
-							goto bad_utf8_s; /* bad utf8 character */
 						s += 4;
 						m += 2; /* + (4 utf8_char_t's - 2 utf16_char_t's) */
 					}
@@ -341,38 +299,26 @@ small_buf:
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8_s; /* incomplete utf8 character */
 						a = (a << 6) + r;
+						if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+							goto bad_utf8_s; /* overlong utf8 character/surrogate */
 						r = s[2];
 						if (0x80 != (r & 0xC0))
-							 goto bad_utf8_s; /* incomplete utf8 character */
-						a = (a << 6) + r - 0xE2080;
-						/* must not begin or end a surrogate pair */
-						if (
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-							a < 0x800 ||
-#endif
-							(0xD800 <= a && a <= 0xDFFF)
-						)
-							goto bad_utf8_s; /* overlong/bad utf8 character */
+							goto bad_utf8_s; /* incomplete utf8 character */
 						s += 3;
 						m += 2; /* + (3 utf8_char_t's - 1 utf16_char_t) */
 					}
 				}
-				else if (a >= 0xC0) {
+				else if (a >= 0xC2) {
 					if ((size_t)(se - s) < 2)
 						goto bad_utf8_s; /* incomplete utf8 character */
 					r = s[1];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r - 0x3080;
-#ifdef LIBUTF16_NO_OVERLONG_UTF8
-					if (a < 0x80)
-						goto bad_utf8_s; /* overlong utf8 character */
-#endif
 					s += 2;
 					m++; /* + (2 utf8_char_t's - 1 utf16_char_t) */
 				}
 				else {
-					/* not expecting 10xxxxxx */
+					/* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
 bad_utf8_s:
 					*q = s; /* (*q) < se */
 					return 0; /* incomplete utf8 character */
