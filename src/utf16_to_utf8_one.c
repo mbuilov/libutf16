@@ -7,7 +7,7 @@
 /* utf16_to_utf8_one.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <stdint.h> /* for uint16_t/uint32_t */
 #endif
 #include "libutf16/utf16_to_utf8_one.h"
