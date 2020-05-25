@@ -17,15 +17,16 @@ extern "C" {
 
 /* write one unicode character (code point) to utf8 string, returns:
   (size_t)-1 - if w is not the second part of utf16 surrogate pair;
-  0          - w is the first part of utf16 surrogate pair and it has been saved in state;
+  0          - w is the first part of utf16 surrogate pair and it has been saved
+               in state, no bytes written to s;
   >0         - number of bytes stored to s, state has been reset to zero. */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_all_args
 A_At(s, A_Pre_writable_size(UTF8_MAX_LEN) A_Post_readable_size(return))
 A_At(ps, A_Inout)
-A_Ret_range(0,UTF8_MAX_LEN)
-A_Success(return <= UTF8_MAX_LEN)
+A_Ret_range(0, UTF8_MAX_LEN)
+A_Success(return != A_Size_t(-1))
 #endif
 size_t utf16_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
@@ -40,8 +41,8 @@ size_t utf16_to_utf8_one(
 A_Check_return
 A_Nonnull_all_args
 A_At(s, A_Pre_writable_size(UTF8_MAX_LEN) A_Post_readable_size(return))
-A_Ret_range(1,UTF8_MAX_LEN)
-A_Success(return <= UTF8_MAX_LEN)
+A_Ret_range(1, UTF8_MAX_LEN)
+A_Success(return != A_Size_t(-1))
 #endif
 size_t utf32_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
