@@ -16,14 +16,16 @@ extern "C" {
 #endif
 
 /* read one unicode character (code point) from utf8 string, returns:
-  (size_t)-1 - if s contains invalid utf8 byte sequence;
-  (size_t)-2 - if s is too short to read complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
+  (size_t)-2 - s is too short to read complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
-  (size_t)-3 - second part of utf16 surrogate pair of unicode character has been stored,
-               no source bytes have been consumed;
-  >0         - number of bytes consumed from s, state has been reset to zero,
-               one utf16 character (or the first part of surrogate pair) has been read;
+  (size_t)-3 - second part of utf16 surrogate pair of unicode character has
+               been read from state, no source bytes have been consumed,
+               state has been reset to zero;
+  >0         - number of bytes consumed from s, one utf16 character has been read:
+               if it's a first part of utf16-surrogate pair, second part has been
+               saved in state, otherwise state has been reset to zero;
   0          - nul utf16 character has been read (one nul byte has been consumed from s). */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
@@ -31,8 +33,8 @@ A_Nonnull_all_args
 A_At(pw, A_Notnull)
 A_At(s, A_In_reads(n))
 A_At(ps, A_Inout)
-A_Success(return != (size_t)-1)
-A_When(return < (size_t)-2, A_At(pw, A_Post_valid))
+A_Success(return != A_Size_t(-1))
+A_When(return < A_Size_t(-2), A_At(pw, A_Post_valid))
 #endif
 size_t utf8_to_utf16_one(
 	utf16_char_t *const pw/*out,!=NULL*/,
@@ -41,12 +43,12 @@ size_t utf8_to_utf16_one(
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from utf8 string, returns:
-  (size_t)-1 - if s contains invalid utf8 byte sequence;
-  (size_t)-2 - if s is too short to read complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
+  (size_t)-2 - s is too short to read complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
-  >0         - number of bytes consumed from s, state has been reset to zero,
-               one utf32 character has been read;
+  >0         - number of bytes consumed from s, one utf32 character has been read,
+               state has been reset to zero;
   0          - nul utf32 character has been read (one nul byte has been consumed from s). */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
@@ -54,8 +56,8 @@ A_Nonnull_all_args
 A_At(pw, A_Notnull)
 A_At(s, A_In_reads(n))
 A_At(ps, A_Inout)
-A_Success(return != (size_t)-1)
-A_When(return < (size_t)-2, A_At(pw, A_Post_valid))
+A_Success(return != A_Size_t(-1))
+A_When(return < A_Size_t(-2), A_At(pw, A_Post_valid))
 #endif
 size_t utf8_to_utf32_one(
 	utf32_char_t *const pw/*out,!=NULL*/,
@@ -64,19 +66,19 @@ size_t utf8_to_utf32_one(
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* determine the length of one unicode character (code point) encoded in utf8 string, returns:
-  (size_t)-1 - if s contains invalid utf8 byte sequence;
-  (size_t)-2 - if s is too short to scan complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
+  (size_t)-2 - s is too short to scan complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
-  >0         - number of bytes consumed from s, state has been reset to zero,
-               one unicode character has been scanned;
+  >0         - number of bytes consumed from s, one unicode character has been scanned,
+               state has been reset to zero;
   0          - nul unicode character has been scanned (one nul byte has been consumed from s). */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_all_args
 A_At(s, A_In_reads(n))
 A_At(ps, A_Inout)
-A_Success(return != (size_t)-1)
+A_Success(return != A_Size_t(-1))
 #endif
 size_t utf8_len_one(
 	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
