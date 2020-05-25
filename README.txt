@@ -22,33 +22,37 @@ Building.
 You need any c99 compiler,
 
 for example gcc:
-gcc -g -O2 -I. -c ./src/utf16_to_utf8.c
-gcc -g -O2 -I. -c ./src/utf8_to_utf16.c
-gcc -g -O2 -I. -c ./src/utf8_to_utf16_one.c
-gcc -g -O2 -I. -c ./src/utf16_to_utf8_one.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf16_to_utf8.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_to_utf16.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_to_utf16_one.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf16_to_utf8_one.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_cstd.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o
 
 or MSVC:
-cl /O2 /I. /c .\src\utf16_to_utf8.c
-cl /O2 /I. /c .\src\utf8_to_utf16.c
-cl /O2 /I. /c .\src\utf8_to_utf16_one.c
-cl /O2 /I. /c .\src\utf16_to_utf8_one.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj
+cl /O2 /I. /c /Wall .\src\utf16_to_utf8.c
+cl /O2 /I. /c /Wall .\src\utf8_to_utf16.c
+cl /O2 /I. /c /Wall .\src\utf8_to_utf16_one.c
+cl /O2 /I. /c /Wall .\src\utf16_to_utf8_one.c
+cl /O2 /I. /c /Wall .\src\utf8_cstd.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj
 
 
 
 Also, the library can be built with source annotations (restricted pointers, non-null attributes, etc.)
 
 gcc:
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf16_to_utf8.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf8_to_utf16.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf8_to_utf16_one.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c ./src/utf16_to_utf8_one.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf16_to_utf8.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_to_utf16.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_to_utf16_one.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf16_to_utf8_one.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_cstd.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o
 
 MSVC:
-cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf16_to_utf8.c
-cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf8_to_utf16.c
-cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf8_to_utf16_one.c
-cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c .\src\utf16_to_utf8_one.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf16_to_utf8.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_to_utf16.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_to_utf16_one.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf16_to_utf8_one.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_cstd.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj
