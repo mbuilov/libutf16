@@ -7,7 +7,7 @@
 /* utf16_to_utf8.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include <stdint.h> /* for uint16_t */
 #endif
 #include "libutf16/utf16_to_utf8.h"
@@ -15,6 +15,10 @@
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Use_decl_annotations
 #define A_Restrict
+#endif
+
+#ifdef _MSC_VER
+#pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
 
 A_Use_decl_annotations
