@@ -39,7 +39,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 				unsigned r;
 				if (a >= 0xE0) {
 					if (a >= 0xF0) {
-						if (a & ~0xF4)
+						if (a & ~0xF4u)
 							goto bad_utf8; /* unicode code point must be <= 0x10FFFF */
 						r = s[1];
 						if (0x80 != (r & 0xC0))
@@ -111,7 +111,7 @@ small_buf:
 			unsigned r;
 			if (a >= 0xE0) {
 				if (a >= 0xF0) {
-					if (a & ~0xF4)
+					if (a & ~0xF4u)
 						goto bad_utf8_s; /* unicode code point must be <= 0x10FFFF */
 					r = s[1];
 					if (0x80 != (r & 0xC0))
@@ -195,7 +195,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 					unsigned r;
 					if (a >= 0xE0) {
 						if (a >= 0xF0) {
-							if (a & ~0xF4)
+							if (a & ~0xF4u)
 								goto bad_utf8; /* unicode code point must be <= 0x10FFFF */
 							if ((size_t)(se - s) < 4)
 								goto bad_utf8; /* incomplete utf8 character */
@@ -273,7 +273,7 @@ small_buf:
 				unsigned r;
 				if (a >= 0xE0) {
 					if (a >= 0xF0) {
-						if (a & ~0xF4)
+						if (a & ~0xF4u)
 							goto bad_utf8_s; /* unicode code point must be <= 0x10FFFF */
 						if ((size_t)(se - s) < 4)
 							goto bad_utf8_s; /* incomplete utf8 character */
