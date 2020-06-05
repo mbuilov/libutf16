@@ -50,4 +50,7 @@ typedef unsigned int utf8_state_t;
 /* check if utf16_char_t is a part of utf16-surrogate pair */
 #define utf16_is_surrogate(c) (((unsigned)(c) - 0xD800) <= (0xDFFF - 0xD800))
 
+/* h - high part of surrogate pair, l - low part */
+#define utf16_to_utf32(h, l) (((unsigned)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
+
 #endif /* UTF16_CHAR_H_INCLUDED */
