@@ -334,7 +334,7 @@ const utf16_char_t *utf16_to_utf8_z_unsafe(const utf16_char_t *w, utf8_char_t bu
 }
 
 A_Use_decl_annotations
-void utf16_to_utf8_unsafe(const utf16_char_t *w, utf8_char_t buf[], const size_t n)
+void utf16_to_utf8_unsafe(const utf16_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
