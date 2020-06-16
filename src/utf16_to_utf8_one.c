@@ -75,7 +75,7 @@ size_t utf32_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t w)
 				c += 0x3C00000;
 				b = 4;
 				s[b - 4] = (utf8_char_t)(c >> 18);
-				c = (c & 0x3FFFF) + 0x380000;
+				c = (c & 0x3FFFF) + 0x80000;
 			}
 			else if (0xD800 <= c && c <= 0xDFFF)
 				return (size_t)-1; /* must not be a surrogate */
