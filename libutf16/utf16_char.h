@@ -53,4 +53,10 @@ typedef unsigned int utf8_state_t;
 /* h - high part of surrogate pair, l - low part */
 #define utf16_to_utf32(h, l) (((unsigned)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
 
+/* get high part of utf16 surrogate pair from a utf32 character > 0xFFFF */
+#define utf32_get_high_surrogate(u) ((utf16_char_t)((((u) - 0x10000) >> 10) + 0xD800))
+
+/* get low part of utf16 surrogate pair from a utf32 character > 0xFFFF */
+#define utf32_get_low_surrogate(u) ((utf16_char_t)((((u) - 0x10000) & 0x3FF) + 0xDC00))
+
 #endif /* UTF16_CHAR_H_INCLUDED */
