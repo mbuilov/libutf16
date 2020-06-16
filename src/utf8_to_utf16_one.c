@@ -69,7 +69,7 @@ static size_t utf8_read_one_internal(const utf8_char_t *A_Restrict s, size_t n,
 		}
 		if (a >= 0xE0) {
 			if (a >= 0xF0) {
-				if (a & ~0xF4u)
+				if (a > 0xF4)
 					return (size_t)-1; /* unicode code point must be <= 0x10FFFF */
 				if (!--n) {
 					*state = a + 0x40000000;
