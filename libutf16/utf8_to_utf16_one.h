@@ -2,7 +2,7 @@
 #define UTF8_TO_UTF16_ONE_H_INCLUDED
 
 /**********************************************************************************
-* UTF-8 -> UTF-16 characters conversion
+* UTF-8 -> UTF-16/32 characters conversion
 * Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
