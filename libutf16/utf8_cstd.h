@@ -252,6 +252,82 @@ A_Success(return != A_Size_t(-1))
 #endif
 size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, size_t n);
 
+/* mbstowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ)
+ dst != NULL:
+   number of utf32 characters stored, not counting terminating nul, which is not written
+   if buffer is too small. Use red zone in output buffer of at least 1 utf32 character
+   to check if buffer size is enough to store all characters, including terminating nul
+   character (only nul character can be written to red zone).
+ dst == NULL:
+   size of buffer required to store all utf32 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, size_t n);
+
+/* wcstombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ)
+ dst != NULL:
+   number of utf8 bytes stored, not counting terminating nul, which is not written
+   if buffer is too small. Use red zone in output buffer of at least UTF8_MAX_LEN
+   utf8 bytes to check if buffer size is enough to store all characters, including
+   terminating nul character (only nul character can be written to red zone).
+ dst == NULL:
+   size of buffer required to store all utf8 bytes, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, size_t n);
+
+/* mbstowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ)
+ dst != NULL:
+   number of utf32 characters stored, not counting terminating nul, which is not written
+   if buffer is too small. Use red zone in output buffer of at least 1 utf32 character
+   to check if buffer size is enough to store all characters, including terminating nul
+   character (only nul character can be written to red zone).
+ dst == NULL:
+   size of buffer required to store all utf32 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, size_t n);
+
+/* wcstombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ)
+ dst != NULL:
+   number of utf16 characters stored, not counting terminating nul, which is not written
+   if buffer is too small. Use red zone in output buffer of at least 2 utf16 characters
+   to check if buffer size is enough to store all characters, including terminating nul
+   character (only nul character can be written to red zone).
+ dst == NULL:
+   size of buffer required to store all utf16 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, size_t n);
+
 #ifdef __cplusplus
 }
 #endif

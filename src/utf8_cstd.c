@@ -14,6 +14,10 @@
 #include "libutf16/utf8_cstd.h"
 #include "libutf16/utf8_to_utf16.h"
 #include "libutf16/utf16_to_utf8.h"
+#include "libutf16/utf8_to_utf32.h"
+#include "libutf16/utf32_to_utf8.h"
+#include "libutf16/utf16_to_utf32.h"
+#include "libutf16/utf32_to_utf16.h"
 #include "libutf16/utf8_to_utf16_one.h"
 #include "libutf16/utf16_to_utf8_one.h"
 
@@ -368,6 +372,90 @@ size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, siz
 			else
 				/* 3 utf8 bytes per 2 utf16 bytes overflows size_t */
 				errno = E2BIG;
+			return (size_t)-1;
+		}
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
+	}
+}
+
+A_Use_decl_annotations
+size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, size_t n)
+{
+	if (!dst)
+		n = 0;
+	else if (!n)
+		return 0;
+	{
+		const utf8_char_t *q = src;
+		utf32_char_t *b = dst;
+		const size_t sz = utf8_to_utf32_z(&q, &b, n);
+		if (!sz) {
+			errno = EILSEQ;
+			return (size_t)-1;
+		}
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
+	}
+}
+
+A_Use_decl_annotations
+size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, size_t n)
+{
+	if (!dst)
+		n = 0;
+	else if (!n)
+		return 0;
+	{
+		const utf32_char_t *w = src;
+		utf8_char_t *b = dst;
+		const size_t sz = utf32_to_utf8_z(&w, &b, n);
+		if (!sz) {
+			errno = EILSEQ;
+			return (size_t)-1;
+		}
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
+	}
+}
+
+A_Use_decl_annotations
+size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, size_t n)
+{
+	if (!dst)
+		n = 0;
+	else if (!n)
+		return 0;
+	{
+		const utf16_char_t *q = src;
+		utf32_char_t *b = dst;
+		const size_t sz = utf16_to_utf32_z(&q, &b, n);
+		if (!sz) {
+			errno = EILSEQ;
+			return (size_t)-1;
+		}
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
+	}
+}
+
+A_Use_decl_annotations
+size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, size_t n)
+{
+	if (!dst)
+		n = 0;
+	else if (!n)
+		return 0;
+	{
+		const utf32_char_t *w = src;
+		utf16_char_t *b = dst;
+		const size_t sz = utf32_to_utf16_z(&w, &b, n);
+		if (!sz) {
+			errno = EILSEQ;
 			return (size_t)-1;
 		}
 		if (sz <= n || !n)
