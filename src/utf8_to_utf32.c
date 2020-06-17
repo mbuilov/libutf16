@@ -87,7 +87,7 @@ size_t utf8_to_utf32_z(const utf8_char_t **const q, utf32_char_t **const b, size
 			if (!a) {
 				m = (size_t)(d - *b);
 bad_utf8:
-				*q = s; /* (*q) != 0 if bad_utf8, else (*q) points beyond successfully converted 0 */
+				*q = s; /* (**q) != 0 if bad_utf8, else (*q) points beyond successfully converted 0 */
 				*b = d;
 				return m; /* 0 if bad_utf8, else >0 */
 			}
@@ -144,7 +144,7 @@ bad_utf8:
 			else {
 				/* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
 bad_utf8_s:
-				*q = s; /* (*q) != 0 */
+				*q = s; /* (**q) != 0 */
 				return 0; /* incomplete utf8 character */
 			}
 		}
@@ -356,9 +356,7 @@ const utf8_char_t *utf8_to_utf32_z_unsafe(const utf8_char_t *q, utf32_char_t buf
 		}
 		else
 			q++;
-		/* make analyzer happy: this equivalent to:
-		   *b++ = (utf32_char_t)a; */
-		buf[b++ - buf] = (utf32_char_t)a;
+		*b++ = (utf32_char_t)a;
 		if (!a)
 			return q; /* ok, q[-1] == 0 */
 	}
