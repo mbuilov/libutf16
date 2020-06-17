@@ -27,7 +27,11 @@ gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_to_utf16.c
 gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_to_utf16_one.c
 gcc -g -O2 -I. -c -Wall -Wextra ./src/utf16_to_utf8_one.c
 gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_cstd.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf32_to_utf8.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf8_to_utf32.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf32_to_utf16.c
+gcc -g -O2 -I. -c -Wall -Wextra ./src/utf16_to_utf32.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o ./utf32_to_utf8.o ./utf8_to_utf32.o ./utf32_to_utf16.o ./utf16_to_utf32.o
 
 or MSVC:
 cl /O2 /I. /c /Wall .\src\utf16_to_utf8.c
@@ -35,19 +39,27 @@ cl /O2 /I. /c /Wall .\src\utf8_to_utf16.c
 cl /O2 /I. /c /Wall .\src\utf8_to_utf16_one.c
 cl /O2 /I. /c /Wall .\src\utf16_to_utf8_one.c
 cl /O2 /I. /c /Wall .\src\utf8_cstd.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj
+cl /O2 /I. /c /Wall .\src\utf32_to_utf8.c
+cl /O2 /I. /c /Wall .\src\utf8_to_utf32.c
+cl /O2 /I. /c /Wall .\src\utf32_to_utf16.c
+cl /O2 /I. /c /Wall .\src\utf16_to_utf32.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj .\utf32_to_utf8.obj .\utf8_to_utf32.obj .\utf32_to_utf16.obj .\utf16_to_utf32.obj
 
 
 
 Also, the library can be built with source annotations (restricted pointers, non-null attributes, etc.)
 
 gcc:
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf16_to_utf8.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_to_utf16.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_to_utf16_one.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf16_to_utf8_one.c
-gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra ./src/utf8_cstd.c
-ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf16_to_utf8.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf8_to_utf16.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf8_to_utf16_one.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf16_to_utf8_one.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf8_cstd.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf32_to_utf8.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf8_to_utf32.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf32_to_utf16.c
+gcc -g -O2 -include ../cmn_headers/sal_defs.h -I. -c -Wall -Wextra -fanalyzer ./src/utf16_to_utf32.c
+ar -crs libutf16.a ./utf16_to_utf8.o ./utf8_to_utf16.o ./utf8_to_utf16_one.o ./utf16_to_utf8_one.o ./utf8_cstd.o ./utf32_to_utf8.o ./utf8_to_utf32.o ./utf32_to_utf16.o ./utf16_to_utf32.o
 
 MSVC:
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf16_to_utf8.c
@@ -55,4 +67,8 @@ cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_to_
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_to_utf16_one.c
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf16_to_utf8_one.c
 cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_cstd.c
-lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf32_to_utf8.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf8_to_utf32.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf32_to_utf16.c
+cl /O2 /FI..\cmn_headers\sal_defs.h /I. /c /Wall /wd4464 /analyze .\src\utf16_to_utf32.c
+lib /out:utf16.a .\utf16_to_utf8.obj .\utf8_to_utf16.obj .\utf8_to_utf16_one.obj .\utf16_to_utf8_one.obj .\utf8_cstd.obj .\utf32_to_utf8.obj .\utf8_to_utf32.obj .\utf32_to_utf16.obj .\utf16_to_utf32.obj
