@@ -117,9 +117,10 @@ A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
 A_Ret_range(1, UTF8_MAX_LEN)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_c32rtomb(utf8_char_t *const s, const utf32_char_t wi);
+size_t utf8_c32rtomb_(utf8_char_t *const s, const utf32_char_t wi);
+#define utf8_c32rtomb(s, wi, ps) ((void)(ps), utf8_c32rtomb_(s, wi))
 
-/* mbtowc (3) */
+/* mbtowc (3) for 16/32 bit wchar_t */
 /* returns:
   -1   on incomplete character (errno == 0) or on error (errno == EILSEQ)
  s != NULL:
@@ -143,7 +144,7 @@ A_Ret_range(-1, UTF8_MAX_LEN)
 #endif
 int utf8_mbtowc32(utf32_char_t *const pwc, const utf8_char_t *const s, const size_t n);
 
-/* mbrtowc (3) */
+/* mbrtowc (3) for 16/32 bit wchar_t */
 /* returns:
   -1   on error (errno == EILSEQ)
  s != NULL:
@@ -172,7 +173,7 @@ A_Success(return != A_Size_t(-1))
 size_t utf8_mbrtowc32(utf32_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *ps);
 
-/* wctomb (3) */
+/* wctomb (3) for 16/32 bit wchar_t */
 /* returns:
   -1   on error (errno == EILSEQ)
  s != NULL:
@@ -195,7 +196,7 @@ A_Success(return != -1)
 #endif
 int utf8_wc32tomb(utf8_char_t *const s, const utf32_char_t wc);
 
-/* wcrtomb (3) */
+/* wcrtomb (3) for 16/32 bit wchar_t */
 /* returns:
   -1   on error (errno == EILSEQ)
  s != NULL:
@@ -211,52 +212,45 @@ A_Success(return != A_Size_t(-1))
 #endif
 size_t utf8_wc16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps);
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
-A_At(ps, A_Inout_opt)
-A_Ret_range(1, UTF8_MAX_LEN)
-A_Success(return != A_Size_t(-1))
-#endif
-size_t utf8_wc32rtomb(utf8_char_t *const s, const utf32_char_t wc, utf8_state_t *ps);
+#define utf8_wc32rtomb(s, wc, ps) utf8_c32rtomb(s, wc, ps)
 
 /* mbstowcs (3) */
 /* returns:
   -1   on error (errno == EILSEQ)
- wcstr != NULL:
-   number of wide characters stored, not counting terminating nul, which is not written
+ dst != NULL:
+   number of utf16 characters stored, not counting terminating nul, which is not written
    if buffer is too small. Use red zone in output buffer of at least 2 utf16 characters
    to check if buffer size is enough to store all characters, including terminating nul
    character (only nul character can be written to red zone).
- wcstr == NULL:
-   size of buffer required to store all wide characters, not counting terminating nul */
+ dst == NULL:
+   size of buffer required to store all utf16 characters, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
-A_At(wcstr, A_Out_writes_opt(count))
-A_At(mbstr, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_mbstowc16s(utf16_char_t *const wcstr, const utf8_char_t *const mbstr, size_t count);
+size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, size_t n);
 
 /* wcstombs (3) */
 /* returns:
   -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long)
- mbstr != NULL:
+ dst != NULL:
    number of utf8 bytes stored, not counting terminating nul, which is not written
    if buffer is too small. Use red zone in output buffer of at least UTF8_MAX_LEN
-   utf8 bytes to check if buffer size is enough to store all characters, includings
+   utf8 bytes to check if buffer size is enough to store all characters, including
    terminating nul character (only nul character can be written to red zone).
- mbstr == NULL:
+ dst == NULL:
    size of buffer required to store all utf8 bytes, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
-A_At(mbstr, A_Out_writes_opt(count))
-A_At(wcstr, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(src, A_In_z)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_wc16stombs(utf8_char_t *const mbstr, const utf16_char_t *const wcstr, size_t count);
+size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, size_t n);
 
 #ifdef __cplusplus
 }

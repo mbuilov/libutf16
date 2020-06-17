@@ -145,7 +145,7 @@ size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *
 }
 
 A_Use_decl_annotations
-size_t utf8_c32rtomb(utf8_char_t *const s, utf32_char_t wi)
+size_t utf8_c32rtomb_(utf8_char_t *const s, utf32_char_t wi)
 {
 	if (s) {
 		const size_t count = utf32_to_utf8_one(s, wi);
@@ -276,7 +276,7 @@ static int utf8_wctomb_(utf8_char_t *const s, const unsigned wc, utf8_state_t *c
 			/* Trying to convert a high part of utf16-surrogate pair.
 			   But it's not possible to save a unicode character without
 			   a low part of utf16-surrogate pair.
-			   c16rtomb should be in this case.  */
+			   c16rtomb should be used in this case.  */
 			errno = EILSEQ;
 			return -1; /* wc can not be represented as a multibyte sequence */
 		}
@@ -304,24 +304,19 @@ int utf8_wc32tomb(utf8_char_t *const s, const utf32_char_t wc)
 	return utf8_wctomb_(s, wc, /*wc16_state:*/NULL);
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
-A_At(wc16_state, A_Inout_opt)
-A_Success(return != A_Size_t(-1))
-A_Ret_range(1, UTF8_MAX_LEN)
-#endif
-static size_t utf8_wcrtomb_(utf8_char_t *const s, const unsigned wc, utf8_state_t *const wc16_state)
+A_Use_decl_annotations
+size_t utf8_wc16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
 {
+	static utf8_state_t wc16rtomb_state = 0;
+	if (!ps)
+		ps = &wc16rtomb_state;
 	if (s) {
-		const size_t count = wc16_state
-			? utf16_to_utf8_one(s, (utf16_char_t)wc, wc16_state)
-			: utf32_to_utf8_one(s, (utf32_char_t)wc);
-		if (wc16_state && !count) {
+		const size_t count = utf16_to_utf8_one(s, wc, ps);
+		if (!count) {
 			/* Trying to convert a high part of utf16-surrogate pair.
 			   But it's not possible to save a unicode character without
 			   a low part of utf16-surrogate pair.
-			   c16rtomb should be in this case.  */
+			   c16rtomb should be used in this case.  */
 			errno = EILSEQ;
 			return (size_t)-1; /* wc can not be represented as a multibyte sequence */
 		}
@@ -329,67 +324,54 @@ static size_t utf8_wcrtomb_(utf8_char_t *const s, const unsigned wc, utf8_state_
 			errno = EILSEQ;
 		return count; /* 1-4, (size_t)-1 */
 	}
-	if (!wc16_state || !*wc16_state)
+	if (!*ps)
 		return 1;
 	errno = EILSEQ;
 	return (size_t)-1;
 }
 
 A_Use_decl_annotations
-size_t utf8_wc16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
+size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, size_t n)
 {
-	static utf8_state_t wc16rtomb_state = 0;
-	return utf8_wcrtomb_(s, wc, ps ? ps : &wc16rtomb_state);
-}
-
-A_Use_decl_annotations
-size_t utf8_wc32rtomb(utf8_char_t *const s, const utf32_char_t wc, utf8_state_t *ps)
-{
-	return utf8_wcrtomb_(s, wc, ps ? ps : /*wc16_state:*/NULL);
-}
-
-A_Use_decl_annotations
-size_t utf8_mbstowc16s(utf16_char_t *const wcstr, const utf8_char_t *const mbstr, size_t count)
-{
-	if (!wcstr)
-		count = 0;
-	else if (!count)
+	if (!dst)
+		n = 0;
+	else if (!n)
 		return 0;
 	{
-		const utf8_char_t *q = mbstr;
-		utf16_char_t *b = wcstr;
-		const size_t n = utf8_to_utf16_z(&q, &b, count);
-		if (!n) {
+		const utf8_char_t *q = src;
+		utf16_char_t *b = dst;
+		const size_t sz = utf8_to_utf16_z(&q, &b, n);
+		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
 		}
-		if (n <= count || !count)
-			return n - 1; /* don't count terminating nul */
-		return (size_t)(b - wcstr);
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
 	}
 }
 
 A_Use_decl_annotations
-size_t utf8_wc16stombs(utf8_char_t *const mbstr, const utf16_char_t *const wcstr, size_t count)
+size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, size_t n)
 {
-	if (!mbstr)
-		count = 0;
-	else if (!count)
+	if (!dst)
+		n = 0;
+	else if (!n)
 		return 0;
 	{
-		const utf16_char_t *w = wcstr;
-		utf8_char_t *b = mbstr;
-		const size_t n = utf16_to_utf8_z(&w, &b, count);
-		if (!n) {
-			if (w == wcstr || w[-1])
+		const utf16_char_t *w = src;
+		utf8_char_t *b = dst;
+		const size_t sz = utf16_to_utf8_z(&w, &b, n);
+		if (!sz) {
+			if (w == src || w[-1])
 				errno = EILSEQ;
 			else
 				/* 3 utf8 bytes per 2 utf16 bytes overflows size_t */
 				errno = E2BIG;
 			return (size_t)-1;
 		}
-		if (n <= count || !count)
-			return n - 1; /* don't count terminating nul */
-		return (size_t)(b - mbstr);
+		if (sz <= n || !n)
+			return sz - 1; /* don't count terminating nul */
+		return (size_t)(b - dst);
 	}
 }
