@@ -149,7 +149,7 @@ size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *
 }
 
 A_Use_decl_annotations
-size_t utf8_c32rtomb_(utf8_char_t *const s, utf32_char_t wi)
+size_t utf8_c32rtomb(utf8_char_t *const s, utf32_char_t wi, utf8_state_t *ps)
 {
 	if (s) {
 		const size_t count = utf32_to_utf8_one(s, wi);
@@ -157,7 +157,10 @@ size_t utf8_c32rtomb_(utf8_char_t *const s, utf32_char_t wi)
 			errno = EILSEQ;
 		return count; /* 1-4, (size_t)-1 */
 	}
-	return 1;
+	if (!ps || !*ps)
+		return 1;
+	errno = EILSEQ;
+	return (size_t)-1;
 }
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -199,7 +202,7 @@ static int utf8_mbtowc_(const int is_wchar_16, void *const pwc,
 }
 
 A_Use_decl_annotations
-int utf8_mbtowc16(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n)
+int utf8_mbtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n)
 {
 	static utf8_state_t mbtowc16_state = 0;
 	return utf8_mbtowc_(/*is_wchar_16:*/1, pwc, s, n, &mbtowc16_state);
@@ -212,24 +215,18 @@ int utf8_mbtowc32(utf32_char_t *const pwc, const utf8_char_t *const s, const siz
 	return utf8_mbtowc_(/*is_wchar_16:*/0, pwc, s, n, &mbtowc32_state);
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_arg(5)
-A_When(s, A_At(pwc, A_Out_opt))
-A_At(s, A_In_reads_opt(n))
-A_At(ps, A_Inout)
-A_Success(return != A_Size_t(-1))
-#endif
-static size_t utf8_mbrtowc_(const int is_wchar_16, void *const pwc,
-	const utf8_char_t *const s, const size_t n, utf8_state_t *const ps)
+A_Use_decl_annotations
+size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s,
+	const size_t n, utf8_state_t *ps)
 {
+	static utf8_state_t mbrtowc16_state = 0;
+	if (!ps)
+		ps = &mbrtowc16_state;
 	if (!pwc)
 		return utf8_mbrlen(s, n, ps);
 	if (s) {
-		const size_t count = is_wchar_16
-			? utf8_to_utf16_one((utf16_char_t*)pwc, s, n, ps)
-			: utf8_to_utf32_one((utf32_char_t*)pwc, s, n, ps);
-		if (count < (size_t)-2 && is_wchar_16 && *ps) {
+		const size_t count = utf8_to_utf16_one(pwc, s, n, ps);
+		if (count < (size_t)-2 && *ps) {
 			/* A unicode character requires a utf16-surrogate
 			   pair, which cannot be stored in a single wchar_t.
 			   mbrtoc16/mbrtoc32 should be used in this case.  */
@@ -248,19 +245,11 @@ static size_t utf8_mbrtowc_(const int is_wchar_16, void *const pwc,
 }
 
 A_Use_decl_annotations
-size_t utf8_mbrtowc16(utf16_char_t *const pwc, const utf8_char_t *const s,
-	const size_t n, utf8_state_t *const ps)
-{
-	static utf8_state_t mbrtowc16_state = 0;
-	return utf8_mbrtowc_(/*is_wchar_16:*/1, pwc, s, n, ps ? ps : &mbrtowc16_state);
-}
-
-A_Use_decl_annotations
 size_t utf8_mbrtowc32(utf32_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *const ps)
 {
 	static utf8_state_t mbrtowc32_state = 0;
-	return utf8_mbrtowc_(/*is_wchar_16:*/0, pwc, s, n, ps ? ps : &mbrtowc32_state);
+	return utf8_mbrtoc32(pwc, s, n, ps ? ps : &mbrtowc32_state);
 }
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -296,7 +285,7 @@ static int utf8_wctomb_(utf8_char_t *const s, const unsigned wc, utf8_state_t *c
 }
 
 A_Use_decl_annotations
-int utf8_wc16tomb(utf8_char_t *const s, const utf16_char_t wc)
+int utf8_wc16tomb_obsolete(utf8_char_t *const s, const utf16_char_t wc)
 {
 	static utf8_state_t wc16tomb_state = 0;
 	return utf8_wctomb_(s, wc, &wc16tomb_state);
@@ -309,7 +298,7 @@ int utf8_wc32tomb(utf8_char_t *const s, const utf32_char_t wc)
 }
 
 A_Use_decl_annotations
-size_t utf8_wc16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
+size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
 {
 	static utf8_state_t wc16rtomb_state = 0;
 	if (!ps)

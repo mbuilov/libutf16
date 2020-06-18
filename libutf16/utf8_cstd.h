@@ -114,11 +114,11 @@ size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
+A_At(ps, A_In_opt)
 A_Ret_range(1, UTF8_MAX_LEN)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_c32rtomb_(utf8_char_t *const s, const utf32_char_t wi);
-#define utf8_c32rtomb(s, wi, ps) ((void)(ps), utf8_c32rtomb_(s, wi))
+size_t utf8_c32rtomb(utf8_char_t *const s, const utf32_char_t wi, utf8_state_t *ps);
 
 /* mbtowc (3) for 16/32 bit wchar_t */
 /* returns:
@@ -130,15 +130,16 @@ size_t utf8_c32rtomb_(utf8_char_t *const s, const utf32_char_t wi);
    0   UTF8 is a stateless encoding */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
-A_At(pwc, A_Out_opt)
+A_When(s, A_At(pwc, A_Out_opt))
 A_At(s, A_In_reads_opt(n))
 A_Ret_range(-1, UTF8_MAX_LEN)
 #endif
-int utf8_mbtowc16(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n);
+/* NOTE: do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
+int utf8_mbtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n);
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
-A_At(pwc, A_Out_opt)
+A_When(s, A_At(pwc, A_Out_opt))
 A_At(s, A_In_reads_opt(n))
 A_Ret_range(-1, UTF8_MAX_LEN)
 #endif
@@ -155,17 +156,18 @@ int utf8_mbtowc32(utf32_char_t *const pwc, const utf8_char_t *const s, const siz
    0   state is zero */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
-A_At(pwc, A_Out_opt)
+A_When(s, A_At(pwc, A_Out_opt))
 A_At(s, A_In_reads_opt(n))
 A_At(ps, A_Inout_opt)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_mbrtowc16(utf16_char_t *const pwc, const utf8_char_t *const s,
+/* NOTE: do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
+size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *const ps);
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
-A_At(pwc, A_Out_opt)
+A_When(s, A_At(pwc, A_Out_opt))
 A_At(s, A_In_reads_opt(n))
 A_At(ps, A_Inout_opt)
 A_Success(return != A_Size_t(-1))
@@ -186,7 +188,8 @@ A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
 A_Ret_range(0, UTF8_MAX_LEN)
 A_Success(return != -1)
 #endif
-int utf8_wc16tomb(utf8_char_t *const s, const utf16_char_t wc);
+/* NOTE: do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
+int utf8_wc16tomb_obsolete(utf8_char_t *const s, const utf16_char_t wc);
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
@@ -210,9 +213,10 @@ A_At(ps, A_Inout_opt)
 A_Ret_range(1, UTF8_MAX_LEN)
 A_Success(return != A_Size_t(-1))
 #endif
-size_t utf8_wc16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps);
+/* NOTE: do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
+size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps);
 
-#define utf8_wc32rtomb(s, wc, ps) utf8_c32rtomb(s, wc, ps)
+#define utf8_wc32rtomb utf8_c32rtomb
 
 /* mbstowcs (3) */
 /* returns:
