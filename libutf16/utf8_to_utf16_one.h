@@ -96,7 +96,7 @@ A_At(s, A_In_z)
 A_Success(return)
 #endif
 const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t *s/*'\0'-terminated,!=NULL*/);
+	const utf8_char_t s[]/*'\0'-terminated,!=NULL*/);
 
 #ifdef __cplusplus
 }
