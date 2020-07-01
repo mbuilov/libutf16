@@ -85,6 +85,19 @@ size_t utf8_len_one(
 	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
+/* read one unicode character (code point) from NUL-terminated utf8 string, returns:
+  NULL if s contains invalid or incomplete utf8 byte sequence,
+  else - pointer beyond read unicode character stored to (*pw) */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_all_args
+A_At(pw, A_Out)
+A_At(s, A_In_z)
+A_Success(return)
+#endif
+const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw/*out,!=NULL*/,
+	const utf8_char_t *s/*'\0'-terminated,!=NULL*/);
+
 #ifdef __cplusplus
 }
 #endif

@@ -206,3 +206,57 @@ size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const p
 	*ps = 0;
 	return !a ? 0 : r;
 }
+
+A_Use_decl_annotations
+const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw, const utf8_char_t *s)
+{
+	unsigned r;
+	unsigned a = *s++;
+	if (a < 0x80) {
+		*pw = a;
+		return s;
+	}
+	if (a >= 0xE0) {
+		if (a >= 0xF0) {
+			if (a > 0xF4)
+				return NULL; /* unicode code point must be <= 0x10FFFF */
+			r = *s++;
+			if (0x80 != (r & 0xC0))
+				return NULL; /* incomplete utf8 character */
+			a = (a << 6) + r;
+			if (!(0x3C90 <= a && a <= 0x3D8F))
+				return NULL; /* overlong utf8 character/out of range */
+			r = *s++;
+			if (0x80 != (r & 0xC0))
+				return NULL; /* incomplete utf8 character */
+			a = (a << 6) + r;
+			r = *s++;
+			if (0x80 != (r & 0xC0))
+				return NULL; /* incomplete utf8 character */
+			a = (a << 6) + r - 0x682080 - 0x3600000;
+			*pw = a;
+			return s;
+		}
+		r = *s++;
+		if (0x80 != (r & 0xC0))
+			return NULL; /* incomplete utf8 character */
+		a = (a << 6) + r;
+		if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+			return NULL; /* overlong utf8 character/surrogate */
+		r = *s++;
+		if (0x80 != (r & 0xC0))
+			return NULL; /* incomplete utf8 character */
+		a = (a << 6) + r - 0xE2080;
+		*pw = a;
+		return s;
+	}
+	if (a >= 0xC2) {
+		r = *s++;
+		if (0x80 != (r & 0xC0))
+			return NULL; /* incomplete utf8 character */
+		a = (a << 6) + r - 0x3080;
+		*pw = a;
+		return s;
+	}
+	return NULL; /* not expecting 10xxxxxx or overlong utf8 character: 1100000x */
+}
