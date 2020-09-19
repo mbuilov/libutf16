@@ -333,7 +333,7 @@ size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, siz
 	{
 		const utf8_char_t *q = src;
 		utf16_char_t *b = dst;
-		const size_t sz = utf8_to_utf16_z(&q, &b, n);
+		const size_t sz = utf8_to_utf16_z_(&q, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
@@ -354,7 +354,7 @@ size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, siz
 	{
 		const utf16_char_t *w = src;
 		utf8_char_t *b = dst;
-		const size_t sz = utf16_to_utf8_z(&w, &b, n);
+		const size_t sz = utf16_to_utf8_z_(&w, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			if (w == src || w[-1])
 				errno = EILSEQ;
@@ -379,7 +379,7 @@ size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, siz
 	{
 		const utf8_char_t *q = src;
 		utf32_char_t *b = dst;
-		const size_t sz = utf8_to_utf32_z(&q, &b, n);
+		const size_t sz = utf8_to_utf32_z_(&q, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
@@ -400,7 +400,7 @@ size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, siz
 	{
 		const utf32_char_t *w = src;
 		utf8_char_t *b = dst;
-		const size_t sz = utf32_to_utf8_z(&w, &b, n);
+		const size_t sz = utf32_to_utf8_z_(&w, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
@@ -421,7 +421,7 @@ size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, s
 	{
 		const utf16_char_t *q = src;
 		utf32_char_t *b = dst;
-		const size_t sz = utf16_to_utf32_z(&q, &b, n);
+		const size_t sz = utf16_to_utf32_z_(&q, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
@@ -442,7 +442,7 @@ size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, s
 	{
 		const utf32_char_t *w = src;
 		utf16_char_t *b = dst;
-		const size_t sz = utf32_to_utf16_z(&w, &b, n);
+		const size_t sz = utf32_to_utf16_z_(&w, &b, n, /*determ_req_size:*/!n);
 		if (!sz) {
 			errno = EILSEQ;
 			return (size_t)-1;
