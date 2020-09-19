@@ -15,6 +15,25 @@
 extern "C" {
 #endif
 
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(1)
+A_At(q, A_Always(A_Inout))
+A_At(*q, A_In_z A_Always(A_Post_notnull))
+A_When(!sz, A_Unchanged(*q))
+A_When(!sz, A_At(b, A_Maybenull))
+A_When(!sz, A_Unchanged(*b))
+A_When(sz, A_At(b, A_Always(A_Outptr)))
+A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
+A_Success(return)
+A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_z A_Post_readable_size(return)))
+#endif
+size_t utf8_to_utf32_z_(
+	const utf8_char_t **const q/*in,out,!=NULL*/,
+	utf32_char_t **const b/*in,out,!=NULL if sz>0*/,
+	size_t sz/*0?*/,
+	const int determ_req_size);
+
 /* convert utf8 0-terminated string to utf32 0-terminated one,
  input:
   q  - address of the pointer to the beginning of input 0-terminated utf8 string,
@@ -37,23 +56,13 @@ extern "C" {
    . if output buffer is too small, last valid utf8_char_t may be beyond last converted one,
    . last valid utf8_char_t is _not_ 0;
   (*b) - if sz > 0, points beyond last successfully converted and stored (non-0) utf32_char_t */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_arg(1)
-A_At(q, A_Always(A_Inout))
-A_At(*q, A_In_z A_Always(A_Post_notnull))
-A_When(!sz, A_Unchanged(*q))
-A_When(!sz, A_At(b, A_Maybenull))
-A_When(!sz, A_Unchanged(*b))
-A_When(sz, A_At(b, A_Always(A_Outptr)))
-A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
-A_Success(return)
-A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_z A_Post_readable_size(return)))
-#endif
-size_t utf8_to_utf32_z(
-	const utf8_char_t **const q/*in,out,!=NULL*/,
-	utf32_char_t **const b/*in,out,!=NULL if sz>0*/,
-	size_t sz/*0?*/);
+#define utf8_to_utf32_z(q/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
+	utf8_to_utf32_z_(q, b, sz, /*determ_req_size:*/1)
+
+/* same as utf8_to_utf32_z(), but if output buffer is not empty and is too small, do not
+  determine its required size. */
+#define utf8_to_utf32_z_partial(q/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
+	utf8_to_utf32_z_(q, b, sz, /*determ_req_size:*/0)
 
 /* determine the size (in utf32_char_t's) of resulting converted from
   utf8 to utf32 0-terminated string, including terminating 0,
@@ -66,6 +75,27 @@ size_t utf8_to_utf32_z(
   (*q) - points beyond last valid utf8_char_t,
    . last valid utf8_char_t is _not_ 0 */
 #define utf8_to_utf32_z_size(q/*in,out,!=NULL*/) utf8_to_utf32_z(q, NULL, 0)
+
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_When(!n, A_Ret_range(==,0))
+A_When(!n, A_At(q, A_Maybenull))
+A_When(n, A_At(q, A_Always(A_Inout)))
+A_When(n, A_At(*q, A_In_reads(n) A_Always(A_Post_notnull)))
+A_When(n && !sz, A_Unchanged(*q))
+A_When(!sz || !n, A_At(b, A_Maybenull))
+A_When(!sz || !n, A_Unchanged(*b))
+A_When(n && sz, A_At(b, A_Always(A_Outptr)))
+A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
+A_Success(return)
+A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_readable_size(return)))
+#endif
+size_t utf8_to_utf32_(
+	const utf8_char_t **const q/*in,out,!=NULL if n>0*/,
+	utf32_char_t **const b/*in,out,!=NULL if n>0 && sz>0*/,
+	size_t sz/*0?*/,
+	const size_t n/*0?*/,
+	const int determ_req_size);
 
 /* convert 'n' utf8_char_t's to utf32 ones,
  input:
@@ -90,25 +120,13 @@ size_t utf8_to_utf32_z(
    . last valid utf8_char_t is _not_ the last character of utf8 string;
   (*b) - if sz > 0, points beyond last successfully converted and stored utf32_char_t */
 /* Note: zero utf8_char_t is not treated specially, i.e. conversion do not stops */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_When(!n, A_Ret_range(==,0))
-A_When(!n, A_At(q, A_Maybenull))
-A_When(n, A_At(q, A_Always(A_Inout)))
-A_When(n, A_At(*q, A_In_reads(n) A_Always(A_Post_notnull)))
-A_When(n && !sz, A_Unchanged(*q))
-A_When(!sz || !n, A_At(b, A_Maybenull))
-A_When(!sz || !n, A_Unchanged(*b))
-A_When(n && sz, A_At(b, A_Always(A_Outptr)))
-A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
-A_Success(return)
-A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_readable_size(return)))
-#endif
-size_t utf8_to_utf32(
-	const utf8_char_t **const q/*in,out,!=NULL if n>0*/,
-	utf32_char_t **const b/*in,out,!=NULL if n>0 && sz>0*/,
-	size_t sz/*0?*/,
-	const size_t n/*0?*/);
+#define utf8_to_utf32(q/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
+	utf8_to_utf32_(q, b, sz, n, /*determ_req_size:*/1)
+
+/* same as utf8_to_utf32(), but if output buffer is not empty and is too small, do not
+  determine its required size. */
+#define utf8_to_utf32_partial(q/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
+	utf8_to_utf32_(q, b, sz, n, /*determ_req_size:*/0)
 
 /* determine the size (in utf32_char_t's) of resulting buffer needed for converting 'n' utf8_char_t's to utf32 ones,
  input:

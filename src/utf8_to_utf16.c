@@ -22,10 +22,11 @@
 #endif
 
 A_Use_decl_annotations
-size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size_t sz)
+size_t utf8_to_utf16_z_(const utf8_char_t **const q,
+	utf16_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *A_Restrict s = *q;
 	const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 	if (!sz)
@@ -56,7 +57,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r - 0x682080 - 0x10000;
 						s += 4;
-						if ((size_t)(e - d) < 2) {
+						if (d + 1 == e) {
 							t = s - 4;
 							m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 							goto small_buf; /* too small output buffer */
@@ -96,7 +97,7 @@ size_t utf8_to_utf16_z(const utf8_char_t **const q, utf16_char_t **const b, size
 bad_utf8:
 				*q = s; /* (**q) != 0 if bad_utf8, else (*q) points beyond successfully converted 0 */
 				*b = d;
-				return m; /* 0 if bad_utf8, else >0 */
+				return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 			}
 		} while (d != e);
 		/* too small output buffer */
@@ -104,6 +105,10 @@ bad_utf8:
 small_buf:
 		sz = (size_t)(d - *b);
 		*b = d;
+		if (!determ_req_size) {
+			*q = t; /* points after the last successfully converted non-0 utf8_char_t */
+			return sz + 1 + m; /* ok, >0, but > dst buffer size */
+		}
 	}
 	for (;;) {
 		unsigned a = s[0];
@@ -169,18 +174,19 @@ bad_utf8_s:
 				/* append a number of utf16_char_t's in utf8 string started from 't' */
 				sz += (size_t)(s - t) - m;
 				*q = t; /* points after the last successfully converted non-0 utf8_char_t */
-				return sz; /* ok, >0 */
+				return sz; /* ok, >0, but > dst buffer size */
 			}
 		}
 	}
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const size_t n)
+size_t utf8_to_utf16_(const utf8_char_t **const q,
+	utf16_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
-		size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 		const utf8_char_t *A_Restrict s = *q;
 		const utf8_char_t *const se = s + n;
 		const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
@@ -214,7 +220,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r - 0x682080 - 0x10000;
 							s += 4;
-							if ((size_t)(e - d) < 2) {
+							if (d + 1 == e) {
 								t = s - 4;
 								m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 								goto small_buf; /* too small output buffer */
@@ -258,7 +264,7 @@ size_t utf8_to_utf16(const utf8_char_t **const q, utf16_char_t **const b, size_t
 bad_utf8:
 					*q = s; /* (*q) < se if bad_utf8, else (*q) == se */
 					*b = d;
-					return m; /* 0 if bad_utf8, else >0 */
+					return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 				}
 			} while (d != e);
 			/* too small output buffer */
@@ -266,6 +272,10 @@ bad_utf8:
 small_buf:
 			sz = (size_t)(d - *b);
 			*b = d;
+			if (!determ_req_size) {
+				*q = t; /* points after the last successfully converted utf8_char_t, (*q) < se */
+				return sz + 1 + m; /* ok, >0, but > dst buffer size */
+			}
 		}
 		do {
 			unsigned a = s[0];
@@ -337,7 +347,7 @@ bad_utf8_s:
 		/* append a number of utf16_char_t's in utf8 string started from 't' */
 		sz += (size_t)(s - t) - m;
 		*q = t; /* points after the last successfully converted utf8_char_t, (*q) < se */
-		return sz; /* ok, >0 */
+		return sz; /* ok, >0, but > dst buffer size */
 	}
 	return 0; /* n is zero */
 }

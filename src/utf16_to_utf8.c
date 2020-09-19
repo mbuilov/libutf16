@@ -22,10 +22,11 @@
 #endif
 
 A_Use_decl_annotations
-size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size_t sz)
+size_t utf16_to_utf8_z_(const utf16_char_t **const w,
+	utf8_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf16_char_t *A_Restrict s = *w;
 	if (sz) {
 		utf8_char_t *A_Restrict d = *b;
@@ -92,12 +93,16 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 				sz = (size_t)(d - *b);
 				*w = s; /* (*w) points beyond successfully converted 0 */
 				*b = d;
-				return sz; /* ok, >0 */
+				return sz; /* ok, >0 and <= dst buffer size */
 			}
 		} while (d != e);
 		/* too small output buffer */
 		sz = (size_t)(d - *b);
 		*b = d;
+		if (!determ_req_size) {
+			*w = s - (m != 0) - (3 == m); /* points beyond the last converted non-0 utf16_char_t */
+			return sz + 1 + m; /* ok, >0, but > dst buffer size */
+		}
 	}
 	/* NOTE: assume total size in bytes of input utf16 string, including terminating 0,
 	  may be stored in a variable of size_t type without loss, so for each utf16_char_t may
@@ -107,7 +112,7 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 	  2 - at least one utf16_char_t (2 bytes) was checked, no overflow of 'm' is possible,
 	  3 - at least two utf16_char_t's (4 bytes) were checked, no overflow of 'm' is possible */
 	{
-		const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t */
+		const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted non-0 utf16_char_t */
 		if (3 == m)
 			m = 2;
 		for (;;) {
@@ -153,7 +158,7 @@ size_t utf16_to_utf8_z(const utf16_char_t **const w, utf8_char_t **const b, size
 			goto too_long;
 #endif
 		*w = t; /* points after the last successfully converted non-0 utf16_char_t */
-		return sz; /* ok, >0 */
+		return sz; /* ok, >0, but > dst buffer size */
 	}
 too_long:
 	*w = s; /* points after the 0-terminator */
@@ -161,11 +166,12 @@ too_long:
 }
 
 A_Use_decl_annotations
-size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const size_t n)
+size_t utf16_to_utf8_(const utf16_char_t **const w,
+	utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
-		size_t m = 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 		const utf16_char_t *A_Restrict s = *w;
 		const utf16_char_t *const se = s + n;
 		if (sz) {
@@ -226,12 +232,16 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 					sz = (size_t)(d - *b);
 					*w = s; /* (*w) == se */
 					*b = d;
-					return sz; /* ok, >0 */
+					return sz; /* ok, >0 and <= dst buffer size */
 				}
 			} while (d != e);
 			/* too small output buffer */
 			sz = (size_t)(d - *b);
 			*b = d;
+			if (!determ_req_size) {
+				*w = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t, (*w) < se */
+				return sz + 1 + m; /* ok, >0, but > dst buffer size */
+			}
 		}
 		/* NOTE: assume total size in bytes of input utf16 string,
 		  may be stored in a variable of size_t type without loss, so for each utf16_char_t may
@@ -241,7 +251,7 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 		  2 - at least one utf16_char_t (2 bytes) was checked, no overflow of 'm' is possible,
 		  3 - at least two utf16_char_t's (4 bytes) were checked, no overflow of 'm' is possible */
 		{
-			const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t */
+			const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t, t < se */
 			if (3 == m)
 				m = 2;
 			do {
@@ -285,7 +295,7 @@ size_t utf16_to_utf8(const utf16_char_t **const w, utf8_char_t **const b, size_t
 				goto too_long;
 #endif
 			*w = t; /* points after the last successfully converted utf16_char_t, (*w) < se */
-			return sz; /* ok, >0 */
+			return sz; /* ok, >0, but > dst buffer size */
 		}
 too_long:
 		*w = s; /* (*w) == se */
