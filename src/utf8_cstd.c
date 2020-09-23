@@ -150,7 +150,7 @@ size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *
 }
 
 A_Use_decl_annotations
-size_t utf8_c32rtomb(utf8_char_t *const s, utf32_char_t wi, utf8_state_t *ps)
+size_t utf8_c32rtomb(utf8_char_t *const s, const utf32_char_t wi, utf8_state_t *ps)
 {
 	if (s) {
 		const size_t count = utf32_to_utf8_one(s, wi);
@@ -247,7 +247,7 @@ size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const
 
 A_Use_decl_annotations
 size_t utf8_mbrtowc32(utf32_char_t *const pwc, const utf8_char_t *const s,
-	const size_t n, utf8_state_t *const ps)
+	const size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t mbrtowc32_state = 0;
 	return utf8_mbrtoc32(pwc, s, n, ps ? ps : &mbrtowc32_state);

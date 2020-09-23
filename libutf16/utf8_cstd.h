@@ -163,7 +163,7 @@ A_Success(return != A_Size_t(-1))
 #endif
 /* NOTE: do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
 size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s,
-	const size_t n, utf8_state_t *const ps);
+	const size_t n, utf8_state_t *ps);
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
