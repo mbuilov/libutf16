@@ -100,8 +100,18 @@ size_t utf16_to_utf8_z_(const utf16_char_t **const w,
 		sz = (size_t)(d - *b);
 		*b = d;
 		if (!determ_req_size) {
+			const size_t x = m + 1;
+#ifdef UBSAN_UNSIGNED_OVERFLOW
+			if (sz > (size_t)-1 - x)
+				goto too_long_find_nul;
+#endif
+			sz += x;
+#ifndef UBSAN_UNSIGNED_OVERFLOW
+			if (sz < x)
+				goto too_long_find_nul;
+#endif
 			*w = s - (m != 0) - (3 == m); /* points beyond the last converted non-0 utf16_char_t */
-			return sz + 1 + m; /* ok, >0, but > dst buffer size */
+			return sz; /* ok, >0, but > dst buffer size */
 		}
 	}
 	/* NOTE: assume total size in bytes of input utf16 string, including terminating 0,
@@ -160,6 +170,8 @@ size_t utf16_to_utf8_z_(const utf16_char_t **const w,
 		*w = t; /* points after the last successfully converted non-0 utf16_char_t */
 		return sz; /* ok, >0, but > dst buffer size */
 	}
+too_long_find_nul:
+	while (*s++);
 too_long:
 	*w = s; /* points after the 0-terminator */
 	return 0; /* integer overflow, input string is too long */
@@ -239,8 +251,18 @@ size_t utf16_to_utf8_(const utf16_char_t **const w,
 			sz = (size_t)(d - *b);
 			*b = d;
 			if (!determ_req_size) {
+				const size_t x = m + 1;
+#ifdef UBSAN_UNSIGNED_OVERFLOW
+				if (sz > (size_t)-1 - x)
+					goto too_long;
+#endif
+				sz += x;
+#ifndef UBSAN_UNSIGNED_OVERFLOW
+				if (sz < x)
+					goto too_long;
+#endif
 				*w = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t, (*w) < se */
-				return sz + 1 + m; /* ok, >0, but > dst buffer size */
+				return sz; /* ok, >0, but > dst buffer size */
 			}
 		}
 		/* NOTE: assume total size in bytes of input utf16 string,
@@ -298,7 +320,7 @@ size_t utf16_to_utf8_(const utf16_char_t **const w,
 			return sz; /* ok, >0, but > dst buffer size */
 		}
 too_long:
-		*w = s; /* (*w) == se */
+		*w = se; /* (*w) == se */
 		return 0; /* integer overflow, input string is too long */
 	}
 	return 0; /* n is zero */
