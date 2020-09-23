@@ -218,6 +218,8 @@ size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8
 
 #define utf8_wc32rtomb utf8_c32rtomb
 
+/* ================ mbstowcs()/wcstombs() ============== */
+
 /* mbstowcs (3) */
 /* returns:
   -1   on error (errno == EILSEQ)
@@ -227,7 +229,7 @@ size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8
    to check if buffer size is enough to store all characters, including terminating nul
    character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf16 characters, not counting terminating nul */
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -246,7 +248,7 @@ size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, siz
    utf8 bytes to check if buffer size is enough to store all characters, including
    terminating nul character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf8 bytes, not counting terminating nul */
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -265,7 +267,7 @@ size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, siz
    to check if buffer size is enough to store all characters, including terminating nul
    character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf32 characters, not counting terminating nul */
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -284,7 +286,7 @@ size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, siz
    utf8 bytes to check if buffer size is enough to store all characters, including
    terminating nul character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf8 bytes, not counting terminating nul */
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -303,7 +305,7 @@ size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, siz
    to check if buffer size is enough to store all characters, including terminating nul
    character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf32 characters, not counting terminating nul */
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -322,7 +324,7 @@ size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, s
    to check if buffer size is enough to store all characters, including terminating nul
    character (only nul character can be written to red zone).
  dst == NULL:
-   size of buffer required to store all utf16 characters, not counting terminating nul */
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 A_Check_return
 A_Nonnull_arg(2)
@@ -331,6 +333,269 @@ A_At(src, A_In_z)
 A_Success(return != A_Size_t(-1))
 #endif
 size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, size_t n);
+
+/* ================ mbsrtowcs()/wcsrtombs() ============== */
+
+/* mbsrtowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+ dst != NULL:
+   number of utf16 characters stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
+   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+ dst == NULL:
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(ps, A_Inout_opt)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_mbsrtoc16s(utf16_char_t dst[/*n*/], const utf8_char_t **const src, size_t n, utf8_state_t *ps);
+
+/* wcsrtombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long),
+   *src will point beyond the last successfully converted utf16 character,
+ dst != NULL:
+   number of utf8 bytes stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
+   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+ dst == NULL:
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(ps, A_Inout_opt)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c16srtombs(utf8_char_t dst[/*n*/], const utf16_char_t **const src, size_t n, utf8_state_t *ps);
+
+/* mbsrtowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+ dst != NULL:
+   number of utf32 characters stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+ dst == NULL:
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_mbsrtoc32s(utf32_char_t dst[/*n*/], const utf8_char_t **const src, size_t n);
+
+/* wcsrtombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+ dst != NULL:
+   number of utf8 bytes stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
+   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+ dst == NULL:
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(ps, A_Inout_opt)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32srtombs(utf8_char_t dst[/*n*/], const utf32_char_t **const src, size_t n, utf8_state_t *ps);
+
+/* mbsrtowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf16 character,
+ dst != NULL:
+   number of utf32 characters stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+ dst == NULL:
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c16srtoc32s(utf32_char_t dst[/*n*/], const utf16_char_t **const src, size_t n);
+
+/* wcsrtombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+ dst != NULL:
+   number of utf16 characters stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
+   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+ dst == NULL:
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull_z)
+A_At(*src, A_In_z)
+A_At(dst, A_Out_writes_opt(n))
+A_At(ps, A_Inout_opt)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32srtoc16s(utf16_char_t dst[/*n*/], const utf32_char_t **const src, size_t n, utf8_state_t *ps);
+
+/* ================ non-standard extension ============== */
+
+/* like utf8_mbsrtoc16s(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+ dst != NULL:
+   number of utf16 characters stored (including any nul characters):
+   a) if the last source utf8 multibyte sequence was processed, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+ dst == NULL:
+   size of buffer (in utf16-chars) required to store all utf16 characters (including any nul characters) */
+/* note: *ps == 0 if it's in initial state */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_Nonnull_arg(5)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_At(ps, A_Inout)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_mbsrtoc16s_nz(utf16_char_t dst[/*n*/], const utf8_char_t **const src,
+	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/);
+
+/* like utf8_c16srtombs(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long),
+   *src will point beyond the last successfully converted utf16 character,
+ dst != NULL:
+   number of utf8 bytes stored (including any nul characters):
+   a) if the last source utf16 character was converted, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+ dst == NULL:
+   size of buffer (in bytes) required to store all utf8 bytes (including any nul characters) */
+/* note: *ps == 0 if it's in initial state */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_Nonnull_arg(5)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_At(ps, A_Inout)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c16srtombs_nz(utf8_char_t dst[/*n*/], const utf16_char_t **const src,
+	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/);
+
+/* like utf8_mbsrtoc32s(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+ dst != NULL:
+   number of utf32 characters stored (including any nul characters):
+   a) if the last source utf8 multibyte sequence was processed, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+ dst == NULL:
+   size of buffer (in utf32-chars) required to store all utf32 characters (including any nul characters) */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_mbsrtoc32s_nz(utf32_char_t dst[/*n*/], const utf8_char_t **const src,
+	size_t nsrc, size_t n);
+
+/* like utf8_c32srtombs(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+ dst != NULL:
+   number of utf8 bytes stored (including any nul characters):
+   a) if the last source utf32 character was converted, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+ dst == NULL:
+   size of buffer (in bytes) required to store all utf8 bytes (including any nul characters) */
+/* note: *ps == 0 if it's in initial state */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_Nonnull_arg(5)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_At(ps, A_Inout)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32srtombs_nz(utf8_char_t dst[/*n*/], const utf32_char_t **const src,
+	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/);
+
+/* like utf8_c16srtoc32s(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf16 character,
+ dst != NULL:
+   number of utf32 characters stored (including any nul characters):
+   a) if the last source utf16 character was converted, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+ dst == NULL:
+   size of buffer (in utf32-chars) required to store all utf32 characters (including any nul characters) */
+/* note: *ps == 0 if it's in initial state */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c16srtoc32s_nz(utf32_char_t dst[/*n*/], const utf16_char_t **const src,
+	size_t nsrc, size_t n);
+
+/* like utf8_c32srtoc16s(), but do not treats nul characters specially */
+/* returns:
+  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+ dst != NULL:
+   number of utf16 characters stored (including any nul characters):
+   a) if the last source utf32 character was converted, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+ dst == NULL:
+   size of buffer (in utf16-chars) required to store all utf16 characters (including any nul characters) */
+/* note: *ps == 0 if it's in initial state */
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Check_return
+A_Nonnull_arg(2)
+A_Nonnull_arg(5)
+A_At(src, A_Inout A_Outptr_result_maybenull)
+A_At(*src, A_In_reads(nsrc))
+A_At(dst, A_Out_writes_opt(n))
+A_At(dst, A_Post_readable_size(return))
+A_At(ps, A_Inout)
+A_Success(return != A_Size_t(-1))
+#endif
+size_t utf8_c32srtoc16s_nz(utf16_char_t dst[/*n*/], const utf32_char_t **const src,
+	size_t nsrc, size_t n, utf8_state_t *ps);
 
 #ifdef __cplusplus
 }
