@@ -27,6 +27,18 @@
 #define A_Restrict
 #endif
 
+#ifndef FALLTHROUGH
+#if defined __cplusplus && __cplusplus >= 201703L
+#define FALLTHROUGH [[fallthrough]]
+#elif defined __GNUC__ && __GNUC__ >= 7
+#define FALLTHROUGH __attribute__ ((fallthrough))
+#elif defined __cplusplus && defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 6)
+#define FALLTHROUGH [[clang::fallthrough]]
+#else
+#define FALLTHROUGH ((void)0)
+#endif
+#endif /* !FALLTHROUGH */
+
 #ifdef _MSC_VER
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #pragma warning(disable:4711) /* function 'function' selected for inline expansion */
@@ -544,8 +556,8 @@ static size_t read_saved_utf8(const unsigned saved,
 				assert(n);
 				return n;
 			}
-			/* fallthrough */
 			FALLTHROUGH;
+			/* fallthrough */
 		case 2:
 			*(*b)++ = (utf8_char_t)(c >> 6);
 			c = (c & 0x3F) + 0x80;
@@ -554,8 +566,8 @@ static size_t read_saved_utf8(const unsigned saved,
 				assert(n);
 				return n;
 			}
-			/* fallthrough */
 			FALLTHROUGH;
+			/* fallthrough */
 		case 1:
 			*(*b)++ = (utf8_char_t)c;
 			if (n == x) {
