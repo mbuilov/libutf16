@@ -1,15 +1,22 @@
 /**********************************************************************************
 * UTF-16 -> UTF-8 characters conversion
-* Copyright (C) 2018-2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* utf16_to_utf8.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _WIN32
+
+#ifndef _MSC_VER
 #include <stdint.h> /* for uint16_t */
 #endif
+
+#ifdef _MSC_VER
+#include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
+#endif
+
+#include "libutf16/utf16_swap.h"
 #include "libutf16/utf16_to_utf8.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -22,8 +29,13 @@
 #endif
 
 A_Use_decl_annotations
-size_t utf16_to_utf8_z_(const utf16_char_t **const w,
-	utf8_char_t **const b, size_t sz, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF16
+utf16x_to_utf8_z_
+#else
+utf16_to_utf8_z_
+#endif
+(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -32,11 +44,11 @@ size_t utf16_to_utf8_z_(const utf16_char_t **const w,
 		utf8_char_t *A_Restrict d = *b;
 		const utf8_char_t *const e = d + sz;
 		do {
-			unsigned c = *s++;
+			unsigned c = UTF16_CVT(*s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (0xD800 == (c & 0xFC00)) {
-						const unsigned r = *s;
+						const unsigned r = UTF16_CVT(*s);
 						if (0xDC00 != (r & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							*b = d;
@@ -126,11 +138,11 @@ size_t utf16_to_utf8_z_(const utf16_char_t **const w,
 		if (3 == m)
 			m = 2;
 		for (;;) {
-			unsigned c = *s++;
+			unsigned c = UTF16_CVT(*s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (0xD800 == (c & 0xFC00)) {
-						c = *s;
+						c = UTF16_CVT(*s);
 						if (0xDC00 != (c & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							return 0; /* bad utf16 surrogate pair: no lower surrogate */
@@ -178,8 +190,13 @@ too_long:
 }
 
 A_Use_decl_annotations
-size_t utf16_to_utf8_(const utf16_char_t **const w,
-	utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF16
+utf16x_to_utf8_
+#else
+utf16_to_utf8_
+#endif
+(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -190,11 +207,11 @@ size_t utf16_to_utf8_(const utf16_char_t **const w,
 			utf8_char_t *A_Restrict d = *b;
 			const utf8_char_t *const e = d + sz;
 			do {
-				unsigned c = *s++;
+				unsigned c = UTF16_CVT(*s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (0xD800 == (c & 0xFC00)) {
-							const unsigned r = (s != se) ? *s : 0u;
+							const unsigned r = (s != se) ? UTF16_CVT(*s) : 0u;
 							if (0xDC00 != (r & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								*b = d;
@@ -277,11 +294,11 @@ size_t utf16_to_utf8_(const utf16_char_t **const w,
 			if (3 == m)
 				m = 2;
 			do {
-				unsigned c = *s++;
+				unsigned c = UTF16_CVT(*s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (0xD800 == (c & 0xFC00)) {
-							c = (s != se) ? *s : 0u;
+							c = (s != se) ? UTF16_CVT(*s) : 0u;
 							if (0xDC00 != (c & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								return 0; /* bad utf16 surrogate pair: no lower surrogate */
@@ -327,16 +344,22 @@ too_long:
 }
 
 A_Use_decl_annotations
-const utf16_char_t *utf16_to_utf8_z_unsafe(const utf16_char_t *w, utf8_char_t buf[])
+const utf16_char_t *
+#ifdef SWAP_UTF16
+utf16x_to_utf8_z_unsafe
+#else
+utf16_to_utf8_z_unsafe
+#endif
+(const utf16_char_t *w, utf8_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
-		unsigned c = *w++;
+		unsigned c = UTF16_CVT(*w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = (c << 10) + (unsigned)*w++ - 0x20DC00 + 0x800000 + 0x10000;
+					c = (c << 10) + (unsigned)UTF16_CVT(*w++) - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
 					c = (c & 0x3FFFF) + 0x80000;
@@ -366,17 +389,23 @@ const utf16_char_t *utf16_to_utf8_z_unsafe(const utf16_char_t *w, utf8_char_t bu
 }
 
 A_Use_decl_annotations
-void utf16_to_utf8_unsafe(const utf16_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
+void
+#ifdef SWAP_UTF16
+utf16x_to_utf8_unsafe
+#else
+utf16_to_utf8_unsafe
+#endif
+(const utf16_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf16_char_t *const we = w + n;
 	do {
-		unsigned c = *w++;
+		unsigned c = UTF16_CVT(*w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = (c << 10) + (unsigned)*w++ - 0x20DC00 + 0x800000 + 0x10000;
+					c = (c << 10) + (unsigned)UTF16_CVT(*w++) - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
 					c = (c & 0x3FFFF) + 0x80000;

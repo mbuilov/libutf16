@@ -1,15 +1,22 @@
 /**********************************************************************************
 * UTF-32 -> UTF-8 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* utf32_to_utf8.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _WIN32
+
+#ifndef _MSC_VER
 #include <stdint.h> /* for uint32_t */
 #endif
+
+#ifdef _MSC_VER
+#include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
+#endif
+
+#include "libutf16/utf16_swap.h"
 #include "libutf16/utf32_to_utf8.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -22,8 +29,13 @@
 #endif
 
 A_Use_decl_annotations
-size_t utf32_to_utf8_z_(const utf32_char_t **const w,
-	utf8_char_t **const b, size_t sz, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF32
+utf32x_to_utf8_z_
+#else
+utf32_to_utf8_z_
+#endif
+(const utf32_char_t **const w, utf8_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -32,7 +44,7 @@ size_t utf32_to_utf8_z_(const utf32_char_t **const w,
 		utf8_char_t *A_Restrict d = *b;
 		const utf8_char_t *const e = d + sz;
 		do {
-			unsigned c = *s++;
+			unsigned c = UTF32_CVT(*s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (c > 0xFFFF) {
@@ -101,7 +113,7 @@ size_t utf32_to_utf8_z_(const utf32_char_t **const w,
 	{
 		const utf32_char_t *const t = s - (m != 0); /* points beyond the last converted non-0 utf32_char_t */
 		for (;;) {
-			unsigned c = *s++;
+			unsigned c = UTF32_CVT(*s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (c > 0xFFFF) {
@@ -129,8 +141,13 @@ size_t utf32_to_utf8_z_(const utf32_char_t **const w,
 }
 
 A_Use_decl_annotations
-size_t utf32_to_utf8_(const utf32_char_t **const w,
-	utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF32
+utf32x_to_utf8_
+#else
+utf32_to_utf8_
+#endif
+(const utf32_char_t **const w, utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -141,7 +158,7 @@ size_t utf32_to_utf8_(const utf32_char_t **const w,
 			utf8_char_t *A_Restrict d = *b;
 			const utf8_char_t *const e = d + sz;
 			do {
-				unsigned c = *s++;
+				unsigned c = UTF32_CVT(*s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (c > 0xFFFF) {
@@ -210,7 +227,7 @@ size_t utf32_to_utf8_(const utf32_char_t **const w,
 		{
 			const utf32_char_t *const t = s - (m != 0); /* points beyond the last converted utf32_char_t, t < se */
 			do {
-				unsigned c = *s++;
+				unsigned c = UTF32_CVT(*s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (c > 0xFFFF) {
@@ -238,12 +255,18 @@ size_t utf32_to_utf8_(const utf32_char_t **const w,
 }
 
 A_Use_decl_annotations
-const utf32_char_t *utf32_to_utf8_z_unsafe(const utf32_char_t *w, utf8_char_t buf[])
+const utf32_char_t *
+#ifdef SWAP_UTF32
+utf32x_to_utf8_z_unsafe
+#else
+utf32_to_utf8_z_unsafe
+#endif
+(const utf32_char_t *w, utf8_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
-		unsigned c = *w++;
+		unsigned c = UTF32_CVT(*w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (c > 0xFFFF) {
@@ -277,13 +300,19 @@ const utf32_char_t *utf32_to_utf8_z_unsafe(const utf32_char_t *w, utf8_char_t bu
 }
 
 A_Use_decl_annotations
-void utf32_to_utf8_unsafe(const utf32_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
+void
+#ifdef SWAP_UTF32
+utf32x_to_utf8_unsafe
+#else
+utf32_to_utf8_unsafe
+#endif
+(const utf32_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf32_char_t *const we = w + n;
 	do {
-		unsigned c = *w++;
+		unsigned c = UTF32_CVT(*w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (c > 0xFFFF) {

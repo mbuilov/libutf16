@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 -> UTF-8 characters conversion
-* Copyright (C) 2018-2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -28,11 +28,18 @@ A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_z A_Post_readable_size(return)))
 #endif
-size_t utf16_to_utf8_z_(
+size_t
+#ifdef SWAP_UTF16
+utf16x_to_utf8_z_
+#else
+utf16_to_utf8_z_
+#endif
+(
 	const utf16_char_t **const w/*in,out,!=NULL*/,
 	utf8_char_t **const b/*in,out,!=NULL if sz>0*/,
 	size_t sz/*0?*/,
-	const int determ_req_size);
+	const int determ_req_size
+);
 
 /* convert utf16 0-terminated string to utf8 0-terminated one,
  input:
@@ -57,11 +64,17 @@ size_t utf16_to_utf8_z_(
    . if input utf16 string is too long, last valid utf16_char_t is the 0-terminator,
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ 0;
   (*b) - if sz > 0, points beyond last successfully converted and stored (non-0) utf8_char_t */
+#define utf16x_to_utf8_z(w/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
+	utf16x_to_utf8_z_(w, b, sz, /*determ_req_size:*/1)
+
 #define utf16_to_utf8_z(w/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
 	utf16_to_utf8_z_(w, b, sz, /*determ_req_size:*/1)
 
 /* same as utf16_to_utf8_z(), but if output buffer is not empty and is too small, do not
   determine its required size. */
+#define utf16x_to_utf8_z_partial(w/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
+	utf16x_to_utf8_z_(w, b, sz, /*determ_req_size:*/0)
+
 #define utf16_to_utf8_z_partial(w/*in,out,!=NULL*/, b/*in,out,!=NULL if sz>0*/, sz/*0?*/) \
 	utf16_to_utf8_z_(w, b, sz, /*determ_req_size:*/0)
 
@@ -76,6 +89,7 @@ size_t utf16_to_utf8_z_(
   (*w) - points beyond last valid utf16_char_t,
    . if input utf16 string is too long, last valid utf16_char_t is the 0-terminator,
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ 0 */
+#define utf16x_to_utf8_z_size(w/*in,out,!=NULL*/) utf16x_to_utf8_z(w, NULL, 0)
 #define utf16_to_utf8_z_size(w/*in,out,!=NULL*/) utf16_to_utf8_z(w, NULL, 0)
 
 #ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -92,12 +106,19 @@ A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0)))
 A_Success(return)
 A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_readable_size(return)))
 #endif
-size_t utf16_to_utf8_(
+size_t
+#ifdef SWAP_UTF16
+utf16x_to_utf8_
+#else
+utf16_to_utf8_
+#endif
+(
 	const utf16_char_t **const w/*in,out,!=NULL if n>0*/,
 	utf8_char_t **const b/*in,out,!=NULL if n>0 && sz>0*/,
 	size_t sz/*0?*/,
 	const size_t n/*0?*/,
-	const int determ_req_size);
+	const int determ_req_size
+);
 
 /* convert 'n' utf16_char_t's to utf8 ones,
  input:
@@ -123,11 +144,17 @@ size_t utf16_to_utf8_(
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ the last character of utf16 string;
   (*b) - if sz > 0, points beyond last successfully converted and stored utf8_char_t */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
+#define utf16x_to_utf8(w/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
+	utf16x_to_utf8_(w, b, sz, n, /*determ_req_size:*/1)
+
 #define utf16_to_utf8(w/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
 	utf16_to_utf8_(w, b, sz, n, /*determ_req_size:*/1)
 
 /* same as utf16_to_utf8(), but if output buffer is not empty and is too small, do not
   determine its required size. */
+#define utf16x_to_utf8_partial(w/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
+	utf16x_to_utf8_(w, b, sz, n, /*determ_req_size:*/0)
+
 #define utf16_to_utf8_partial(w/*in,out,!=NULL if n>0*/, b/*in,out,!=NULL if n>0 && sz>0*/, sz/*0?*/, n/*0?*/) \
 	utf16_to_utf8_(w, b, sz, n, /*determ_req_size:*/0)
 
@@ -143,6 +170,7 @@ size_t utf16_to_utf8_(
    . if input utf16 string is too long, last valid utf16_char_t is the last character of utf16 string,
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ the last character of utf16 string */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
+#define utf16x_to_utf8_size(w/*in,out,!=NULL if n>0*/, n/*0?*/) utf16x_to_utf8(w, NULL, 0, n)
 #define utf16_to_utf8_size(w/*in,out,!=NULL if n>0*/, n/*0?*/) utf16_to_utf8(w, NULL, 0, n)
 
 /* for converting remaining part of the source utf16 0-terminating string after calling utf16_to_utf8_z():
@@ -155,9 +183,16 @@ A_Ret_never_null
 A_At(w, A_In_z)
 A_At(buf, A_Out A_Post_z)
 #endif
-const utf16_char_t *utf16_to_utf8_z_unsafe(
+const utf16_char_t *
+#ifdef SWAP_UTF16
+utf16x_to_utf8_z_unsafe
+#else
+utf16_to_utf8_z_unsafe
+#endif
+(
 	const utf16_char_t *w/*!=NULL,0-terminated*/,
-	utf8_char_t buf[]/*out,!=NULL*/);
+	utf8_char_t buf[]/*out,!=NULL*/
+);
 
 /* for converting remaining part of the source utf16 string after calling utf16_to_utf8():
   - assume source string is valid and 'n' is not zero,
@@ -169,10 +204,17 @@ A_At(w, A_In_reads(n))
 A_At(buf, A_Out)
 A_At(n, A_In_range(>,0))
 #endif
-void utf16_to_utf8_unsafe(
+void
+#ifdef SWAP_UTF16
+utf16x_to_utf8_unsafe
+#else
+utf16_to_utf8_unsafe
+#endif
+(
 	const utf16_char_t *w/*!=NULL*/,
 	utf8_char_t buf[]/*out,!=NULL*/,
-	const size_t n/*>0*/);
+	const size_t n/*>0*/
+);
 
 #ifdef __cplusplus
 }

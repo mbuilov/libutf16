@@ -1,15 +1,22 @@
 /**********************************************************************************
 * UTF-8 -> UTF-32 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* utf8_to_utf32.c */
 
 #include <stddef.h> /* for size_t */
-#ifndef _WIN32
+
+#ifndef _MSC_VER
 #include <stdint.h> /* for uint32_t */
 #endif
+
+#ifdef _MSC_VER
+#include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
+#endif
+
+#include "libutf16/utf16_swap.h"
 #include "libutf16/utf8_to_utf32.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
@@ -22,8 +29,13 @@
 #endif
 
 A_Use_decl_annotations
-size_t utf8_to_utf32_z_(const utf8_char_t **const q,
-	utf32_char_t **const b, size_t sz, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF32
+utf8_to_utf32x_z_
+#else
+utf8_to_utf32_z_
+#endif
+(const utf8_char_t **const q, utf32_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -84,7 +96,7 @@ size_t utf8_to_utf32_z_(const utf8_char_t **const q,
 			}
 			else
 				s++;
-			*d++ = (utf32_char_t)a;
+			*d++ = UTF32_CVT((utf32_char_t)a);
 			if (!a) {
 				m = (size_t)(d - *b);
 bad_utf8:
@@ -173,8 +185,13 @@ bad_utf8_s:
 }
 
 A_Use_decl_annotations
-size_t utf8_to_utf32_(const utf8_char_t **const q,
-	utf32_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t
+#ifdef SWAP_UTF32
+utf8_to_utf32x_
+#else
+utf8_to_utf32_
+#endif
+(const utf8_char_t **const q, utf32_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -243,7 +260,7 @@ size_t utf8_to_utf32_(const utf8_char_t **const q,
 				}
 				else
 					s++;
-				*d++ = (utf32_char_t)a;
+				*d++ = UTF32_CVT((utf32_char_t)a);
 				if (se == s) {
 					m = (size_t)(d - *b);
 bad_utf8:
@@ -337,7 +354,13 @@ bad_utf8_s:
 }
 
 A_Use_decl_annotations
-const utf8_char_t *utf8_to_utf32_z_unsafe(const utf8_char_t *q, utf32_char_t buf[])
+const utf8_char_t *
+#ifdef SWAP_UTF32
+utf8_to_utf32x_z_unsafe
+#else
+utf8_to_utf32_z_unsafe
+#endif
+(const utf8_char_t *q, utf32_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf32_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -366,14 +389,20 @@ const utf8_char_t *utf8_to_utf32_z_unsafe(const utf8_char_t *q, utf32_char_t buf
 		}
 		else
 			q++;
-		*b++ = (utf32_char_t)a;
+		*b++ = UTF32_CVT((utf32_char_t)a);
 		if (!a)
 			return q; /* ok, q[-1] == 0 */
 	}
 }
 
 A_Use_decl_annotations
-void utf8_to_utf32_unsafe(const utf8_char_t *q, utf32_char_t buf[], const size_t n/*>0*/)
+void
+#ifdef SWAP_UTF32
+utf8_to_utf32x_unsafe
+#else
+utf8_to_utf32_unsafe
+#endif
+(const utf8_char_t *q, utf32_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf32_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -413,6 +442,6 @@ void utf8_to_utf32_unsafe(const utf8_char_t *q, utf32_char_t buf[], const size_t
 		}
 		else
 			q++;
-		*b++ = (utf32_char_t)a;
+		*b++ = UTF32_CVT((utf32_char_t)a);
 	} while (q != qe);
 }
