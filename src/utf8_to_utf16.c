@@ -16,8 +16,12 @@
 #include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
 #endif
 
-#include "libutf16/utf16_swap.h"
+#include <memory.h> /* for memcpy() */
+
 #include "libutf16/utf8_to_utf16.h"
+#include "libutf16/utf16_swap.h"
+
+#include "utf16_internal.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Use_decl_annotations
@@ -28,14 +32,24 @@
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
 
-A_Use_decl_annotations
-size_t
-#ifdef SWAP_UTF16
-utf8_to_utf16x_z_
+#ifdef UTF_PUT_UNALIGNED
+#define UTF16_CHAR_T utf16_char_unaligned_t
 #else
-utf8_to_utf16_z_
+#define UTF16_CHAR_T utf16_char_t
 #endif
-(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const int determ_req_size)
+
+#define UTF_FORM_NAME2(tu, tx, suffix)  utf8_to_utf16##tu##tx##suffix
+#define UTF_FORM_NAME1(tu, tx, suffix)  UTF_FORM_NAME2(tu, tx, suffix)
+#define UTF_FORM_NAME(suffix)           UTF_FORM_NAME1(UTF_PUT_U, UTF16_X, suffix)
+
+/*
+ utf8_to_utf16_z_
+ utf8_to_utf16x_z_
+ utf8_to_utf16u_z_
+ utf8_to_utf16ux_z_
+*/
+A_Use_decl_annotations
+size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -44,8 +58,8 @@ utf8_to_utf16_z_
 	if (!sz)
 		t = s;
 	else {
-		utf16_char_t *A_Restrict d = *b;
-		const utf16_char_t *const e = d + sz;
+		UTF16_CHAR_T *A_Restrict d = *b;
+		const UTF16_CHAR_T *const e = d + sz;
 		do {
 			unsigned a = s[0];
 			if (a >= 0x80) {
@@ -74,8 +88,8 @@ utf8_to_utf16_z_
 							m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 							goto small_buf; /* too small output buffer */
 						}
-						*d++ = UTF16_CVT((utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
-						a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
+						UTF16_PUT(d++, (utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
+						a = (a & 0x3FF) + 0xDC00;                /* 110111bbcccccccc */
 					}
 					else {
 						r = s[1];
@@ -103,7 +117,7 @@ utf8_to_utf16_z_
 			}
 			else
 				s++;
-			*d++ = UTF16_CVT((utf16_char_t)a);
+			UTF16_PUT(d++, (utf16_char_t)a);
 			if (!a) {
 				m = (size_t)(d - *b);
 bad_utf8:
@@ -192,14 +206,14 @@ bad_utf8_s:
 	}
 }
 
+/*
+ utf8_to_utf16_
+ utf8_to_utf16u_
+ utf8_to_utf16x_
+ utf8_to_utf16ux_
+*/
 A_Use_decl_annotations
-size_t
-#ifdef SWAP_UTF16
-utf8_to_utf16x_
-#else
-utf8_to_utf16_
-#endif
-(const utf8_char_t **const q, utf16_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t UTF_FORM_NAME(_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -210,8 +224,8 @@ utf8_to_utf16_
 		if (!sz)
 			t = s;
 		else {
-			utf16_char_t *A_Restrict d = *b;
-			const utf16_char_t *const e = d + sz;
+			UTF16_CHAR_T *A_Restrict d = *b;
+			const UTF16_CHAR_T *const e = d + sz;
 			do {
 				unsigned a = s[0];
 				if (a >= 0x80) {
@@ -242,8 +256,8 @@ utf8_to_utf16_
 								m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 								goto small_buf; /* too small output buffer */
 							}
-							*d++ = UTF16_CVT((utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
-							a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
+							UTF16_PUT(d++, (utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
+							a = (a & 0x3FF) + 0xDC00;                /* 110111bbcccccccc */
 						}
 						else {
 							if ((size_t)(se - s) < 3)
@@ -275,7 +289,7 @@ utf8_to_utf16_
 				}
 				else
 					s++;
-				*d++ = UTF16_CVT((utf16_char_t)a);
+				UTF16_PUT(d++, (utf16_char_t)a);
 				if (se == s) {
 					m = (size_t)(d - *b);
 bad_utf8:
@@ -369,17 +383,17 @@ bad_utf8_s:
 	return 0; /* n is zero */
 }
 
+/*
+ utf8_to_utf16_z_unsafe
+ utf8_to_utf16x_z_unsafe
+ utf8_to_utf16u_z_unsafe
+ utf8_to_utf16ux_z_unsafe
+*/
 A_Use_decl_annotations
-const utf8_char_t *
-#ifdef SWAP_UTF16
-utf8_to_utf16x_z_unsafe
-#else
-utf8_to_utf16_z_unsafe
-#endif
-(const utf8_char_t *q, utf16_char_t buf[])
+const utf8_char_t *UTF_FORM_NAME(_z_unsafe)(const utf8_char_t *q, UTF16_CHAR_T buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	UTF16_CHAR_T *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
 		unsigned a = q[0];
 		if (a >= 0x80) {
@@ -391,8 +405,8 @@ utf8_to_utf16_z_unsafe
 				if (a >= (0xF0 << 12)) {
 					r = q[3];
 					a = (a << 6) + r - 0x682080 - 0x10000;
-					*b++ = UTF16_CVT((utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
+					UTF16_PUT(b++, (utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
+					a = (a & 0x3FF) + 0xDC00;                /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
@@ -407,23 +421,23 @@ utf8_to_utf16_z_unsafe
 		}
 		else
 			q++;
-		*b++ = UTF16_CVT((utf16_char_t)a);
+		UTF16_PUT(b++, (utf16_char_t)a);
 		if (!a)
 			return q; /* ok, q[-1] == 0 */
 	}
 }
 
+/*
+ utf8_to_utf16_unsafe
+ utf8_to_utf16x_unsafe
+ utf8_to_utf16u_unsafe
+ utf8_to_utf16ux_unsafe
+*/
 A_Use_decl_annotations
-void
-#ifdef SWAP_UTF16
-utf8_to_utf16x_unsafe
-#else
-utf8_to_utf16_unsafe
-#endif
-(const utf8_char_t *q, utf16_char_t buf[], const size_t n/*>0*/)
+void UTF_FORM_NAME(_unsafe)(const utf8_char_t *q, UTF16_CHAR_T buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	UTF16_CHAR_T *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *const qe = q + n;
 	do {
 		unsigned a = q[0];
@@ -446,8 +460,8 @@ utf8_to_utf16_unsafe
 #endif
 					r = q[3];
 					a = (a << 6) + r - 0x682080 - 0x10000;
-					*b++ = UTF16_CVT((utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
-					a = (a & 0x3FF) + 0xDC00;       /* 110111bbcccccccc */
+					UTF16_PUT(b++, (utf16_char_t)(a >> 10)); /* 110110aaaabbbbbb */
+					a = (a & 0x3FF) + 0xDC00;                /* 110111bbcccccccc */
 					q += 4;
 				}
 				else {
@@ -462,6 +476,6 @@ utf8_to_utf16_unsafe
 		}
 		else
 			q++;
-		*b++ = UTF16_CVT((utf16_char_t)a);
+		UTF16_PUT(b++, (utf16_char_t)a);
 	} while (q != qe);
 }

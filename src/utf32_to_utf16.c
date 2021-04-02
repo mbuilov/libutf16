@@ -16,8 +16,12 @@
 #include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
 #endif
 
-#include "libutf16/utf16_swap.h"
+#include <memory.h> /* for memcpy() */
+
 #include "libutf16/utf32_to_utf16.h"
+#include "libutf16/utf16_swap.h"
+
+#include "utf16_internal.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Use_decl_annotations
@@ -28,27 +32,51 @@
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
 
-A_Use_decl_annotations
-size_t
-#if defined(SWAP_UTF16) && defined(SWAP_UTF32)
-utf32x_to_utf16x_z_
-#elif defined(SWAP_UTF16)
-utf32_to_utf16x_z_
-#elif defined(SWAP_UTF32)
-utf32x_to_utf16_z_
+#ifdef UTF_GET_UNALIGNED
+#define UTF32_CHAR_T utf32_char_unaligned_t
 #else
-utf32_to_utf16_z_
+#define UTF32_CHAR_T utf32_char_t
 #endif
-(const utf32_char_t **const w, utf16_char_t **const b, size_t sz, const int determ_req_size)
+
+#ifdef UTF_PUT_UNALIGNED
+#define UTF16_CHAR_T utf16_char_unaligned_t
+#else
+#define UTF16_CHAR_T utf16_char_t
+#endif
+
+#define UTF_FORM_NAME2(fu, fx, tu, tx, suffix)  utf32##fu##fx##_to_utf16##tu##tx##suffix
+#define UTF_FORM_NAME1(fu, fx, tu, tx, suffix)  UTF_FORM_NAME2(fu, fx, tu, tx, suffix)
+#define UTF_FORM_NAME(suffix)                   UTF_FORM_NAME1(UTF_GET_U, UTF32_X, UTF_PUT_U, UTF16_X, suffix)
+
+/*
+ utf32_to_utf16_z_
+ utf32_to_utf16x_z_
+ utf32_to_utf16u_z_
+ utf32_to_utf16ux_z_
+ utf32x_to_utf16_z_
+ utf32x_to_utf16x_z_
+ utf32x_to_utf16u_z_
+ utf32x_to_utf16ux_z_
+ utf32u_to_utf16_z_
+ utf32u_to_utf16x_z_
+ utf32u_to_utf16u_z_
+ utf32u_to_utf16ux_z_
+ utf32ux_to_utf16_z_
+ utf32ux_to_utf16x_z_
+ utf32ux_to_utf16u_z_
+ utf32ux_to_utf16ux_z_
+*/
+A_Use_decl_annotations
+size_t UTF_FORM_NAME(_z_)(const UTF32_CHAR_T **const w, UTF16_CHAR_T **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const utf32_char_t *A_Restrict s = *w;
+	const UTF32_CHAR_T *A_Restrict s = *w;
 	if (sz) {
-		utf16_char_t *A_Restrict d = *b;
-		const utf16_char_t *const e = d + sz;
+		UTF16_CHAR_T *A_Restrict d = *b;
+		const UTF16_CHAR_T *const e = d + sz;
 		do {
-			unsigned c = UTF32_CVT(*s++);
+			unsigned c = UTF32_GET(s++);
 			if (c > 0xFFFF) {
 				if (c > 0x10FFFF) {
 					*w = s - 1; /* (**w) != 0 */
@@ -59,15 +87,15 @@ utf32_to_utf16_z_
 					m = 1;
 					break; /* too small output buffer */
 				}
-				*d++ = UTF16_CVT(utf32_get_high_surrogate(c));
-				c = UTF16_CVT(utf32_get_low_surrogate(c));
+				UTF16_PUT(d++, utf32_get_high_surrogate(c));
+				c = utf32_get_low_surrogate(c);
 			}
 			else if (0xD800 <= c && c <= 0xDFFF) {
 				*w = s - 1; /* (**w) != 0 */
 				*b = d;
 				return 0; /* must not be a surrogate */
 			}
-			*d++ = UTF16_CVT((utf16_char_t)c);
+			UTF16_PUT(d++, (utf16_char_t)c);
 			if (!c) {
 				sz = (size_t)(d - *b);
 				*w = s; /* (*w) points beyond successfully converted 0 */
@@ -87,9 +115,9 @@ utf32_to_utf16_z_
 	  may be stored in a variable of size_t type without loss, so for each utf32_char_t may
 	  safely increment 'm' at least by 2 without integer overflow */
 	{
-		const utf32_char_t *const t = s - m; /* points beyond the last converted non-0 utf32_char_t */
+		const UTF32_CHAR_T *const t = s - m; /* points beyond the last converted non-0 utf32_char_t */
 		for (;;) {
-			unsigned c = UTF32_CVT(*s++);
+			unsigned c = UTF32_GET(s++);
 			if (c > 0xFFFF) {
 				if (c > 0x10FFFF) {
 					*w = s - 1; /* (**w) != 0 */
@@ -110,29 +138,37 @@ utf32_to_utf16_z_
 	}
 }
 
+/*
+ utf32_to_utf16_
+ utf32_to_utf16x_
+ utf32_to_utf16u_
+ utf32_to_utf16ux_
+ utf32x_to_utf16_
+ utf32x_to_utf16x_
+ utf32x_to_utf16u_
+ utf32x_to_utf16ux_
+ utf32u_to_utf16_
+ utf32u_to_utf16x_
+ utf32u_to_utf16u_
+ utf32u_to_utf16ux_
+ utf32ux_to_utf16_
+ utf32ux_to_utf16x_
+ utf32ux_to_utf16u_
+ utf32ux_to_utf16ux_
+*/
 A_Use_decl_annotations
-size_t
-#if defined(SWAP_UTF16) && defined(SWAP_UTF32)
-utf32x_to_utf16x_
-#elif defined(SWAP_UTF16)
-utf32_to_utf16x_
-#elif defined(SWAP_UTF32)
-utf32x_to_utf16_
-#else
-utf32_to_utf16_
-#endif
-(const utf32_char_t **const w, utf16_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t UTF_FORM_NAME(_)(const UTF32_CHAR_T **const w, UTF16_CHAR_T **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
 		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf32_char_t *A_Restrict s = *w;
-		const utf32_char_t *const se = s + n;
+		const UTF32_CHAR_T *A_Restrict s = *w;
+		const UTF32_CHAR_T *const se = s + n;
 		if (sz) {
-			utf16_char_t *A_Restrict d = *b;
-			const utf16_char_t *const e = d + sz;
+			UTF16_CHAR_T *A_Restrict d = *b;
+			const UTF16_CHAR_T *const e = d + sz;
 			do {
-				unsigned c = UTF32_CVT(*s++);
+				unsigned c = UTF32_GET(s++);
 				if (c > 0xFFFF) {
 					if (c > 0x10FFFF) {
 						*w = s - 1; /* (*w) < se */
@@ -143,15 +179,15 @@ utf32_to_utf16_
 						m = 1;
 						break; /* too small output buffer */
 					}
-					*d++ = UTF16_CVT(utf32_get_high_surrogate(c));
-					c = UTF16_CVT(utf32_get_low_surrogate(c));
+					UTF16_PUT(d++, utf32_get_high_surrogate(c));
+					c = utf32_get_low_surrogate(c);
 				}
 				else if (0xD800 <= c && c <= 0xDFFF) {
 					*w = s - 1; /* (*w) < se */
 					*b = d;
 					return 0; /* must not be a surrogate */
 				}
-				*d++ = UTF16_CVT((utf16_char_t)c);
+				UTF16_PUT(d++, (utf16_char_t)c);
 				if (se == s) {
 					sz = (size_t)(d - *b);
 					*w = s; /* (*w) == se */
@@ -171,9 +207,9 @@ utf32_to_utf16_
 		  may be stored in a variable of size_t type without loss, so for each utf32_char_t may
 		  safely increment 'm' at least by 2 without integer overflow */
 		{
-			const utf32_char_t *const t = s - m; /* points beyond the last converted utf32_char_t, t < se */
+			const UTF32_CHAR_T *const t = s - m; /* points beyond the last converted utf32_char_t, t < se */
 			do {
-				unsigned c = UTF32_CVT(*s++);
+				unsigned c = UTF32_GET(s++);
 				if (c > 0xFFFF) {
 					if (c > 0x10FFFF) {
 						*w = s - 1; /* (*w) < se */
@@ -194,55 +230,71 @@ utf32_to_utf16_
 	return 0; /* n is zero */
 }
 
+/*
+ utf32_to_utf16_z_unsafe
+ utf32_to_utf16x_z_unsafe
+ utf32_to_utf16u_z_unsafe
+ utf32_to_utf16ux_z_unsafe
+ utf32x_to_utf16_z_unsafe
+ utf32x_to_utf16x_z_unsafe
+ utf32x_to_utf16u_z_unsafe
+ utf32x_to_utf16ux_z_unsafe
+ utf32u_to_utf16_z_unsafe
+ utf32u_to_utf16x_z_unsafe
+ utf32u_to_utf16u_z_unsafe
+ utf32u_to_utf16ux_z_unsafe
+ utf32ux_to_utf16_z_unsafe
+ utf32ux_to_utf16x_z_unsafe
+ utf32ux_to_utf16u_z_unsafe
+ utf32ux_to_utf16ux_z_unsafe
+*/
 A_Use_decl_annotations
-const utf32_char_t *
-#if defined(SWAP_UTF16) && defined(SWAP_UTF32)
-utf32x_to_utf16x_z_unsafe
-#elif defined(SWAP_UTF16)
-utf32_to_utf16x_z_unsafe
-#elif defined(SWAP_UTF32)
-utf32x_to_utf16_z_unsafe
-#else
-utf32_to_utf16_z_unsafe
-#endif
-(const utf32_char_t *w, utf16_char_t buf[])
+const UTF32_CHAR_T *UTF_FORM_NAME(_z_unsafe)(const UTF32_CHAR_T *w, UTF16_CHAR_T buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	UTF16_CHAR_T *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
-		unsigned c = UTF32_CVT(*w++);
+		unsigned c = UTF32_GET(w++);
 		if (c > 0xFFFF) {
-			*b++ = UTF16_CVT(utf32_get_high_surrogate(c));
-			c = UTF16_CVT(utf32_get_low_surrogate(c));
+			UTF16_PUT(b++, utf32_get_high_surrogate(c));
+			c = utf32_get_low_surrogate(c);
 		}
-		*b++ = UTF16_CVT((utf16_char_t)c);
+		UTF16_PUT(b++, (utf16_char_t)c);
 		if (!c)
 			return w; /* ok, w[-1] == 0 */
 	}
 }
 
+/*
+ utf32_to_utf16_unsafe
+ utf32_to_utf16x_unsafe
+ utf32_to_utf16u_unsafe
+ utf32_to_utf16ux_unsafe
+ utf32x_to_utf16_unsafe
+ utf32x_to_utf16x_unsafe
+ utf32x_to_utf16u_unsafe
+ utf32x_to_utf16ux_unsafe
+ utf32u_to_utf16_unsafe
+ utf32u_to_utf16x_unsafe
+ utf32u_to_utf16u_unsafe
+ utf32u_to_utf16ux_unsafe
+ utf32ux_to_utf16_unsafe
+ utf32ux_to_utf16x_unsafe
+ utf32ux_to_utf16u_unsafe
+ utf32ux_to_utf16ux_unsafe
+*/
 A_Use_decl_annotations
-void
-#if defined(SWAP_UTF16) && defined(SWAP_UTF32)
-utf32x_to_utf16x_unsafe
-#elif defined(SWAP_UTF16)
-utf32_to_utf16x_unsafe
-#elif defined(SWAP_UTF32)
-utf32x_to_utf16_unsafe
-#else
-utf32_to_utf16_unsafe
-#endif
-(const utf32_char_t *w, utf16_char_t buf[], const size_t n/*>0*/)
+void UTF_FORM_NAME(_unsafe)(const UTF32_CHAR_T *w, UTF16_CHAR_T buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf16_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const utf32_char_t *const we = w + n;
+	UTF16_CHAR_T *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	const UTF32_CHAR_T *const we = w + n;
 	do {
-		unsigned c = UTF32_CVT(*w++);
+		unsigned c = UTF32_GET(w++);
 		if (c > 0xFFFF) {
-			*b++ = UTF16_CVT(utf32_get_high_surrogate(c));
-			c = UTF16_CVT(utf32_get_low_surrogate(c));
+			UTF16_PUT(b++, utf32_get_high_surrogate(c));
+			c = utf32_get_low_surrogate(c);
 		}
-		*b++ = UTF16_CVT((utf16_char_t)c);
+		UTF16_PUT(b++, (utf16_char_t)c);
 	} while (w != we);
 }

@@ -16,8 +16,12 @@
 #include <stdlib.h> /* for _byteswap_ushort()/_byteswap_ulong() */
 #endif
 
-#include "libutf16/utf16_swap.h"
+#include <memory.h> /* for memcpy() */
+
 #include "libutf16/utf16_to_utf8.h"
+#include "libutf16/utf16_swap.h"
+
+#include "utf16_internal.h"
 
 #ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
 #define A_Use_decl_annotations
@@ -28,27 +32,37 @@
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
 
-A_Use_decl_annotations
-size_t
-#ifdef SWAP_UTF16
-utf16x_to_utf8_z_
+#ifdef UTF_GET_UNALIGNED
+#define UTF16_CHAR_T utf16_char_unaligned_t
 #else
-utf16_to_utf8_z_
+#define UTF16_CHAR_T utf16_char_t
 #endif
-(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const int determ_req_size)
+
+#define UTF_FORM_NAME2(fu, fx, suffix)  utf16##fu##fx##_to_utf8##suffix
+#define UTF_FORM_NAME1(fu, fx, suffix)  UTF_FORM_NAME2(fu, fx, suffix)
+#define UTF_FORM_NAME(suffix)           UTF_FORM_NAME1(UTF_GET_U, UTF16_X, suffix)
+
+/*
+ utf16_to_utf8_z_
+ utf16x_to_utf8_z_
+ utf16u_to_utf8_z_
+ utf16ux_to_utf8_z_
+*/
+A_Use_decl_annotations
+size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const utf16_char_t *A_Restrict s = *w;
+	const UTF16_CHAR_T *A_Restrict s = *w;
 	if (sz) {
 		utf8_char_t *A_Restrict d = *b;
 		const utf8_char_t *const e = d + sz;
 		do {
-			unsigned c = UTF16_CVT(*s++);
+			unsigned c = UTF16_GET(s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (0xD800 == (c & 0xFC00)) {
-						const unsigned r = UTF16_CVT(*s);
+						const unsigned r = UTF16_GET(s);
 						if (0xDC00 != (r & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							*b = d;
@@ -134,15 +148,15 @@ utf16_to_utf8_z_
 	  2 - at least one utf16_char_t (2 bytes) was checked, no overflow of 'm' is possible,
 	  3 - at least two utf16_char_t's (4 bytes) were checked, no overflow of 'm' is possible */
 	{
-		const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted non-0 utf16_char_t */
+		const UTF16_CHAR_T *const t = s - (m != 0) - (3 == m); /* points beyond the last converted non-0 utf16_char_t */
 		if (3 == m)
 			m = 2;
 		for (;;) {
-			unsigned c = UTF16_CVT(*s++);
+			unsigned c = UTF16_GET(s++);
 			if (c >= 0x80) {
 				if (c >= 0x800) {
 					if (0xD800 == (c & 0xFC00)) {
-						c = UTF16_CVT(*s);
+						c = UTF16_GET(s);
 						if (0xDC00 != (c & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							return 0; /* bad utf16 surrogate pair: no lower surrogate */
@@ -189,29 +203,29 @@ too_long:
 	return 0; /* integer overflow, input string is too long */
 }
 
+/*
+ utf16_to_utf8_
+ utf16x_to_utf8_
+ utf16u_to_utf8_
+ utf16ux_to_utf8_
+*/
 A_Use_decl_annotations
-size_t
-#ifdef SWAP_UTF16
-utf16x_to_utf8_
-#else
-utf16_to_utf8_
-#endif
-(const utf16_char_t **const w, utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
 		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf16_char_t *A_Restrict s = *w;
-		const utf16_char_t *const se = s + n;
+		const UTF16_CHAR_T *A_Restrict s = *w;
+		const UTF16_CHAR_T *const se = s + n;
 		if (sz) {
 			utf8_char_t *A_Restrict d = *b;
 			const utf8_char_t *const e = d + sz;
 			do {
-				unsigned c = UTF16_CVT(*s++);
+				unsigned c = UTF16_GET(s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (0xD800 == (c & 0xFC00)) {
-							const unsigned r = (s != se) ? UTF16_CVT(*s) : 0u;
+							const unsigned r = (s != se) ? UTF16_GET(s) : 0u;
 							if (0xDC00 != (r & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								*b = d;
@@ -290,15 +304,15 @@ utf16_to_utf8_
 		  2 - at least one utf16_char_t (2 bytes) was checked, no overflow of 'm' is possible,
 		  3 - at least two utf16_char_t's (4 bytes) were checked, no overflow of 'm' is possible */
 		{
-			const utf16_char_t *const t = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t, t < se */
+			const UTF16_CHAR_T *const t = s - (m != 0) - (3 == m); /* points beyond the last converted utf16_char_t, t < se */
 			if (3 == m)
 				m = 2;
 			do {
-				unsigned c = UTF16_CVT(*s++);
+				unsigned c = UTF16_GET(s++);
 				if (c >= 0x80) {
 					if (c >= 0x800) {
 						if (0xD800 == (c & 0xFC00)) {
-							c = (s != se) ? UTF16_CVT(*s) : 0u;
+							c = (s != se) ? UTF16_GET(s) : 0u;
 							if (0xDC00 != (c & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								return 0; /* bad utf16 surrogate pair: no lower surrogate */
@@ -343,23 +357,23 @@ too_long:
 	return 0; /* n is zero */
 }
 
+/*
+ utf16_to_utf8_z_unsafe
+ utf16x_to_utf8_z_unsafe
+ utf16u_to_utf8_z_unsafe
+ utf16ux_to_utf8_z_unsafe
+*/
 A_Use_decl_annotations
-const utf16_char_t *
-#ifdef SWAP_UTF16
-utf16x_to_utf8_z_unsafe
-#else
-utf16_to_utf8_z_unsafe
-#endif
-(const utf16_char_t *w, utf8_char_t buf[])
+const UTF16_CHAR_T *UTF_FORM_NAME(_z_unsafe)(const UTF16_CHAR_T *w, utf8_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
-		unsigned c = UTF16_CVT(*w++);
+		unsigned c = UTF16_GET(w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = (c << 10) + (unsigned)UTF16_CVT(*w++) - 0x20DC00 + 0x800000 + 0x10000;
+					c = (c << 10) + (unsigned)UTF16_GET(w++) - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
 					c = (c & 0x3FFFF) + 0x80000;
@@ -388,24 +402,24 @@ utf16_to_utf8_z_unsafe
 	}
 }
 
+/*
+ utf16_to_utf8_unsafe
+ utf16x_to_utf8_unsafe
+ utf16u_to_utf8_unsafe
+ utf16ux_to_utf8_unsafe
+*/
 A_Use_decl_annotations
-void
-#ifdef SWAP_UTF16
-utf16x_to_utf8_unsafe
-#else
-utf16_to_utf8_unsafe
-#endif
-(const utf16_char_t *w, utf8_char_t buf[], const size_t n/*>0*/)
+void UTF_FORM_NAME(_unsafe)(const UTF16_CHAR_T *w, utf8_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const utf16_char_t *const we = w + n;
+	const UTF16_CHAR_T *const we = w + n;
 	do {
-		unsigned c = UTF16_CVT(*w++);
+		unsigned c = UTF16_GET(w++);
 		if (c >= 0x80) {
 			if (c >= 0x800) {
 				if (0xD800 == (c & 0xFC00)) {
-					c = (c << 10) + (unsigned)UTF16_CVT(*w++) - 0x20DC00 + 0x800000 + 0x10000;
+					c = (c << 10) + (unsigned)UTF16_GET(w++) - 0x20DC00 + 0x800000 + 0x10000;
 					b += 4;
 					b[-4] = (utf8_char_t)(c >> 18);
 					c = (c & 0x3FFFF) + 0x80000;

@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 <-> UTF-8 characters conversion
-* Copyright (C) 2018,2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018,2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -28,6 +28,10 @@ typedef unsigned char utf8_char_t;
 
 /* maximum length of utf8-encoded unicode character in bytes */
 #define UTF8_MAX_LEN 4
+
+/* to declare pointers to unaligned buffers containing utf16/utf32 characters */
+typedef unsigned char utf16_char_unaligned_t[sizeof(utf16_char_t)];
+typedef unsigned char utf32_char_unaligned_t[sizeof(utf32_char_t)];
 
 /* utf8 <-> utf16 conversion state */
 typedef unsigned int utf8_state_t;

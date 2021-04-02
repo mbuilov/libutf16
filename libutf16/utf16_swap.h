@@ -2,14 +2,12 @@
 #define UTF16_SWAP_H_INCLUDED
 
 /**********************************************************************************
-* UTF-16 -> UTF-32 characters conversion
+* UTF-16 <-> UTF-32 characters conversion
 * Copyright (C) 2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
 /* utf16_swap.h */
-
-#include "utf16_char.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,17 +49,47 @@ static inline utf32_char_t utf32_swap_bytes(const utf32_char_t x)
 #endif
 }
 
-#ifdef SWAP_UTF16
-#define UTF16_CVT(c) utf16_swap_bytes(c)
-#else
-#define UTF16_CVT(c) (c)
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_Check_return
+A_At(s, A_In)
 #endif
+static inline utf16_char_t utf16_get_unaligned(const utf16_char_unaligned_t *const s)
+{
+	utf16_char_t c = 0;
+	memcpy(&c, s, sizeof(*s));
+	return c;
+}
 
-#ifdef SWAP_UTF32
-#define UTF32_CVT(c) utf32_swap_bytes(c)
-#else
-#define UTF32_CVT(c) (c)
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_Check_return
+A_At(s, A_In)
 #endif
+static inline utf32_char_t utf32_get_unaligned(const utf32_char_unaligned_t *const s)
+{
+	utf32_char_t c = 0;
+	memcpy(&c, s, sizeof(*s));
+	return c;
+}
+
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_At(d, A_Out)
+#endif
+static inline void utf16_put_unaligned(utf16_char_unaligned_t *const d, utf16_char_t s)
+{
+	memcpy(d, &s, sizeof(s));
+}
+
+#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
+A_Nonnull_all_args
+A_At(d, A_Out)
+#endif
+static inline void utf32_put_unaligned(utf32_char_unaligned_t *const d, utf32_char_t s)
+{
+	memcpy(d, &s, sizeof(s));
+}
 
 #ifdef __cplusplus
 }
