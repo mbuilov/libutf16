@@ -63,4 +63,13 @@ typedef unsigned int utf8_state_t;
 /* get low part of utf16 surrogate pair from a utf32 character > 0xFFFF */
 #define utf32_get_low_surrogate(u) ((utf16_char_t)((((u) - 0x10000) & 0x3FF) + 0xDC00))
 
+/* check for unicode character with code point 0xFEFF (used as Byte Order Mark) */
+#define utf16_is_bom_le(a, b)       ((a) == 0xFF && (b) == 0xFE)
+#define utf16_is_bom_be(a, b)       ((a) == 0xFE && (b) == 0xFF)
+#define utf32_is_bom_le(a, b, c, d) ((a) == 0xFF && (b) == 0xFE && (c) == 0 && (d) == 0)
+#define utf32_is_bom_be(a, b, c, d) ((a) == 0 && (b) == 0 && (c) == 0xFE && (d) == 0xFF)
+
+/* check for BOM in a valid utf8 string: b and c are evaluated only when needed */
+#define UTF8_IS_BOM(a, b, c)        ((a) == 0xEF && (b) == 0xBB && (c) == 0xBF)
+
 #endif /* UTF16_CHAR_H_INCLUDED */
