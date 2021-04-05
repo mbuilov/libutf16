@@ -77,23 +77,23 @@ A_When(!sz, A_Unchanged(*b)) \
 A_When(sz, A_At(b, A_Always(A_Outptr))) \
 A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0))) \
 A_Success(return) \
-A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull oa/*A_Post_z,*/ A_Post_readable_size(return)))
+A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull oa/*A_Post_z,A_Empty*/ A_Post_readable_size(return)))
 #else
 #define ANNS_UTF8_TO_UTF32_Z_(oa)
 #endif
 
 #define TEMPL_UTF8_TO_UTF32_Z_(name, ot, oa) \
-ANNS_UTF8_TO_UTF32_Z_(oa) \
+ANNS_UTF8_TO_UTF32_Z_(A_##oa) \
 size_t name( \
 	const utf8_char_t **const q/*in,out,!=NULL*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
-TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32_z_, utf32_char_t, A_Post_z);
-TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32x_z_, utf32_char_t, A_Post_z);
-TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32u_z_, utf32_char_unaligned_t,);
-TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32ux_z_, utf32_char_unaligned_t,);
+TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32_z_, utf32_char_t, Post_z);
+TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32x_z_, utf32_char_t, Post_z);
+TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32u_z_, utf32_char_unaligned_t, Empty);
+TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32ux_z_, utf32_char_unaligned_t, Empty);
 
 #undef ANNS_UTF8_TO_UTF32_Z_
 #undef TEMPL_UTF8_TO_UTF32_Z_
@@ -225,21 +225,21 @@ TEMPL_UTF8_TO_UTF32_(utf8_to_utf32ux_, utf32_char_unaligned_t);
 A_Nonnull_all_args \
 A_Ret_never_null \
 A_At(q, A_In_z) \
-A_At(buf, A_Out oa/*A_Post_z,*/)
+A_At(buf, A_Out oa/*A_Post_z,A_Empty*/)
 #else
 #define ANNS_UTF8_TO_UTF32_Z_UNSAFE(oa)
 #endif
 
 #define TEMPL_UTF8_TO_UTF32_Z_UNSAFE(name, ot, oa) \
-ANNS_UTF8_TO_UTF32_Z_UNSAFE(oa) \
+ANNS_UTF8_TO_UTF32_Z_UNSAFE(A_##oa) \
 const utf8_char_t *name( \
 	const utf8_char_t *q/*!=NULL,0-terminated*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ buf[]/*out,!=NULL*/)
 
-TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32_z_unsafe, utf32_char_t, A_Post_z);
-TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32x_z_unsafe, utf32_char_t, A_Post_z);
-TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32u_z_unsafe, utf32_char_unaligned_t,);
-TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32ux_z_unsafe, utf32_char_unaligned_t,);
+TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32_z_unsafe, utf32_char_t, Post_z);
+TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32x_z_unsafe, utf32_char_t, Post_z);
+TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32u_z_unsafe, utf32_char_unaligned_t, Empty);
+TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32ux_z_unsafe, utf32_char_unaligned_t, Empty);
 
 #undef ANNS_UTF8_TO_UTF32_Z_UNSAFE
 #undef TEMPL_UTF8_TO_UTF32_Z_UNSAFE

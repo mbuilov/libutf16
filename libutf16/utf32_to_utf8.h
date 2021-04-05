@@ -83,17 +83,17 @@ A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_z A_Post_readable_siz
 #endif
 
 #define TEMPL_UTF32_TO_UTF8_Z_(name, it, ia) \
-ANNS_UTF32_TO_UTF8_Z_(ia) \
+ANNS_UTF32_TO_UTF8_Z_(A_##ia) \
 size_t name( \
 	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const w/*in,out,!=NULL*/, \
 	utf8_char_t **const b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
-TEMPL_UTF32_TO_UTF8_Z_(utf32_to_utf8_z_, utf32_char_t, A_In_z);
-TEMPL_UTF32_TO_UTF8_Z_(utf32x_to_utf8_z_, utf32_char_t, A_In_z);
-TEMPL_UTF32_TO_UTF8_Z_(utf32u_to_utf8_z_, utf32_char_unaligned_t, A_In);
-TEMPL_UTF32_TO_UTF8_Z_(utf32ux_to_utf8_z_, utf32_char_unaligned_t, A_In);
+TEMPL_UTF32_TO_UTF8_Z_(utf32_to_utf8_z_, utf32_char_t, In_z);
+TEMPL_UTF32_TO_UTF8_Z_(utf32x_to_utf8_z_, utf32_char_t, In_z);
+TEMPL_UTF32_TO_UTF8_Z_(utf32u_to_utf8_z_, utf32_char_unaligned_t, In);
+TEMPL_UTF32_TO_UTF8_Z_(utf32ux_to_utf8_z_, utf32_char_unaligned_t, In);
 
 #undef ANNS_UTF32_TO_UTF8_Z_
 #undef TEMPL_UTF32_TO_UTF8_Z_
@@ -231,15 +231,15 @@ A_At(buf, A_Out A_Post_z)
 #endif
 
 #define TEMPL_UTF32_TO_UTF8_Z_UNSAFE(name, it, ia) \
-ANNS_UTF32_TO_UTF8_Z_UNSAFE(ia) \
+ANNS_UTF32_TO_UTF8_Z_UNSAFE(A_##ia) \
 const it/*utf32_char_t,utf32_char_unaligned_t*/ *name( \
 	const it/*utf32_char_t,utf32_char_unaligned_t*/ *w/*!=NULL,0-terminated*/, \
 	utf8_char_t buf[]/*out,!=NULL*/)
 
-TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32_to_utf8_z_unsafe, utf32_char_t, A_In_z);
-TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32x_to_utf8_z_unsafe, utf32_char_t, A_In_z);
-TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32u_to_utf8_z_unsafe, utf32_char_unaligned_t, A_In);
-TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32ux_to_utf8_z_unsafe, utf32_char_unaligned_t, A_In);
+TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32_to_utf8_z_unsafe, utf32_char_t, In_z);
+TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32x_to_utf8_z_unsafe, utf32_char_t, In_z);
+TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32u_to_utf8_z_unsafe, utf32_char_unaligned_t, In);
+TEMPL_UTF32_TO_UTF8_Z_UNSAFE(utf32ux_to_utf8_z_unsafe, utf32_char_unaligned_t, In);
 
 #undef ANNS_UTF32_TO_UTF8_Z_UNSAFE
 #undef TEMPL_UTF32_TO_UTF8_Z_UNSAFE
