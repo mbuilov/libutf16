@@ -128,109 +128,109 @@ ar -crs libutf16.a           \
  ./src/utf8_cstd.o
 
 or MSVC:
-cl /O2 /I. /c /Wall                                                                   .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16.o
-cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16x.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16x.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16ux.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16ux.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16x.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16x.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16u.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16u.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16ux.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16ux.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32.o
-cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32x.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32x.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32ux.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32ux.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32x.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32x.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32u.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32ux.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32u.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32ux.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf32_to_utf8.c     /Fo .\src\utf32_to_utf8.o
-cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo .\src\utf32x_to_utf8.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo .\src\utf32u_to_utf8.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo .\src\utf32ux_to_utf8.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32.o
-cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32x.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32ux.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf8.c     /Fo .\src\utf16_to_utf8.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo .\src\utf16x_to_utf8.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo .\src\utf16u_to_utf8.o
-cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo .\src\utf16ux_to_utf8.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16.o
-cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16x.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16u.o
-cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16ux.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf16_one.c /Fo .\src\utf8_to_utf16_one.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf8_one.c /Fo .\src\utf16_to_utf8_one.o
-cl /O2 /I. /c /Wall                                                                   .\src\utf8_cstd.c         /Fo .\src\utf8_cstd.o
-lib /out:utf16.a             ^
- .\src\utf32_to_utf16.o      ^
- .\src\utf32x_to_utf16.o     ^
- .\src\utf32_to_utf16x.o     ^
- .\src\utf32x_to_utf16x.o    ^
- .\src\utf32_to_utf16u.o     ^
- .\src\utf32x_to_utf16u.o    ^
- .\src\utf32_to_utf16ux.o    ^
- .\src\utf32x_to_utf16ux.o   ^
- .\src\utf32u_to_utf16.o     ^
- .\src\utf32ux_to_utf16.o    ^
- .\src\utf32u_to_utf16x.o    ^
- .\src\utf32ux_to_utf16x.o   ^
- .\src\utf32u_to_utf16u.o    ^
- .\src\utf32ux_to_utf16u.o   ^
- .\src\utf32u_to_utf16ux.o   ^
- .\src\utf32ux_to_utf16ux.o  ^
- .\src\utf16_to_utf32.o      ^
- .\src\utf16_to_utf32x.o     ^
- .\src\utf16x_to_utf32.o     ^
- .\src\utf16x_to_utf32x.o    ^
- .\src\utf16_to_utf32u.o     ^
- .\src\utf16_to_utf32ux.o    ^
- .\src\utf16x_to_utf32u.o    ^
- .\src\utf16x_to_utf32ux.o   ^
- .\src\utf16u_to_utf32.o     ^
- .\src\utf16u_to_utf32x.o    ^
- .\src\utf16ux_to_utf32.o    ^
- .\src\utf16ux_to_utf32x.o   ^
- .\src\utf16u_to_utf32u.o    ^
- .\src\utf16u_to_utf32ux.o   ^
- .\src\utf16ux_to_utf32u.o   ^
- .\src\utf16ux_to_utf32ux.o  ^
- .\src\utf32_to_utf8.o       ^
- .\src\utf32x_to_utf8.o      ^
- .\src\utf32u_to_utf8.o      ^
- .\src\utf32ux_to_utf8.o     ^
- .\src\utf8_to_utf32.o       ^
- .\src\utf8_to_utf32x.o      ^
- .\src\utf8_to_utf32u.o      ^
- .\src\utf8_to_utf32ux.o     ^
- .\src\utf16_to_utf8.o       ^
- .\src\utf16x_to_utf8.o      ^
- .\src\utf16u_to_utf8.o      ^
- .\src\utf16ux_to_utf8.o     ^
- .\src\utf8_to_utf16.o       ^
- .\src\utf8_to_utf16x.o      ^
- .\src\utf8_to_utf16u.o      ^
- .\src\utf8_to_utf16ux.o     ^
- .\src\utf8_to_utf16_one.o   ^
- .\src\utf16_to_utf8_one.o   ^
- .\src\utf8_cstd.o
+cl /O2 /I. /c /Wall                                                                   .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16.obj
+cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16x.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16x.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16ux.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16ux.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16x.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16x.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16u.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16u.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16ux.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16ux.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32.obj
+cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32x.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32x.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32ux.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32ux.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32x.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32x.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32u.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32ux.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32u.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32ux.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf32_to_utf8.c     /Fo.\src\utf32_to_utf8.obj
+cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32x_to_utf8.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo.\src\utf32u_to_utf8.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32ux_to_utf8.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32.obj
+cl /O2 /I. /c /Wall                                                      /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32x.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32ux.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf8.c     /Fo.\src\utf16_to_utf8.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16x_to_utf8.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo.\src\utf16u_to_utf8.obj
+cl /O2 /I. /c /Wall /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16ux_to_utf8.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16.obj
+cl /O2 /I. /c /Wall                                         /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16x.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16u.obj
+cl /O2 /I. /c /Wall                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16ux.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf8_to_utf16_one.c /Fo.\src\utf8_to_utf16_one.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf16_to_utf8_one.c /Fo.\src\utf16_to_utf8_one.obj
+cl /O2 /I. /c /Wall                                                                   .\src\utf8_cstd.c         /Fo.\src\utf8_cstd.obj
+lib /out:utf16.a               ^
+ .\src\utf32_to_utf16.obj      ^
+ .\src\utf32x_to_utf16.obj     ^
+ .\src\utf32_to_utf16x.obj     ^
+ .\src\utf32x_to_utf16x.obj    ^
+ .\src\utf32_to_utf16u.obj     ^
+ .\src\utf32x_to_utf16u.obj    ^
+ .\src\utf32_to_utf16ux.obj    ^
+ .\src\utf32x_to_utf16ux.obj   ^
+ .\src\utf32u_to_utf16.obj     ^
+ .\src\utf32ux_to_utf16.obj    ^
+ .\src\utf32u_to_utf16x.obj    ^
+ .\src\utf32ux_to_utf16x.obj   ^
+ .\src\utf32u_to_utf16u.obj    ^
+ .\src\utf32ux_to_utf16u.obj   ^
+ .\src\utf32u_to_utf16ux.obj   ^
+ .\src\utf32ux_to_utf16ux.obj  ^
+ .\src\utf16_to_utf32.obj      ^
+ .\src\utf16_to_utf32x.obj     ^
+ .\src\utf16x_to_utf32.obj     ^
+ .\src\utf16x_to_utf32x.obj    ^
+ .\src\utf16_to_utf32u.obj     ^
+ .\src\utf16_to_utf32ux.obj    ^
+ .\src\utf16x_to_utf32u.obj    ^
+ .\src\utf16x_to_utf32ux.obj   ^
+ .\src\utf16u_to_utf32.obj     ^
+ .\src\utf16u_to_utf32x.obj    ^
+ .\src\utf16ux_to_utf32.obj    ^
+ .\src\utf16ux_to_utf32x.obj   ^
+ .\src\utf16u_to_utf32u.obj    ^
+ .\src\utf16u_to_utf32ux.obj   ^
+ .\src\utf16ux_to_utf32u.obj   ^
+ .\src\utf16ux_to_utf32ux.obj  ^
+ .\src\utf32_to_utf8.obj       ^
+ .\src\utf32x_to_utf8.obj      ^
+ .\src\utf32u_to_utf8.obj      ^
+ .\src\utf32ux_to_utf8.obj     ^
+ .\src\utf8_to_utf32.obj       ^
+ .\src\utf8_to_utf32x.obj      ^
+ .\src\utf8_to_utf32u.obj      ^
+ .\src\utf8_to_utf32ux.obj     ^
+ .\src\utf16_to_utf8.obj       ^
+ .\src\utf16x_to_utf8.obj      ^
+ .\src\utf16u_to_utf8.obj      ^
+ .\src\utf16ux_to_utf8.obj     ^
+ .\src\utf8_to_utf16.obj       ^
+ .\src\utf8_to_utf16x.obj      ^
+ .\src\utf8_to_utf16u.obj      ^
+ .\src\utf8_to_utf16ux.obj     ^
+ .\src\utf8_to_utf16_one.obj   ^
+ .\src\utf16_to_utf8_one.obj   ^
+ .\src\utf8_cstd.obj
 
 
 Also, the library can be built with source annotations (restricted pointers, non-null attributes, etc.)
@@ -341,106 +341,106 @@ ar -crs libutf16.a           \
  ./src/utf8_cstd.o
 
 MSVC:
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                     /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32_to_utf16ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32x_to_utf16ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo .\src\utf32u_to_utf16ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo .\src\utf32ux_to_utf16ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                     /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16_to_utf32ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16x_to_utf32ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16u_to_utf32ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo .\src\utf16ux_to_utf32ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf32_to_utf8.c     /Fo .\src\utf32_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                     /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo .\src\utf32x_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo .\src\utf32u_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo .\src\utf32ux_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                     /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo .\src\utf8_to_utf32ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf16_to_utf8.c     /Fo .\src\utf16_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo .\src\utf16x_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo .\src\utf16u_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze/DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo .\src\utf16ux_to_utf8.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                        /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16x.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16u.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                    /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo .\src\utf8_to_utf16ux.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf8_to_utf16_one.c /Fo .\src\utf8_to_utf16_one.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf16_to_utf8_one.c /Fo .\src\utf16_to_utf8_one.o
-cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                  .\src\utf8_cstd.c         /Fo .\src\utf8_cstd.o
-lib /out:utf16.a             ^
- .\src\utf32_to_utf16.o      ^
- .\src\utf32x_to_utf16.o     ^
- .\src\utf32_to_utf16x.o     ^
- .\src\utf32x_to_utf16x.o    ^
- .\src\utf32_to_utf16u.o     ^
- .\src\utf32x_to_utf16u.o    ^
- .\src\utf32_to_utf16ux.o    ^
- .\src\utf32x_to_utf16ux.o   ^
- .\src\utf32u_to_utf16.o     ^
- .\src\utf32ux_to_utf16.o    ^
- .\src\utf32u_to_utf16x.o    ^
- .\src\utf32ux_to_utf16x.o   ^
- .\src\utf32u_to_utf16u.o    ^
- .\src\utf32ux_to_utf16u.o   ^
- .\src\utf32u_to_utf16ux.o   ^
- .\src\utf32ux_to_utf16ux.o  ^
- .\src\utf16_to_utf32.o      ^
- .\src\utf16_to_utf32x.o     ^
- .\src\utf16x_to_utf32.o     ^
- .\src\utf16x_to_utf32x.o    ^
- .\src\utf16_to_utf32u.o     ^
- .\src\utf16_to_utf32ux.o    ^
- .\src\utf16x_to_utf32u.o    ^
- .\src\utf16x_to_utf32ux.o   ^
- .\src\utf16u_to_utf32.o     ^
- .\src\utf16u_to_utf32x.o    ^
- .\src\utf16ux_to_utf32.o    ^
- .\src\utf16ux_to_utf32x.o   ^
- .\src\utf16u_to_utf32u.o    ^
- .\src\utf16u_to_utf32ux.o   ^
- .\src\utf16ux_to_utf32u.o   ^
- .\src\utf16ux_to_utf32ux.o  ^
- .\src\utf32_to_utf8.o       ^
- .\src\utf32x_to_utf8.o      ^
- .\src\utf32u_to_utf8.o      ^
- .\src\utf32ux_to_utf8.o     ^
- .\src\utf8_to_utf32.o       ^
- .\src\utf8_to_utf32x.o      ^
- .\src\utf8_to_utf32u.o      ^
- .\src\utf8_to_utf32ux.o     ^
- .\src\utf16_to_utf8.o       ^
- .\src\utf16x_to_utf8.o      ^
- .\src\utf16u_to_utf8.o      ^
- .\src\utf16ux_to_utf8.o     ^
- .\src\utf8_to_utf16.o       ^
- .\src\utf8_to_utf16x.o      ^
- .\src\utf8_to_utf16u.o      ^
- .\src\utf8_to_utf16ux.o     ^
- .\src\utf8_to_utf16_one.o   ^
- .\src\utf16_to_utf8_one.o   ^
- .\src\utf8_cstd.o
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                      /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                      /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf32_to_utf8.c     /Fo.\src\utf32_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                      /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32x_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo.\src\utf32u_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32ux_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                      /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf16_to_utf8.c     /Fo.\src\utf16_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16x_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo.\src\utf16u_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16ux_to_utf8.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                         /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16x.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16u.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16ux.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf8_to_utf16_one.c /Fo.\src\utf8_to_utf16_one.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf16_to_utf8_one.c /Fo.\src\utf16_to_utf8_one.obj
+cl /O2 /I. /c /Wall /FI..\cmn_headers\sal_defs.h /wd4464 /analyze                                                                   .\src\utf8_cstd.c         /Fo.\src\utf8_cstd.obj
+lib /out:utf16.a               ^
+ .\src\utf32_to_utf16.obj      ^
+ .\src\utf32x_to_utf16.obj     ^
+ .\src\utf32_to_utf16x.obj     ^
+ .\src\utf32x_to_utf16x.obj    ^
+ .\src\utf32_to_utf16u.obj     ^
+ .\src\utf32x_to_utf16u.obj    ^
+ .\src\utf32_to_utf16ux.obj    ^
+ .\src\utf32x_to_utf16ux.obj   ^
+ .\src\utf32u_to_utf16.obj     ^
+ .\src\utf32ux_to_utf16.obj    ^
+ .\src\utf32u_to_utf16x.obj    ^
+ .\src\utf32ux_to_utf16x.obj   ^
+ .\src\utf32u_to_utf16u.obj    ^
+ .\src\utf32ux_to_utf16u.obj   ^
+ .\src\utf32u_to_utf16ux.obj   ^
+ .\src\utf32ux_to_utf16ux.obj  ^
+ .\src\utf16_to_utf32.obj      ^
+ .\src\utf16_to_utf32x.obj     ^
+ .\src\utf16x_to_utf32.obj     ^
+ .\src\utf16x_to_utf32x.obj    ^
+ .\src\utf16_to_utf32u.obj     ^
+ .\src\utf16_to_utf32ux.obj    ^
+ .\src\utf16x_to_utf32u.obj    ^
+ .\src\utf16x_to_utf32ux.obj   ^
+ .\src\utf16u_to_utf32.obj     ^
+ .\src\utf16u_to_utf32x.obj    ^
+ .\src\utf16ux_to_utf32.obj    ^
+ .\src\utf16ux_to_utf32x.obj   ^
+ .\src\utf16u_to_utf32u.obj    ^
+ .\src\utf16u_to_utf32ux.obj   ^
+ .\src\utf16ux_to_utf32u.obj   ^
+ .\src\utf16ux_to_utf32ux.obj  ^
+ .\src\utf32_to_utf8.obj       ^
+ .\src\utf32x_to_utf8.obj      ^
+ .\src\utf32u_to_utf8.obj      ^
+ .\src\utf32ux_to_utf8.obj     ^
+ .\src\utf8_to_utf32.obj       ^
+ .\src\utf8_to_utf32x.obj      ^
+ .\src\utf8_to_utf32u.obj      ^
+ .\src\utf8_to_utf32ux.obj     ^
+ .\src\utf16_to_utf8.obj       ^
+ .\src\utf16x_to_utf8.obj      ^
+ .\src\utf16u_to_utf8.obj      ^
+ .\src\utf16ux_to_utf8.obj     ^
+ .\src\utf8_to_utf16.obj       ^
+ .\src\utf8_to_utf16x.obj      ^
+ .\src\utf8_to_utf16u.obj      ^
+ .\src\utf8_to_utf16ux.obj     ^
+ .\src\utf8_to_utf16_one.obj   ^
+ .\src\utf16_to_utf8_one.obj   ^
+ .\src\utf8_cstd.obj
