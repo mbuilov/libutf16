@@ -72,4 +72,26 @@ typedef unsigned int utf8_state_t;
 /* check for BOM in a valid utf8 string: b and c are evaluated only when needed */
 #define UTF8_IS_BOM(a, b, c)        ((a) == 0xEF && (b) == 0xBB && (c) == 0xBF)
 
+/* try to workaround gcc byg
+  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81631 */
+#if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
+#define const_utf16_char_unaligned_ptr(p_) __extension__({ \
+  _Pragma("GCC diagnostic push") \
+  _Pragma("GCC diagnostic ignored \"-Wcast-qual\"") \
+  const utf16_char_unaligned_t *const c_ = (const utf16_char_unaligned_t*)(p_); \
+  _Pragma("GCC diagnostic pop") \
+  c_; \
+})
+#define const_utf32_char_unaligned_ptr(p_) __extension__({ \
+  _Pragma("GCC diagnostic push") \
+  _Pragma("GCC diagnostic ignored \"-Wcast-qual\"") \
+  const utf32_char_unaligned_t *const c_ = (const utf32_char_unaligned_t*)(p_); \
+  _Pragma("GCC diagnostic pop") \
+  c_; \
+})
+#else /* !__GNUC__ */
+#define const_utf16_char_unaligned_ptr(p_)     ((const utf16_char_unaligned_t*)(p_))
+#define const_utf32_char_unaligned_ptr(p_)     ((const utf32_char_unaligned_t*)(p_))
+#endif /* !__GNUC__ */
+
 #endif /* UTF16_CHAR_H_INCLUDED */
