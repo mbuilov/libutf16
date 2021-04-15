@@ -59,7 +59,7 @@ size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, s
 		t = s;
 	else {
 		UTF16_CHAR_T *A_Restrict d = *b;
-		const UTF16_CHAR_T *const e = d + sz;
+		const UTF16_CHAR_T *const e = (const UTF16_CHAR_T*)d + sz;
 		do {
 			unsigned a = s[0];
 			if (a >= 0x80) {
@@ -83,7 +83,7 @@ size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, s
 							goto bad_utf8; /* incomplete utf8 character */
 						a = (a << 6) + r - 0x682080 - 0x10000;
 						s += 4;
-						if (d + 1 == e) {
+						if ((const UTF16_CHAR_T*)d + 1 == e) {
 							t = s - 4;
 							m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 							goto small_buf; /* too small output buffer */
@@ -125,7 +125,7 @@ bad_utf8:
 				*b = d;
 				return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 			}
-		} while (d != e);
+		} while ((const UTF16_CHAR_T*)d != e);
 		/* too small output buffer */
 		t = s;
 small_buf:
@@ -225,7 +225,7 @@ size_t UTF_FORM_NAME(_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, siz
 			t = s;
 		else {
 			UTF16_CHAR_T *A_Restrict d = *b;
-			const UTF16_CHAR_T *const e = d + sz;
+			const UTF16_CHAR_T *const e = (const UTF16_CHAR_T*)d + sz;
 			do {
 				unsigned a = s[0];
 				if (a >= 0x80) {
@@ -251,7 +251,7 @@ size_t UTF_FORM_NAME(_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, siz
 								goto bad_utf8; /* incomplete utf8 character */
 							a = (a << 6) + r - 0x682080 - 0x10000;
 							s += 4;
-							if (d + 1 == e) {
+							if ((const UTF16_CHAR_T*)d + 1 == e) {
 								t = s - 4;
 								m = 2; /* = (4 utf8_char_t's - 2 utf16_char_t's) */
 								goto small_buf; /* too small output buffer */
@@ -297,7 +297,7 @@ bad_utf8:
 					*b = d;
 					return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 				}
-			} while (d != e);
+			} while ((const UTF16_CHAR_T*)d != e);
 			/* too small output buffer */
 			t = s;
 small_buf:

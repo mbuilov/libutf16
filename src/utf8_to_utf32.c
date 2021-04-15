@@ -59,7 +59,7 @@ size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF32_CHAR_T **const b, s
 		t = s;
 	else {
 		UTF32_CHAR_T *A_Restrict d = *b;
-		const UTF32_CHAR_T *const e = d + sz;
+		const UTF32_CHAR_T *const e = (const UTF32_CHAR_T*)d + sz;
 		do {
 			unsigned a = s[0];
 			if (a >= 0x80) {
@@ -118,7 +118,7 @@ bad_utf8:
 				*b = d;
 				return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 			}
-		} while (d != e);
+		} while ((const UTF32_CHAR_T*)d != e);
 		/* too small output buffer */
 		t = s;
 		sz = (size_t)(d - *b);
@@ -217,7 +217,7 @@ size_t UTF_FORM_NAME(_)(const utf8_char_t **const q, UTF32_CHAR_T **const b, siz
 			t = s;
 		else {
 			UTF32_CHAR_T *A_Restrict d = *b;
-			const UTF32_CHAR_T *const e = d + sz;
+			const UTF32_CHAR_T *const e = (const UTF32_CHAR_T*)d + sz;
 			do {
 				unsigned a = s[0];
 				if (a >= 0x80) {
@@ -282,7 +282,7 @@ bad_utf8:
 					*b = d;
 					return m; /* 0 if bad_utf8, else >0 and <= dst buffer size */
 				}
-			} while (d != e);
+			} while ((const UTF32_CHAR_T*)d != e);
 			/* too small output buffer */
 			t = s;
 			sz = (size_t)(d - *b);

@@ -44,9 +44,9 @@
 #define UTF32_CHAR_T utf32_char_t
 #endif
 
-#define UTF_FORM_NAME2(fu, fx, tu, tx, suffix) utf16##fu##fx##_to_utf32##tu##tx##suffix
-#define UTF_FORM_NAME1(fu, fx, tu, tx, suffix) UTF_FORM_NAME2(fu, fx, tu, tx, suffix)
-#define UTF_FORM_NAME(suffix)                  UTF_FORM_NAME1(UTF_GET_U, UTF16_X, UTF_PUT_U, UTF32_X, suffix)
+#define UTF_FORM_NAME2(fu, fx, tu, tx, suffix)  utf16##fu##fx##_to_utf32##tu##tx##suffix
+#define UTF_FORM_NAME1(fu, fx, tu, tx, suffix)  UTF_FORM_NAME2(fu, fx, tu, tx, suffix)
+#define UTF_FORM_NAME(suffix)                   UTF_FORM_NAME1(UTF_GET_U, UTF16_X, UTF_PUT_U, UTF32_X, suffix)
 
 /*
  utf16_to_utf32_z_
@@ -74,7 +74,7 @@ size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const q, UTF32_CHAR_T **const b, 
 	const UTF16_CHAR_T *A_Restrict s = *q;
 	if (sz) {
 		UTF32_CHAR_T *A_Restrict d = *b;
-		const UTF32_CHAR_T *const e = d + sz;
+		const UTF32_CHAR_T *const e = (const UTF32_CHAR_T*)d + sz;
 		do {
 			unsigned c = UTF16_GET(s++);
 			if (0xD800 == (c & 0xFC00)) {
@@ -105,7 +105,7 @@ size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const q, UTF32_CHAR_T **const b, 
 				*b = d;
 				return sz; /* ok, >0 and <= dst buffer size */
 			}
-		} while (d != e);
+		} while ((const UTF32_CHAR_T*)d != e);
 		/* too small output buffer */
 		sz = (size_t)(d - *b);
 		*b = d;
@@ -168,7 +168,7 @@ size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const q, UTF32_CHAR_T **const b, si
 		const UTF16_CHAR_T *const se = s + n;
 		if (sz) {
 			UTF32_CHAR_T *A_Restrict d = *b;
-			const UTF32_CHAR_T *const e = d + sz;
+			const UTF32_CHAR_T *const e = (const UTF32_CHAR_T*)d + sz;
 			do {
 				unsigned c = UTF16_GET(s++);
 				if (0xD800 == (c & 0xFC00)) {
@@ -193,7 +193,7 @@ size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const q, UTF32_CHAR_T **const b, si
 					*b = d;
 					return sz; /* ok, >0 and <= dst buffer size */
 				}
-			} while (d != e);
+			} while ((const UTF32_CHAR_T*)d != e);
 			/* too small output buffer */
 			sz = (size_t)(d - *b);
 			*b = d;
