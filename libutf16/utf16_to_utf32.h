@@ -43,16 +43,15 @@ extern "C" {
  input:
   q  - address of the pointer to the beginning of input 0-terminated utf16 string,
   b  - optional address of the pointer to the beginning of output buffer,
-  sz - free space in output buffer, in utf32_char_t's, if zero - output buffer is not used.
+  sz - free space in output buffer, in utf32_char_t's, if zero - output buffer is not used, b may be not valid.
  returns number of stored utf32_char_t's, including terminating 0:
   0     - if utf16 string is invalid,
   <= sz - 0-terminated utf32 string was successfully stored in the output buffer,
   > sz  - output buffer is too small:
-   . if determ_req_size is non-zero, then return value is the required buffer size to store whole
+   . if sz == 0 or determ_req_size != 0, then return value is the required buffer size to store whole
    converted utf32 0-terminated string, including the part that was already converted and stored
    in the output buffer, including 0-terminator, in utf32_char_t's;
-   . if determ_req_size is zero and output buffer is not empty and is too small, do not determine
-   its required size - return value is a number > sz;
+   . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
  - on success (0 < return <= sz):
   (*q) - points beyond the 0-terminator of input utf16 string,
   (*b) - points beyond the 0-terminator stored in the output buffer;
@@ -60,54 +59,35 @@ extern "C" {
   (*q) - if sz == 0, not changed, else - points beyond last converted (non-0) utf16_char_t,
   (*b) - if sz == 0, not changed, else - points beyond last stored (non-0) utf32_char_t;
  - if input utf16 string is invalid (return == 0):
-  (*q) - points beyond last valid utf16_char_t,
-   . if output buffer is too small, last valid utf16_char_t may be beyond last converted one,
+  (*q) - points beyond last valid utf16_char_t (to first invalid bytes),
+   . if output buffer is too small (e.g. sz == 0), last valid utf16_char_t may be beyond last converted one,
    . last valid utf16_char_t is _not_ 0;
   (*b) - if sz > 0, points beyond last successfully converted and stored (non-0) utf32_char_t */
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define ANNS_UTF16_TO_UTF32_Z_(ia, oa) \
-A_Check_return \
-A_Nonnull_arg(1) \
-A_At(q, A_Always(A_Inout)) \
-A_At(*q, ia/*A_In_z,A_In*/ A_Always(A_Post_notnull)) \
-A_When(!sz, A_Unchanged(*q)) \
-A_When(!sz, A_At(b, A_Maybenull)) \
-A_When(!sz, A_Unchanged(*b)) \
-A_When(sz, A_At(b, A_Always(A_Outptr))) \
-A_When(sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0))) \
-A_Success(return) \
-A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull oa/*A_Post_z,A_Empty*/ A_Post_readable_size(return)))
-#else
-#define ANNS_UTF16_TO_UTF32_Z_(ia, oa)
-#endif
-
-#define TEMPL_UTF16_TO_UTF32_Z_(name, it, ot, ia, oa) \
-ANNS_UTF16_TO_UTF32_Z_(A_##ia, A_##oa) \
+#define TEMPL_UTF16_TO_UTF32_Z_(name, it, ot) \
 size_t name( \
 	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const q/*in,out,!=NULL*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
-TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32_z_, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32x_z_, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32u_z_, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32ux_z_, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32_z_, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32x_z_, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32u_z_, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32ux_z_, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32_z_, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32x_z_, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32u_z_, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32ux_z_, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32_z_, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32x_z_, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32u_z_, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32ux_z_, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
+TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32_z_, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32x_z_, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32u_z_, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16_to_utf32ux_z_, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32_z_, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32x_z_, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32u_z_, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16x_to_utf32ux_z_, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32_z_, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32x_z_, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32u_z_, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16u_to_utf32ux_z_, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32_z_, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32x_z_, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32u_z_, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32ux_z_, utf16_char_unaligned_t, utf32_char_unaligned_t);
 
-#undef ANNS_UTF16_TO_UTF32_Z_
 #undef TEMPL_UTF16_TO_UTF32_Z_
 
 #define utf16_to_utf32_z(q, b, sz)             utf16_to_utf32_z_(q, b, sz, /*determ_req_size:*/1)
@@ -152,7 +132,7 @@ TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32ux_z_, utf16_char_unaligned_t, utf32_cha
   (*q) - not changed;
  returns 0 on error:
   utf16 string is invalid,
-  (*q) - points beyond last valid utf16_char_t,
+  (*q) - points beyond last valid utf16_char_t (to first invalid bytes),
    . last valid utf16_char_t is _not_ 0 */
 #define utf16_to_utf32_z_size(q/*in,out,!=NULL*/)   utf16_to_utf32_z(q, /*b:*/NULL, /*sz:*/0)
 #define utf16x_to_utf32_z_size(q/*in,out,!=NULL*/)  utf16x_to_utf32_z(q, /*b:*/NULL, /*sz:*/0)
@@ -165,16 +145,15 @@ TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32ux_z_, utf16_char_unaligned_t, utf32_cha
  input:
   q  - address of the pointer to the beginning of input utf16 string,
   b  - optional address of the pointer to the beginning of output buffer,
-  sz - free space in output buffer, in utf32_char_t's, if zero - output buffer is not used.
+  sz - free space in output buffer, in utf32_char_t's, if zero - output buffer is not used, b may be not valid,
   n  - number of utf16_char_t's to convert, if zero - input and output buffers are not used.
  returns number of stored utf32_char_t's:
   0     - if 'n' is zero or an invalid utf16 character is encountered,
   <= sz - all 'n' utf16_char_t's were successfully converted to utf32 ones and stored in the output buffer,
   > sz  - output buffer is too small:
-   . if determ_req_size is non-zero, then return value is the required buffer size to store whole converted
+   . if sz == 0 or determ_req_size != 0, then return value is the required buffer size to store whole converted
    utf32 string, including the part that was already converted and stored in the output buffer, in utf32_char_t's;
-   . if determ_req_size is zero and output buffer is not empty and is too small, do not determine
-   its required size - return value is a number > sz;
+   . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
  - on success (0 < return <= sz):
   (*q) - points beyond last source utf16_char_t of input string,
   (*b) - points beyond last converted utf32_char_t stored in the output buffer;
@@ -182,32 +161,13 @@ TEMPL_UTF16_TO_UTF32_Z_(utf16ux_to_utf32ux_z_, utf16_char_unaligned_t, utf32_cha
   (*q) - if sz == 0, not changed, else - points beyond last converted utf16_char_t,
   (*b) - if sz == 0, not changed, else - points beyond last stored utf32_char_t;
  - if input utf16 string is invalid (return == 0):
-  (*q) - points beyond last valid utf16_char_t,
-   . if output buffer is too small, last valid utf16_char_t may be beyond last converted one,
+  (*q) - points beyond last valid utf16_char_t (to first invalid bytes),
+   . if output buffer is too small (e.g. sz == 0), last valid utf16_char_t may be beyond last converted one,
    . last valid utf16_char_t is _not_ the last character of utf16 string;
   (*b) - if sz > 0, points beyond last successfully converted and stored utf32_char_t */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define ANNS_UTF16_TO_UTF32_ \
-A_Check_return \
-A_When(!n, A_Ret_range(==,0)) \
-A_When(!n, A_At(q, A_Maybenull)) \
-A_When(n, A_At(q, A_Always(A_Inout))) \
-A_When(n, A_At(*q, A_In_reads(n) A_Always(A_Post_notnull))) \
-A_When(n && !sz, A_Unchanged(*q)) \
-A_When(!sz || !n, A_At(b, A_Maybenull)) \
-A_When(!sz || !n, A_Unchanged(*b)) \
-A_When(n && sz, A_At(b, A_Always(A_Outptr))) \
-A_When(n && sz, A_At(*b, A_Pre_writable_size(sz) A_Post_readable_size(0))) \
-A_Success(return) \
-A_When(return <= sz, A_At(A_Old(*b), A_Post_notnull A_Post_readable_size(return)))
-#else
-#define ANNS_UTF16_TO_UTF32_
-#endif
-
 #define TEMPL_UTF16_TO_UTF32_(name, it, ot) \
-ANNS_UTF16_TO_UTF32_ \
 size_t name( \
 	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const q/*in,out,!=NULL if n>0*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const b/*in,out,!=NULL if n>0 && sz>0*/, \
@@ -232,7 +192,6 @@ TEMPL_UTF16_TO_UTF32_(utf16ux_to_utf32x_, utf16_char_unaligned_t, utf32_char_t);
 TEMPL_UTF16_TO_UTF32_(utf16ux_to_utf32u_, utf16_char_unaligned_t, utf32_char_unaligned_t);
 TEMPL_UTF16_TO_UTF32_(utf16ux_to_utf32ux_, utf16_char_unaligned_t, utf32_char_unaligned_t);
 
-#undef ANNS_UTF16_TO_UTF32_
 #undef TEMPL_UTF16_TO_UTF32_
 
 #define utf16_to_utf32(q, b, sz, n)             utf16_to_utf32_(q, b, sz, n, /*determ_req_size:*/1)
@@ -292,40 +251,28 @@ TEMPL_UTF16_TO_UTF32_(utf16ux_to_utf32ux_, utf16_char_unaligned_t, utf32_char_un
   - do not check if there is enough space in output buffer, assume it is large enough.
  returns pointer beyond last converted source 0-terminator */
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define ANNS_UTF16_TO_UTF32_Z_UNSAFE(ia, oa) \
-A_Nonnull_all_args \
-A_Ret_never_null \
-A_At(q, ia/*A_In_z,A_In*/) \
-A_At(buf, A_Out oa/*A_Post_z,A_Empty*/)
-#else
-#define ANNS_UTF16_TO_UTF32_Z_UNSAFE(ia, oa)
-#endif
-
-#define TEMPL_UTF16_TO_UTF32_Z_UNSAFE(name, it, ot, ia, oa) \
-ANNS_UTF16_TO_UTF32_Z_UNSAFE(A_##ia, A_##oa) \
+#define TEMPL_UTF16_TO_UTF32_Z_UNSAFE(name, it, ot) \
 const it/*utf16_char_t,utf16_char_unaligned_t*/ *name( \
 	const it/*utf16_char_t,utf16_char_unaligned_t*/ *q/*!=NULL,0-terminated*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ buf[]/*out,!=NULL*/)
 
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32_z_unsafe, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32x_z_unsafe, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32u_z_unsafe, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32ux_z_unsafe, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32_z_unsafe, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32x_z_unsafe, utf16_char_t, utf32_char_t, In_z, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32u_z_unsafe, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32ux_z_unsafe, utf16_char_t, utf32_char_unaligned_t, In_z, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32_z_unsafe, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32x_z_unsafe, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32u_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32ux_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32_z_unsafe, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32x_z_unsafe, utf16_char_unaligned_t, utf32_char_t, In, Post_z);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32u_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
-TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32ux_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t, In, Empty);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32_z_unsafe, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32x_z_unsafe, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32u_z_unsafe, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16_to_utf32ux_z_unsafe, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32_z_unsafe, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32x_z_unsafe, utf16_char_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32u_z_unsafe, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16x_to_utf32ux_z_unsafe, utf16_char_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32_z_unsafe, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32x_z_unsafe, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32u_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16u_to_utf32ux_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32_z_unsafe, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32x_z_unsafe, utf16_char_unaligned_t, utf32_char_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32u_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
+TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32ux_z_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
 
-#undef ANNS_UTF16_TO_UTF32_Z_UNSAFE
 #undef TEMPL_UTF16_TO_UTF32_Z_UNSAFE
 
 /* ------------------------------------------------------------------------------------------ */
@@ -335,18 +282,7 @@ TEMPL_UTF16_TO_UTF32_Z_UNSAFE(utf16ux_to_utf32ux_z_unsafe, utf16_char_unaligned_
   - do not check if there is enough space in output buffer, assume it is large enough */
 /* Note: zero utf16_char_t is not treated specially, i.e. conversion do not stops */
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define ANNS_UTF16_TO_UTF32_UNSAFE \
-A_Nonnull_all_args \
-A_At(q, A_In_reads(n)) \
-A_At(buf, A_Out) \
-A_At(n, A_In_range(>,0))
-#else
-#define ANNS_UTF16_TO_UTF32_UNSAFE
-#endif
-
 #define TEMPL_UTF16_TO_UTF32_UNSAFE(name, it, ot) \
-ANNS_UTF16_TO_UTF32_UNSAFE \
 void name( \
 	const it/*utf16_char_t,utf16_char_unaligned_t*/ *q/*!=NULL*/, \
 	ot/*utf32_char_t,utf32_char_unaligned_t*/ buf[]/*out,!=NULL*/, \
@@ -369,7 +305,6 @@ TEMPL_UTF16_TO_UTF32_UNSAFE(utf16ux_to_utf32x_unsafe, utf16_char_unaligned_t, ut
 TEMPL_UTF16_TO_UTF32_UNSAFE(utf16ux_to_utf32u_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
 TEMPL_UTF16_TO_UTF32_UNSAFE(utf16ux_to_utf32ux_unsafe, utf16_char_unaligned_t, utf32_char_unaligned_t);
 
-#undef ANNS_UTF16_TO_UTF32_UNSAFE
 #undef TEMPL_UTF16_TO_UTF32_UNSAFE
 
 #ifdef __cplusplus

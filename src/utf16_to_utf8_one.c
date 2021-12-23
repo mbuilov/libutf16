@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-16/32 -> UTF-8 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -12,14 +12,9 @@
 #endif
 #include "libutf16/utf16_to_utf8_one.h"
 
-#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define A_Use_decl_annotations
-#endif
-
 /* unsigned integer type must be at least of 32 bits */
 typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
 
-A_Use_decl_annotations
 size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t w, utf8_state_t *const ps)
 {
 	unsigned b;
@@ -62,7 +57,6 @@ b3:
 	return b;
 }
 
-A_Use_decl_annotations
 size_t utf32_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t w)
 {
 	unsigned b;

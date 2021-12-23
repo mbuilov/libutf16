@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-8 -> UTF-16/32 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -27,18 +27,9 @@ extern "C" {
                if it's a first part of utf16-surrogate pair, second part has been
                saved in state, otherwise state has been reset to zero;
   0          - nul utf16 character has been read (one nul byte has been consumed from s). */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(pw, A_Notnull)
-A_At(s, A_In_reads(n))
-A_At(ps, A_Inout)
-A_Success(return != A_Size_t(-1))
-A_When(return < A_Size_t(-2), A_At(pw, A_Post_valid))
-#endif
 size_t utf8_to_utf16_one(
 	utf16_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
+	const utf8_char_t s[/*n*/]/*in,!= NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
@@ -50,18 +41,9 @@ size_t utf8_to_utf16_one(
   >0         - number of bytes consumed from s, one utf32 character has been read,
                state has been reset to zero;
   0          - nul utf32 character has been read (one nul byte has been consumed from s). */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(pw, A_Notnull)
-A_At(s, A_In_reads(n))
-A_At(ps, A_Inout)
-A_Success(return != A_Size_t(-1))
-A_When(return < A_Size_t(-2), A_At(pw, A_Post_valid))
-#endif
 size_t utf8_to_utf32_one(
 	utf32_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
+	const utf8_char_t s[/*n*/]/*in,!=NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
@@ -73,28 +55,14 @@ size_t utf8_to_utf32_one(
   >0         - number of bytes consumed from s, one unicode character has been scanned,
                state has been reset to zero;
   0          - nul unicode character has been scanned (one nul byte has been consumed from s). */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(s, A_In_reads(n))
-A_At(ps, A_Inout)
-A_Success(return != A_Size_t(-1))
-#endif
 size_t utf8_len_one(
-	const utf8_char_t s[/*n*/]/*in,!=NULL*/,
+	const utf8_char_t s[/*n*/]/*in,!=NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from NUL-terminated utf8 string, returns:
   NULL if s contains invalid or incomplete utf8 byte sequence,
   else - pointer beyond read unicode character stored to (*pw) */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(pw, A_Out)
-A_At(s, A_In_z)
-A_Success(return)
-#endif
 const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw/*out,!=NULL*/,
 	const utf8_char_t s[]/*'\0'-terminated,!=NULL*/);
 

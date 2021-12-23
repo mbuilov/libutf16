@@ -23,11 +23,6 @@
 
 #include "utf16_internal.h"
 
-#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define A_Use_decl_annotations
-#define A_Restrict
-#endif
-
 #ifdef _MSC_VER
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
 #endif
@@ -48,14 +43,13 @@
  utf32u_to_utf8_z_
  utf32ux_to_utf8_z_
 */
-A_Use_decl_annotations
 size_t UTF_FORM_NAME(_z_)(const UTF32_CHAR_T **const w, utf8_char_t **const b, size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const UTF32_CHAR_T *A_Restrict s = *w;
+	const UTF32_CHAR_T *s = *w;
 	if (sz) {
-		utf8_char_t *A_Restrict d = *b;
+		utf8_char_t *d = *b;
 		const utf8_char_t *const e = d + sz;
 		do {
 			unsigned c = UTF32_GET(s++);
@@ -160,16 +154,15 @@ size_t UTF_FORM_NAME(_z_)(const UTF32_CHAR_T **const w, utf8_char_t **const b, s
  utf32u_to_utf8_
  utf32ux_to_utf8_
 */
-A_Use_decl_annotations
 size_t UTF_FORM_NAME(_)(const UTF32_CHAR_T **const w, utf8_char_t **const b, size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
 		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const UTF32_CHAR_T *A_Restrict s = *w;
+		const UTF32_CHAR_T *s = *w;
 		const UTF32_CHAR_T *const se = s + n;
 		if (sz) {
-			utf8_char_t *A_Restrict d = *b;
+			utf8_char_t *d = *b;
 			const utf8_char_t *const e = d + sz;
 			do {
 				unsigned c = UTF32_GET(s++);
@@ -274,11 +267,10 @@ size_t UTF_FORM_NAME(_)(const UTF32_CHAR_T **const w, utf8_char_t **const b, siz
  utf32u_to_utf8_z_unsafe
  utf32ux_to_utf8_z_unsafe
 */
-A_Use_decl_annotations
 const UTF32_CHAR_T *UTF_FORM_NAME(_z_unsafe)(const UTF32_CHAR_T *w, utf8_char_t buf[])
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf8_char_t *b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
 		unsigned c = UTF32_GET(w++);
 		if (c >= 0x80) {
@@ -319,11 +311,10 @@ const UTF32_CHAR_T *UTF_FORM_NAME(_z_unsafe)(const UTF32_CHAR_T *w, utf8_char_t 
  utf32u_to_utf8_unsafe
  utf32ux_to_utf8_unsafe
 */
-A_Use_decl_annotations
 void UTF_FORM_NAME(_unsafe)(const UTF32_CHAR_T *w, utf8_char_t buf[], const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	utf8_char_t *A_Restrict b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	utf8_char_t *b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const UTF32_CHAR_T *const we = w + n;
 	do {
 		unsigned c = UTF32_GET(w++);

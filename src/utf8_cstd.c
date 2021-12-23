@@ -1,6 +1,6 @@
 /**********************************************************************************
 * C90/C99/C11 standard multibyte-to-widechar conversion routines for UTF-8 encoding
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -22,11 +22,6 @@
 #include "libutf16/utf8_to_utf16_one.h"
 #include "libutf16/utf16_to_utf8_one.h"
 
-#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define A_Use_decl_annotations
-#define A_Restrict
-#endif
-
 #ifndef FALLTHROUGH
 #if defined __cplusplus && __cplusplus >= 201703L
 #define FALLTHROUGH [[fallthrough]]
@@ -47,15 +42,7 @@
 /* unsigned integer type must be at least of 32 bits */
 typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_arg(3)
-A_At(s, A_In_reads_opt(n))
-A_At(ps, A_Inout)
-A_Success(return != -1)
-#endif
-static int utf8_mblen_(const utf8_char_t *const A_Restrict s, const size_t n,
-	utf8_state_t *const A_Restrict ps)
+static int utf8_mblen_(const utf8_char_t *const s, const size_t n, utf8_state_t *const ps)
 {
 	if (s) {
 		const size_t count = utf8_len_one(s, n, ps);
@@ -72,14 +59,12 @@ static int utf8_mblen_(const utf8_char_t *const A_Restrict s, const size_t n,
 	return 0; /* UTF8 is a stateless encoding.  */
 }
 
-A_Use_decl_annotations
 int utf8_mblen(const utf8_char_t *const s, const size_t n)
 {
 	static utf8_state_t mblen_state = 0;
 	return utf8_mblen_(s, n, &mblen_state);
 }
 
-A_Use_decl_annotations
 size_t utf8_mbrlen(const utf8_char_t *const s, const size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t mbrlen_state = 0;
@@ -98,7 +83,6 @@ size_t utf8_mbrlen(const utf8_char_t *const s, const size_t n, utf8_state_t *ps)
 	return (size_t)-1;
 }
 
-A_Use_decl_annotations
 size_t utf8_mbrtoc16(utf16_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *ps)
 {
@@ -120,7 +104,6 @@ size_t utf8_mbrtoc16(utf16_char_t *const pwc, const utf8_char_t *const s,
 	return (size_t)-1;
 }
 
-A_Use_decl_annotations
 size_t utf8_mbrtoc32(utf32_char_t *const pwi, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *ps)
 {
@@ -142,8 +125,7 @@ size_t utf8_mbrtoc32(utf32_char_t *const pwi, const utf8_char_t *const s,
 	return (size_t)-1;
 }
 
-A_Use_decl_annotations
-size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
+size_t utf8_c16rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc, utf8_state_t *ps)
 {
 	static utf8_state_t c16rtomb_state = 0;
 	if (!ps)
@@ -161,8 +143,7 @@ size_t utf8_c16rtomb(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *
 	return (size_t)-1;
 }
 
-A_Use_decl_annotations
-size_t utf8_c32rtomb(utf8_char_t *const s, const utf32_char_t wi, utf8_state_t *ps)
+size_t utf8_c32rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t wi, utf8_state_t *ps)
 {
 	if (s) {
 		const size_t count = utf32_to_utf8_one(s, wi);
@@ -176,14 +157,6 @@ size_t utf8_c32rtomb(utf8_char_t *const s, const utf32_char_t wi, utf8_state_t *
 	return (size_t)-1;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_arg(5)
-A_When(s, A_At(pwc, A_Out_opt))
-A_At(s, A_In_reads_opt(n))
-A_At(ps, A_Inout)
-A_Ret_range(-1, UTF8_MAX_LEN)
-#endif
 static int utf8_mbtowc_(const int is_wchar_16, void *const pwc,
 	const utf8_char_t *const s, const size_t n, utf8_state_t *const ps)
 {
@@ -214,21 +187,18 @@ static int utf8_mbtowc_(const int is_wchar_16, void *const pwc,
 	return 0; /* UTF8 is a stateless encoding.  */
 }
 
-A_Use_decl_annotations
 int utf8_mbtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n)
 {
 	static utf8_state_t mbtowc16_state = 0;
 	return utf8_mbtowc_(/*is_wchar_16:*/1, pwc, s, n, &mbtowc16_state);
 }
 
-A_Use_decl_annotations
 int utf8_mbtowc32(utf32_char_t *const pwc, const utf8_char_t *const s, const size_t n)
 {
 	static utf8_state_t mbtowc32_state = 0;
 	return utf8_mbtowc_(/*is_wchar_16:*/0, pwc, s, n, &mbtowc32_state);
 }
 
-A_Use_decl_annotations
 size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *ps)
 {
@@ -257,7 +227,6 @@ size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const
 	return (size_t)-1;
 }
 
-A_Use_decl_annotations
 size_t utf8_mbrtowc32(utf32_char_t *const pwc, const utf8_char_t *const s,
 	const size_t n, utf8_state_t *ps)
 {
@@ -265,14 +234,7 @@ size_t utf8_mbrtowc32(utf32_char_t *const pwc, const utf8_char_t *const s,
 	return utf8_mbrtoc32(pwc, s, n, ps ? ps : &mbrtowc32_state);
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_At(s, A_Out_writes_opt(UTF8_MAX_LEN))
-A_At(wc16_state, A_Inout_opt)
-A_Success(return != -1)
-A_Ret_range(0, UTF8_MAX_LEN)
-#endif
-static int utf8_wctomb_(utf8_char_t *const s, const unsigned wc, utf8_state_t *const wc16_state)
+static int utf8_wctomb_(utf8_char_t s[UTF8_MAX_LEN], const unsigned wc, utf8_state_t *const wc16_state)
 {
 	if (s) {
 		const size_t count = wc16_state
@@ -297,21 +259,18 @@ static int utf8_wctomb_(utf8_char_t *const s, const unsigned wc, utf8_state_t *c
 	return 0; /* UTF8 is a stateless encoding.  */
 }
 
-A_Use_decl_annotations
-int utf8_wc16tomb_obsolete(utf8_char_t *const s, const utf16_char_t wc)
+int utf8_wc16tomb_obsolete(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc)
 {
 	static utf8_state_t wc16tomb_state = 0;
 	return utf8_wctomb_(s, wc, &wc16tomb_state);
 }
 
-A_Use_decl_annotations
-int utf8_wc32tomb(utf8_char_t *const s, const utf32_char_t wc)
+int utf8_wc32tomb(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t wc)
 {
 	return utf8_wctomb_(s, wc, /*wc16_state:*/NULL);
 }
 
-A_Use_decl_annotations
-size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8_state_t *ps)
+size_t utf8_wc16rtomb_obsolete(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc, utf8_state_t *ps)
 {
 	static utf8_state_t wc16rtomb_state = 0;
 	if (!ps)
@@ -338,7 +297,6 @@ size_t utf8_wc16rtomb_obsolete(utf8_char_t *const s, const utf16_char_t wc, utf8
 
 /* ================ mbstowcs()/wcstombs() ============== */
 
-A_Use_decl_annotations
 size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -359,7 +317,6 @@ size_t utf8_mbstoc16s(utf16_char_t dst[/*n*/], const utf8_char_t *const src, siz
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -384,7 +341,6 @@ size_t utf8_c16stombs(utf8_char_t dst[/*n*/], const utf16_char_t *const src, siz
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -405,7 +361,6 @@ size_t utf8_mbstoc32s(utf32_char_t dst[/*n*/], const utf8_char_t *const src, siz
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -426,7 +381,6 @@ size_t utf8_c32stombs(utf8_char_t dst[/*n*/], const utf32_char_t *const src, siz
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -447,7 +401,6 @@ size_t utf8_c16stoc32s(utf32_char_t dst[/*n*/], const utf16_char_t *const src, s
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, size_t n)
 {
 	if (!dst)
@@ -470,14 +423,6 @@ size_t utf8_c32stoc16s(utf16_char_t dst[/*n*/], const utf32_char_t *const src, s
 
 /* ================ mbsrtowcs()/wcsrtombs() ============== */
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(src, A_Inout)
-A_At(*src, A_In_reads(4))
-A_At(ps, A_Out)
-A_Ret_range(>,0)
-#endif
 static utf16_char_t save_low_surrogate(const utf8_char_t **const src, utf8_state_t *ps)
 {
 	const utf8_char_t *const s = *src;
@@ -490,7 +435,6 @@ static utf16_char_t save_low_surrogate(const utf8_char_t **const src, utf8_state
 	return (utf16_char_t)(a >> 10); /* high surrogate: 110110aaaabbbbbb */
 }
 
-A_Use_decl_annotations
 size_t utf8_mbsrtoc16s(utf16_char_t dst[/*n*/], const utf8_char_t **const src, size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t utf8_mbsrtoc16s_state = 0;
@@ -532,63 +476,35 @@ size_t utf8_mbsrtoc16s(utf16_char_t dst[/*n*/], const utf8_char_t **const src, s
 	return n;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(saved, A_In_range(>,0))
-A_At(ps, A_Inout)
-A_At(b, A_Notnull)
-A_At(*b, A_Out_writes(n))
-A_At(n, A_In_range(>,0))
-A_Ret_range(0,3)
-#endif
 static size_t read_saved_utf8(const unsigned saved,
 	unsigned *const ps, utf8_char_t **const b, const size_t n)
 {
 	const unsigned x = saved >> 30;
-	unsigned c = saved & ~0xC0000000;
-	switch (x) {
-		case 3:
-			*(*b)++ = (utf8_char_t)(c >> 12);
-			c = (c & 0xFFF) + 0x2000;
-			if (n == x - 2) {
-				*ps = c + 0x80000000;
-				assert(n);
-				return n;
-			}
-			FALLTHROUGH;
-			/* fallthrough */
-		case 2:
-			*(*b)++ = (utf8_char_t)(c >> 6);
-			c = (c & 0x3F) + 0x80;
-			if (n == x - 1) {
-				*ps = c + 0x40000000;
-				assert(n);
-				return n;
-			}
-			FALLTHROUGH;
-			/* fallthrough */
-		case 1:
-			*(*b)++ = (utf8_char_t)c;
-			if (n == x) {
-				*ps = 0;
-				assert(n);
-				return n;
-			}
-			break;
-		default:
-			assert(0);
-	}
-	return 0;
+	unsigned c = saved;
+	assert(x); /* 1,2,3 */
+	if (x == 2)
+		goto x2;
+	if (x != 3)
+		goto x1;
+	*(*b)++ = (utf8_char_t)((c >> 12) & 0xFF);
+	c = (c & 0xFFF) + 0x2000 + 0x80000000;
+	if (n == 1)
+		goto ret;
+x2:
+	*(*b)++ = (utf8_char_t)((c >> 6) & 0xFF);
+	c = (c & 0x3F) + 0x80 + 0x40000000;
+	if (n < x) /* (x == 3 && n == 2) || (x == 2 && n == 1) */
+		goto ret;
+x1:
+	*(*b)++ = (utf8_char_t)(c & 0xFF);
+	c = 0;
+	if (n > x)
+		return 0;
+ret:
+	*ps = c;
+	return n;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(b, A_Out_writes_to_ptr(lim))
-A_At(lim, A_Notnull)
-A_At(src, A_Inout)
-#endif
 static unsigned save_part_utf16(utf8_char_t *b,
 	const utf8_char_t *const lim, const utf16_char_t **const src)
 {
@@ -625,13 +541,6 @@ ret:
 	return c;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(b, A_Out_writes_to_ptr(lim))
-A_At(lim, A_Notnull)
-A_At(src, A_Inout)
-#endif
 static unsigned save_part_utf32(utf8_char_t *b,
 	const utf8_char_t *const lim, const utf32_char_t **const src)
 {
@@ -668,7 +577,6 @@ ret:
 	return c;
 }
 
-A_Use_decl_annotations
 size_t utf8_c16srtombs(utf8_char_t dst[/*n*/], const utf16_char_t **const src, size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t utf8_c16srtombs_state = 0;
@@ -707,14 +615,13 @@ size_t utf8_c16srtombs(utf8_char_t dst[/*n*/], const utf16_char_t **const src, s
 		}
 		n += saved >> 30;
 		if ((size_t)(b - dst) != n) {
-			/* there is a room for the bytes of utf8-encoded non-one-byte unicode character */
+			/* there is a room for at least one byte of utf8-encoded non-one-byte unicode character */
 			*ps = save_part_utf16(b, &dst[n], src);
 		}
 	}
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_mbsrtoc32s(utf32_char_t dst[/*n*/], const utf8_char_t **const src, size_t n)
 {
 	if (!dst)
@@ -737,7 +644,6 @@ size_t utf8_mbsrtoc32s(utf32_char_t dst[/*n*/], const utf8_char_t **const src, s
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c32srtombs(utf8_char_t dst[/*n*/], const utf32_char_t **const src, size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t utf8_c32srtombs_state = 0;
@@ -771,14 +677,13 @@ size_t utf8_c32srtombs(utf8_char_t dst[/*n*/], const utf32_char_t **const src, s
 		}
 		n += saved >> 30;
 		if ((size_t)(b - dst) != n) {
-			/* there is a room for the bytes of utf8-encoded non-one-byte unicode character */
+			/* there is a room for at least one byte of utf8-encoded non-one-byte unicode character */
 			*ps = save_part_utf32(b, &dst[n], src);
 		}
 	}
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c16srtoc32s(utf32_char_t dst[/*n*/], const utf16_char_t **const src, size_t n)
 {
 	if (!dst)
@@ -801,7 +706,6 @@ size_t utf8_c16srtoc32s(utf32_char_t dst[/*n*/], const utf16_char_t **const src,
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c32srtoc16s(utf16_char_t dst[/*n*/], const utf32_char_t **const src, size_t n, utf8_state_t *ps)
 {
 	static utf8_state_t utf8_c32srtoc16s_state = 0;
@@ -848,7 +752,6 @@ size_t utf8_c32srtoc16s(utf16_char_t dst[/*n*/], const utf32_char_t **const src,
 
 /* ================ non-standard extension ============== */
 
-A_Use_decl_annotations
 size_t utf8_mbsrtoc16s_nz(utf16_char_t dst[/*n*/], const utf8_char_t **const src,
 	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/)
 {
@@ -895,7 +798,6 @@ size_t utf8_mbsrtoc16s_nz(utf16_char_t dst[/*n*/], const utf8_char_t **const src
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c16srtombs_nz(utf8_char_t dst[/*n*/], const utf16_char_t **const src,
 	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/)
 {
@@ -939,14 +841,13 @@ size_t utf8_c16srtombs_nz(utf8_char_t dst[/*n*/], const utf16_char_t **const src
 		}
 		n += saved >> 30;
 		if ((size_t)(b - dst) != n) {
-			/* there is a room for the bytes of utf8-encoded non-one-byte unicode character */
+			/* there is a room for at least one byte of utf8-encoded non-one-byte unicode character */
 			*ps = save_part_utf16(b, &dst[n], src);
 		}
 	}
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_mbsrtoc32s_nz(utf32_char_t dst[/*n*/], const utf8_char_t **const src,
 	size_t nsrc, size_t n)
 {
@@ -974,7 +875,6 @@ size_t utf8_mbsrtoc32s_nz(utf32_char_t dst[/*n*/], const utf8_char_t **const src
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c32srtombs_nz(utf8_char_t dst[/*n*/], const utf32_char_t **const src,
 	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/)
 {
@@ -1013,14 +913,13 @@ size_t utf8_c32srtombs_nz(utf8_char_t dst[/*n*/], const utf32_char_t **const src
 		}
 		n += saved >> 30;
 		if ((size_t)(b - dst) != n) {
-			/* there is a room for the bytes of utf8-encoded non-one-byte unicode character */
+			/* there is a room for at least one byte of utf8-encoded non-one-byte unicode character */
 			*ps = save_part_utf32(b, &dst[n], src);
 		}
 	}
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c16srtoc32s_nz(utf32_char_t dst[/*n*/], const utf16_char_t **const src,
 	size_t nsrc, size_t n)
 {
@@ -1048,7 +947,6 @@ size_t utf8_c16srtoc32s_nz(utf32_char_t dst[/*n*/], const utf16_char_t **const s
 	return n;
 }
 
-A_Use_decl_annotations
 size_t utf8_c32srtoc16s_nz(utf16_char_t dst[/*n*/], const utf32_char_t **const src,
 	size_t nsrc, size_t n, utf8_state_t *ps/*!=NULL*/)
 {

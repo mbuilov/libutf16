@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-#endif
 static inline utf16_char_t utf16_swap_bytes(const utf16_char_t x)
 {
 #ifdef _MSC_VER
@@ -30,9 +27,6 @@ static inline utf16_char_t utf16_swap_bytes(const utf16_char_t x)
 #endif
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-#endif
 static inline utf32_char_t utf32_swap_bytes(const utf32_char_t x)
 {
 #ifdef _MSC_VER
@@ -49,46 +43,28 @@ static inline utf32_char_t utf32_swap_bytes(const utf32_char_t x)
 #endif
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_Check_return
-A_At(s, A_In)
-#endif
 static inline utf16_char_t utf16_get_unaligned(const utf16_char_unaligned_t *const s)
 {
 	utf16_char_t c = 0;
-	memcpy(&c, s, sizeof(*s));
+	(void)memcpy(&c, s, sizeof(*s));
 	return c;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_Check_return
-A_At(s, A_In)
-#endif
 static inline utf32_char_t utf32_get_unaligned(const utf32_char_unaligned_t *const s)
 {
 	utf32_char_t c = 0;
-	memcpy(&c, s, sizeof(*s));
+	(void)memcpy(&c, s, sizeof(*s));
 	return c;
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_At(d, A_Out)
-#endif
-static inline void utf16_put_unaligned(utf16_char_unaligned_t *const d, utf16_char_t s)
+static inline void utf16_put_unaligned(utf16_char_unaligned_t *const d, const utf16_char_t s)
 {
-	memcpy(d, &s, sizeof(s));
+	(void)memcpy(d, &s, sizeof(s));
 }
 
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Nonnull_all_args
-A_At(d, A_Out)
-#endif
-static inline void utf32_put_unaligned(utf32_char_unaligned_t *const d, utf32_char_t s)
+static inline void utf32_put_unaligned(utf32_char_unaligned_t *const d, const utf32_char_t s)
 {
-	memcpy(d, &s, sizeof(s));
+	(void)memcpy(d, &s, sizeof(s));
 }
 
 #ifdef __cplusplus

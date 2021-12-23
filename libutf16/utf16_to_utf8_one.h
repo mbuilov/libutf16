@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16/32 -> UTF-8 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -20,14 +20,6 @@ extern "C" {
   0          - w is the first part of utf16 surrogate pair and it has been saved
                in state, no bytes written to s;
   >0         - number of bytes stored to s, state has been reset to zero. */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(s, A_Pre_writable_size(UTF8_MAX_LEN) A_Post_readable_size(return))
-A_At(ps, A_Inout)
-A_Ret_range(0, UTF8_MAX_LEN)
-A_Success(return != A_Size_t(-1))
-#endif
 size_t utf16_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
 	const utf16_char_t w,
@@ -37,13 +29,6 @@ size_t utf16_to_utf8_one(
   (size_t)-1 - if w is not a valid utf32 character (unicode code point)
                (> 0x10FFFF or from surrogate range 0xD800..0xDFFF),
   >0         - number of bytes stored to s. */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(s, A_Pre_writable_size(UTF8_MAX_LEN) A_Post_readable_size(return))
-A_Ret_range(1, UTF8_MAX_LEN)
-A_Success(return != A_Size_t(-1))
-#endif
 size_t utf32_to_utf8_one(
 	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
 	const utf32_char_t w);

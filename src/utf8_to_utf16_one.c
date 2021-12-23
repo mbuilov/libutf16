@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-8 -> UTF-16/32 characters conversion
-* Copyright (C) 2020 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -11,11 +11,6 @@
 #include <stdint.h> /* for uint16_t/uint32_t */
 #endif
 #include "libutf16/utf8_to_utf16_one.h"
-
-#ifndef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-#define A_Use_decl_annotations
-#define A_Restrict
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */
@@ -29,15 +24,8 @@ typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)]
   (size_t)-2 - if s is too short to read complete unicode character,
                n bytes of s have been consumed, state has been updated;
   >0         - number of bytes consumed from s, state contains read unicode character. */
-#ifdef SAL_DEFS_H_INCLUDED /* include "sal_defs.h" for the annotations */
-A_Check_return
-A_Nonnull_all_args
-A_At(s, A_In_reads(n))
-A_At(state, A_Inout)
-A_Success(return != A_Size_t(-1))
-#endif
-static size_t utf8_read_one_internal(const utf8_char_t *A_Restrict s, size_t n,
-	unsigned *const A_Restrict state, unsigned a)
+static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n,
+	unsigned *const state, unsigned a)
 {
 	if (!n)
 		return (size_t)-2;
@@ -149,7 +137,6 @@ c13:
 	}
 }
 
-A_Use_decl_annotations
 size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[],
 	const size_t n, utf8_state_t *const ps)
 {
@@ -174,7 +161,6 @@ size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[],
 	return r;
 }
 
-A_Use_decl_annotations
 size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[],
 	const size_t n, utf8_state_t *const ps)
 {
@@ -194,7 +180,6 @@ size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[],
 	return 0 == (*pw = a) ? 0 : r;
 }
 
-A_Use_decl_annotations
 size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const ps)
 {
 	unsigned a = *ps;
@@ -207,7 +192,6 @@ size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const p
 	return !a ? 0 : r;
 }
 
-A_Use_decl_annotations
 const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw, const utf8_char_t s[])
 {
 	unsigned r;
