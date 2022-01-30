@@ -57,7 +57,7 @@ static inline utf32_char_t utf32_get_unaligned(const utf32_char_unaligned_t *con
 
 static inline utf16_char_unaligned_t *utf16_put_unaligned(utf16_char_unaligned_t *const d, const utf16_char_t s)
 {
-	return (utf32_char_unaligned_t*)memcpy(d, &s, sizeof(s));
+	return (utf16_char_unaligned_t*)memcpy(d, &s, sizeof(s));
 }
 
 static inline utf32_char_unaligned_t *utf32_put_unaligned(utf32_char_unaligned_t *const d, const utf32_char_t s)
