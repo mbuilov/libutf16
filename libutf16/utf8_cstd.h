@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * C90/C99/C11 standard multibyte-to-widechar conversion routines for UTF-8 encoding
-* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
