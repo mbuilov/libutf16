@@ -1,6 +1,6 @@
 /**********************************************************************************
 * C90/C99/C11 standard multibyte-to-widechar conversion routines for UTF-8 encoding
-* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -21,18 +21,6 @@
 #include "libutf16/utf32_to_utf16.h"
 #include "libutf16/utf8_to_utf16_one.h"
 #include "libutf16/utf16_to_utf8_one.h"
-
-#ifndef FALLTHROUGH
-#if defined __cplusplus && __cplusplus >= 201703L
-#define FALLTHROUGH [[fallthrough]]
-#elif defined __GNUC__ && __GNUC__ >= 7
-#define FALLTHROUGH __attribute__ ((fallthrough))
-#elif defined __cplusplus && defined __clang__ && __clang_major__ > 3 - (__clang_minor__ >= 6)
-#define FALLTHROUGH [[clang::fallthrough]]
-#else
-#define FALLTHROUGH ((void)0)
-#endif
-#endif /* !FALLTHROUGH */
 
 #ifdef _MSC_VER
 #pragma warning(disable:5045) /* Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified */

@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-8 -> UTF-16 characters conversion
-* Copyright (C) 2018-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -190,7 +190,7 @@ bad_utf8_s:
 				 4 utf8_char_t's -> 2 utf16_char_t's (surrogate pair),
 				 3 utf8_char_t's -> 1 utf16_char_t,
 				 2 utf8_char_t's -> 1 utf16_char_t,
-				 1 utf8_char_t  -> 1 utf16_char_t*/
+				 1 utf8_char_t   -> 1 utf16_char_t. */
 				/* append a number of utf16_char_t's in utf8 string started from 't' */
 				sz += (size_t)(s - t) - m;
 				*q = t; /* points after the last successfully converted non-0 utf8_char_t */
@@ -367,7 +367,7 @@ bad_utf8_s:
 		 4 utf8_char_t's -> 2 utf16_char_t's (surrogate pair),
 		 3 utf8_char_t's -> 1 utf16_char_t,
 		 2 utf8_char_t's -> 1 utf16_char_t,
-		 1 utf8_char_t  -> 1 utf16_char_t*/
+		 1 utf8_char_t   -> 1 utf16_char_t. */
 		/* append a number of utf16_char_t's in utf8 string started from 't' */
 		sz += (size_t)(s - t) - m;
 		*q = t; /* points after the last successfully converted utf8_char_t, (*q) < se */
