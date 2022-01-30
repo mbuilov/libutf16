@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 <-> UTF-32 characters conversion
-* Copyright (C) 2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2021-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -46,25 +46,23 @@ static inline utf32_char_t utf32_swap_bytes(const utf32_char_t x)
 static inline utf16_char_t utf16_get_unaligned(const utf16_char_unaligned_t *const s)
 {
 	utf16_char_t c = 0;
-	(void)memcpy(&c, s, sizeof(*s));
-	return c;
+	return *(utf16_char_t*)memcpy(&c, s, sizeof(*s));
 }
 
 static inline utf32_char_t utf32_get_unaligned(const utf32_char_unaligned_t *const s)
 {
 	utf32_char_t c = 0;
-	(void)memcpy(&c, s, sizeof(*s));
-	return c;
+	return *(utf32_char_t*)memcpy(&c, s, sizeof(*s));
 }
 
-static inline void utf16_put_unaligned(utf16_char_unaligned_t *const d, const utf16_char_t s)
+static inline utf16_char_unaligned_t *utf16_put_unaligned(utf16_char_unaligned_t *const d, const utf16_char_t s)
 {
-	(void)memcpy(d, &s, sizeof(s));
+	return (utf32_char_unaligned_t*)memcpy(d, &s, sizeof(s));
 }
 
-static inline void utf32_put_unaligned(utf32_char_unaligned_t *const d, const utf32_char_t s)
+static inline utf32_char_unaligned_t *utf32_put_unaligned(utf32_char_unaligned_t *const d, const utf32_char_t s)
 {
-	(void)memcpy(d, &s, sizeof(s));
+	return (utf32_char_unaligned_t*)memcpy(d, &s, sizeof(s));
 }
 
 #ifdef __cplusplus
