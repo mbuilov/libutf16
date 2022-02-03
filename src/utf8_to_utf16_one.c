@@ -32,17 +32,17 @@ static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n,
 	{
 		unsigned r;
 		const unsigned t = a >> 30;
-		a &= ~0xC0000000;
+		const unsigned m = ((unsigned)1 << 31) - 1 + ((unsigned)1 << 31);
 		switch (t) {
 			case 1:
-				if (a >= 0xE0) {
-					if (a >= 0xF0)
+				if (a >= 0x40000000 + 0xE0) {
+					if (a >= 0x40000000 + 0xF0)
 						goto c11;
 					goto c12;
 				}
 				goto c13;
 			case 2:
-				if (a >= (0xF0 << 6))
+				if (a >= 0x80000000 + (0xF0 << 6))
 					goto c21;
 				goto c22;
 			case 3:
@@ -68,7 +68,7 @@ c11:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = (a << 6) + r;
+				a = ((a << 6) & m) + r;
 				if (!(0x3C90 <= a && a <= 0x3D8F))
 					return (size_t)-1; /* overlong utf8 character/out of range */
 				if (!--n) {
@@ -80,7 +80,7 @@ c21:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = (a << 6) + r;
+				a = ((a << 6) & m) + r;
 				if (!--n) {
 					*state = a + 0xC0000000;
 					return (size_t)-2;
@@ -90,7 +90,7 @@ c31:
 				r = *s;
 				if (0x80 != (r & 0xC0))
 					return (size_t)-1; /* incomplete utf8 character */
-				a = (a << 6) + r - 0x682080 - 0x10000;
+				a = ((a << 6) & m) + r - 0x682080 - 0x10000;
 				*state = a;
 				return 4 - t;
 			}
@@ -103,7 +103,7 @@ c12:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) + r;
+			a = ((a << 6) & m) + r;
 			if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
 				return (size_t)-1; /* overlong utf8 character/surrogate */
 			if (!--n) {
@@ -115,7 +115,7 @@ c22:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) + r - 0xE2080;
+			a = ((a << 6) & m) + r - 0xE2080;
 			*state = a;
 			return 3 - t;
 		}
@@ -129,7 +129,7 @@ c13:
 			r = *s;
 			if (0x80 != (r & 0xC0))
 				return (size_t)-1; /* incomplete utf8 character */
-			a = (a << 6) + r - 0x3080;
+			a = ((a << 6) & m) + r - 0x3080;
 			*state = a;
 			return 2 - t;
 		}
