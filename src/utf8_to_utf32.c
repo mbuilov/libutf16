@@ -1,6 +1,6 @@
 /**********************************************************************************
 * UTF-8 -> UTF-32 characters conversion
-* Copyright (C) 2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2020-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -57,21 +57,20 @@ size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF32_CHAR_T **const b, s
 		do {
 			unsigned a = s[0];
 			if (a >= 0x80) {
-				unsigned r;
-				if (a >= 0xE0) {
-					if (a >= 0xF0) {
-						if (a > 0xF4)
+				unsigned r = s[1];
+				if (0x80 != (r & 0xC0))
+					goto bad_utf8; /* incomplete utf8 character */
+				a = (a << 6) + r;
+				if (a >= (0xE0 << 6) + 0x80) {
+					r = s[2];
+					if (0x80 != (r & 0xC0))
+						goto bad_utf8; /* incomplete utf8 character */
+					a = (a << 6) + r;
+					if (a >= (((0xF0 << 6) + 0x80) << 6) + 0x80) {
+						if (a > (((0xF4 << 6) + 0x80) << 6) + 0x80)
 							goto bad_utf8; /* unicode code point must be <= 0x10FFFF */
-						r = s[1];
-						if (0x80 != (r & 0xC0))
-							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) + r;
-						if (!(0x3C90 <= a && a <= 0x3D8F))
+						if (!((0x3C90 << 6) + 0x80 <= a && a <= (0x3D8F << 6) + 0xBF))
 							goto bad_utf8; /* overlong utf8 character/out of range */
-						r = s[2];
-						if (0x80 != (r & 0xC0))
-							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) + r;
 						r = s[3];
 						if (0x80 != (r & 0xC0))
 							goto bad_utf8; /* incomplete utf8 character */
@@ -79,24 +78,14 @@ size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF32_CHAR_T **const b, s
 						s += 4;
 					}
 					else {
-						r = s[1];
-						if (0x80 != (r & 0xC0))
-							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) + r;
-						if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
+						if (a < (0x38A0 << 6) + 0x80 || ((0x3BE0 << 6) + 0x80 <= a && a <= (0x3BFF << 6) + 0xBF))
 							goto bad_utf8; /* overlong utf8 character/surrogate */
-						r = s[2];
-						if (0x80 != (r & 0xC0))
-							goto bad_utf8; /* incomplete utf8 character */
-						a = (a << 6) + r - 0xE2080;
+						a -= 0xE2080;
 						s += 3;
 					}
 				}
-				else if (a >= 0xC2) {
-					r = s[1];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8; /* incomplete utf8 character */
-					a = (a << 6) + r - 0x3080;
+				else if (a >= (0xC2 << 6) + 0x80) {
+					a -= 0x3080;
 					s += 2;
 				}
 				else
@@ -125,20 +114,19 @@ bad_utf8:
 	for (;;) {
 		unsigned a = s[0];
 		if (a >= 0x80) {
-			unsigned r;
+			unsigned r = s[1];
+			if (0x80 != (r & 0xC0))
+				goto bad_utf8_s; /* incomplete utf8 character */
 			if (a >= 0xE0) {
-				if (a >= 0xF0) {
-					if (a > 0xF4)
+				unsigned x = s[2];
+				if (0x80 != (x & 0xC0))
+					goto bad_utf8_s; /* incomplete utf8 character */
+				a = (a << 6) + r;
+				if (a >= (0xF0 << 6) + 0x80) {
+					if (a > (0xF4 << 6) + 0x80)
 						goto bad_utf8_s; /* unicode code point must be <= 0x10FFFF */
-					r = s[1];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r;
 					if (!(0x3C90 <= a && a <= 0x3D8F))
 						goto bad_utf8_s; /* overlong utf8 character/out of range */
-					r = s[2];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_s; /* incomplete utf8 character */
 					r = s[3];
 					if (0x80 != (r & 0xC0))
 						goto bad_utf8_s; /* incomplete utf8 character */
@@ -146,23 +134,13 @@ bad_utf8:
 					m += 3; /* + (4 utf8_char_t's - 1 utf32_char_t) */
 				}
 				else {
-					r = s[1];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_s; /* incomplete utf8 character */
-					a = (a << 6) + r;
 					if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
 						goto bad_utf8_s; /* overlong utf8 character/surrogate */
-					r = s[2];
-					if (0x80 != (r & 0xC0))
-						goto bad_utf8_s; /* incomplete utf8 character */
 					s += 3;
 					m += 2; /* + (3 utf8_char_t's - 1 utf32_char_t) */
 				}
 			}
 			else if (a >= 0xC2) {
-				r = s[1];
-				if (0x80 != (r & 0xC0))
-					goto bad_utf8_s; /* incomplete utf8 character */
 				s += 2;
 				m++; /* + (2 utf8_char_t's - 1 utf32_char_t) */
 			}
@@ -182,7 +160,7 @@ bad_utf8_s:
 				 4 utf8_char_t's -> 1 utf32_char_t,
 				 3 utf8_char_t's -> 1 utf32_char_t,
 				 2 utf8_char_t's -> 1 utf32_char_t,
-				 1 utf8_char_t  -> 1 utf32_char_t*/
+				 1 utf8_char_t   -> 1 utf32_char_t. */
 				/* append a number of utf32_char_t's in utf8 string started from 't' */
 				sz += (size_t)(s - t) - m;
 				*q = t; /* points after the last successfully converted non-0 utf8_char_t */
@@ -351,7 +329,7 @@ bad_utf8_s:
 		 4 utf8_char_t's -> 1 utf32_char_t,
 		 3 utf8_char_t's -> 1 utf32_char_t,
 		 2 utf8_char_t's -> 1 utf32_char_t,
-		 1 utf8_char_t  -> 1 utf32_char_t*/
+		 1 utf8_char_t   -> 1 utf32_char_t. */
 		/* append a number of utf32_char_t's in utf8 string started from 't' */
 		sz += (size_t)(s - t) - m;
 		*q = t; /* points after the last successfully converted utf8_char_t, (*q) < se */
@@ -375,10 +353,10 @@ const utf8_char_t *UTF_FORM_NAME(_z_unsafe)(const utf8_char_t *q, UTF32_CHAR_T b
 		if (a >= 0x80) {
 			unsigned r = q[1];
 			a = (a << 6) + r;
-			if (a >= (0xE0 << 6)) {
+			if (a >= (0xE0 << 6) + 0x80) {
 				r = q[2];
 				a = (a << 6) + r;
-				if (a >= (0xF0 << 12)) {
+				if (a >= (((0xF0 << 6) + 0x80) << 6) + 0x80) {
 					r = q[3];
 					a = (a << 6) + r - 0x3C82080;
 					q += 4;
@@ -421,13 +399,13 @@ void UTF_FORM_NAME(_unsafe)(const utf8_char_t *q, UTF32_CHAR_T buf[], const size
 #endif
 			r = q[1];
 			a = (a << 6) + r;
-			if (a >= (0xE0 << 6)) {
+			if (a >= (0xE0 << 6) + 0x80) {
 #ifdef _MSC_VER
 				__assume(n > 2); /* assume input string is valid */
 #endif
 				r = q[2];
 				a = (a << 6) + r;
-				if (a >= (0xF0 << 12)) {
+				if (a >= (((0xF0 << 6) + 0x80) << 6) + 0x80) {
 #ifdef _MSC_VER
 					__assume(n > 3); /* assume input string is valid */
 #endif
