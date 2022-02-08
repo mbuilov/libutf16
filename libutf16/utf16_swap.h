@@ -31,7 +31,7 @@ static inline utf32_char_t utf32_swap_bytes(const utf32_char_t x)
 {
 #ifdef _MSC_VER
 	/* note: #include <stdlib.h> for _byteswap_ulong() */
-	return (utf16_char_t)_byteswap_ulong(x);
+	return (utf32_char_t)_byteswap_ulong(x);
 #else
 	/* gcc, clang, icc optimizes this to simple bswap, cl - can't */
 	return (
