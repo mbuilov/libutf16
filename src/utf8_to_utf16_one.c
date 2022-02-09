@@ -42,7 +42,7 @@ static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n,
 				}
 				goto c13;
 			case 2:
-				if (a >= 0x80000000 + (0xF0 << 6))
+				if (a >= 0x80000000 + (0xF0 << 6) + 0x80)
 					goto c21;
 				goto c22;
 			case 3:
@@ -60,7 +60,7 @@ static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n,
 				if (a > 0xF4)
 					return (size_t)-1; /* unicode code point must be <= 0x10FFFF */
 				if (!--n) {
-					*state = a + 0x40000000;
+					*state = a + 0x40000000; /* 1 of 4 */
 					return (size_t)-2;
 				}
 				s++;
@@ -72,7 +72,7 @@ c11:
 				if (!(0x3C90 <= a && a <= 0x3D8F))
 					return (size_t)-1; /* overlong utf8 character/out of range */
 				if (!--n) {
-					*state = a + 0x80000000;
+					*state = a + 0x80000000; /* 2 of 4 */
 					return (size_t)-2;
 				}
 				s++;
@@ -82,7 +82,7 @@ c21:
 					return (size_t)-1; /* incomplete utf8 character */
 				a = ((a << 6) & m) + r;
 				if (!--n) {
-					*state = a + 0xC0000000;
+					*state = a + 0xC0000000; /* 3 of 4 */
 					return (size_t)-2;
 				}
 				s++;
@@ -95,7 +95,7 @@ c31:
 				return 4 - t;
 			}
 			if (!--n) {
-				*state = a + 0x40000000;
+				*state = a + 0x40000000; /* 1 of 3 */
 				return (size_t)-2;
 			}
 			s++;
@@ -107,7 +107,7 @@ c12:
 			if (a < 0x38A0 || (0x3BE0 <= a && a <= 0x3BFF))
 				return (size_t)-1; /* overlong utf8 character/surrogate */
 			if (!--n) {
-				*state = a + 0x80000000;
+				*state = a + 0x80000000; /* 2 of 3 */
 				return (size_t)-2;
 			}
 			s++;
@@ -121,7 +121,7 @@ c22:
 		}
 		if (a >= 0xC2) {
 			if (!--n) {
-				*state = a + 0x40000000;
+				*state = a + 0x40000000; /* 1 of 2 */
 				return (size_t)-2;
 			}
 			s++;
@@ -220,7 +220,7 @@ const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw, const utf8_char_t
 				*pw = (a << 6) + r - 0x3C82080;
 				return s + 4;
 			}
-			if (a < (0x38A0 << 6) + 0x80 || ((0x3BE0 << 6) + 0x80 <= a && a <= (0x3BFF << 6) + 0x3BF))
+			if (a < (0x38A0 << 6) + 0x80 || ((0x3BE0 << 6) + 0x80 <= a && a <= (0x3BFF << 6) + 0xBF))
 				return NULL; /* overlong utf8 character/surrogate */
 			*pw = a - 0xE2080;
 			return s + 3;
