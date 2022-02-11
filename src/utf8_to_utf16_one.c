@@ -24,8 +24,11 @@ typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)]
   (size_t)-2 - if s is too short to read complete unicode character,
                n bytes of s have been consumed, state has been updated;
   >0         - number of bytes consumed from s, state contains read unicode character. */
-static size_t utf8_read_one_internal(const utf8_char_t *s, size_t n,
-	unsigned *const state, unsigned a)
+static size_t utf8_read_one_internal(
+	const utf8_char_t *LIBUTF16_RESTRICT s,
+	size_t n,
+	unsigned *const LIBUTF16_RESTRICT state,
+	unsigned a)
 {
 	if (!n)
 		return (size_t)-2;
@@ -137,8 +140,11 @@ c13:
 	}
 }
 
-size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[],
-	const size_t n, utf8_state_t *const ps)
+size_t utf8_to_utf16_one(
+	utf16_char_t *const LIBUTF16_RESTRICT pw,
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
+	const size_t n,
+	utf8_state_t *const LIBUTF16_RESTRICT ps)
 {
 	size_t r;
 	unsigned a = *ps;
@@ -161,8 +167,11 @@ size_t utf8_to_utf16_one(utf16_char_t *const pw, const utf8_char_t s[],
 	return r;
 }
 
-size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[],
-	const size_t n, utf8_state_t *const ps)
+size_t utf8_to_utf32_one(
+	utf32_char_t *const LIBUTF16_RESTRICT pw,
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
+	const size_t n,
+	utf8_state_t *const LIBUTF16_RESTRICT ps)
 {
 	unsigned a = *ps;
 	size_t r = utf8_read_one_internal(s, n, &a, a);
@@ -180,7 +189,10 @@ size_t utf8_to_utf32_one(utf32_char_t *const pw, const utf8_char_t s[],
 	return 0 == (*pw = a) ? 0 : r;
 }
 
-size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const ps)
+size_t utf8_len_one(
+	const utf8_char_t *LIBUTF16_RESTRICT const s,
+	const size_t n,
+	utf8_state_t *const LIBUTF16_RESTRICT ps)
 {
 	unsigned a = *ps;
 	size_t r = utf8_read_one_internal(s, n, &a, a);
@@ -192,7 +204,9 @@ size_t utf8_len_one(const utf8_char_t s[], const size_t n, utf8_state_t *const p
 	return !a ? 0 : r;
 }
 
-const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw, const utf8_char_t s[])
+const utf8_char_t *utf8_to_utf32_one_z(
+	utf32_char_t *const LIBUTF16_RESTRICT pw,
+	const utf8_char_t *const LIBUTF16_RESTRICT s)
 {
 	unsigned a = s[0];
 	if (a < 0x80) {

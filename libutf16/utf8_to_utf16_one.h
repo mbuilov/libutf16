@@ -28,10 +28,10 @@ extern "C" {
                saved in state, otherwise state has been reset to zero;
   0          - nul utf16 character has been read (one nul byte has been consumed from s). */
 size_t utf8_to_utf16_one(
-	utf16_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t s[/*n*/]/*in,!= NULL if n>0*/,
+	utf16_char_t *const LIBUTF16_RESTRICT pw/*out,!=NULL*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!= NULL if n>0*/,
 	const size_t n/*>=0*/,
-	utf8_state_t *const ps/*in,out,!=NULL*/);
+	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
@@ -42,10 +42,10 @@ size_t utf8_to_utf16_one(
                state has been reset to zero;
   0          - nul utf32 character has been read (one nul byte has been consumed from s). */
 size_t utf8_to_utf32_one(
-	utf32_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t s[/*n*/]/*in,!=NULL if n>0*/,
+	utf32_char_t *const LIBUTF16_RESTRICT pw/*out,!=NULL*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!=NULL if n>0*/,
 	const size_t n/*>=0*/,
-	utf8_state_t *const ps/*in,out,!=NULL*/);
+	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* determine the length of one unicode character (code point) encoded in utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
@@ -56,15 +56,16 @@ size_t utf8_to_utf32_one(
                state has been reset to zero;
   0          - nul unicode character has been scanned (one nul byte has been consumed from s). */
 size_t utf8_len_one(
-	const utf8_char_t s[/*n*/]/*in,!=NULL if n>0*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!=NULL if n>0*/,
 	const size_t n/*>=0*/,
-	utf8_state_t *const ps/*in,out,!=NULL*/);
+	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from NUL-terminated utf8 string, returns:
   NULL if s contains invalid or incomplete utf8 byte sequence,
   else - pointer beyond read unicode character stored to (*pw) */
-const utf8_char_t *utf8_to_utf32_one_z(utf32_char_t *const pw/*out,!=NULL*/,
-	const utf8_char_t s[]/*'\0'-terminated,!=NULL*/);
+const utf8_char_t *utf8_to_utf32_one_z(
+	utf32_char_t *const LIBUTF16_RESTRICT pw/*out,!=NULL*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*'\0'-terminated,!=NULL*/);
 
 #ifdef __cplusplus
 }
