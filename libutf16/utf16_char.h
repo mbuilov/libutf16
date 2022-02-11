@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 <-> UTF-8 characters conversion
-* Copyright (C) 2018,2020-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018,2020-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -72,7 +72,7 @@ typedef unsigned int utf8_state_t;
 /* check for BOM in a valid utf8 string: b and c are evaluated only when needed */
 #define UTF8_IS_BOM(a, b, c)        ((a) == 0xEF && (b) == 0xBB && (c) == 0xBF)
 
-/* try to workaround gcc byg
+/* try to workaround gcc bug
   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81631 */
 #if defined __GNUC__ && __GNUC__ > 4 - (__GNUC_MINOR__ >= 6)
 #define const_utf16_char_unaligned_ptr(p_) __extension__({ \
@@ -93,5 +93,24 @@ typedef unsigned int utf8_state_t;
 #define const_utf16_char_unaligned_ptr(p_)     ((const utf16_char_unaligned_t*)(p_))
 #define const_utf32_char_unaligned_ptr(p_)     ((const utf32_char_unaligned_t*)(p_))
 #endif /* !__GNUC__ */
+
+/* LIBUTF16_RESTRICT - annotates a pointer though which:
+  - reads may be prefetched,
+  - writes may be delayed */
+#ifndef LIBUTF16_RESTRICT
+#ifdef A_Restrict
+#define LIBUTF16_RESTRICT A_Restrict
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#define LIBUTF16_RESTRICT restrict
+#elif defined(_MSC_VER) && (_MSC_VER >= 1600)
+#define LIBUTF16_RESTRICT __restrict
+#elif defined(__GNUC__) && (__GNUC__ >= 3)
+#define LIBUTF16_RESTRICT __restrict__
+#elif defined(__clang__)
+#define LIBUTF16_RESTRICT __restrict__
+#else
+#define LIBUTF16_RESTRICT
+#endif
+#endif
 
 #endif /* UTF16_CHAR_H_INCLUDED */
