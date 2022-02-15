@@ -16,14 +16,14 @@ extern "C" {
 #endif
 
 /* write one unicode character (code point) to utf8 string, returns:
-  (size_t)-1 - if w is not the second part of utf16 surrogate pair;
+  (size_t)-1 - if w is not the second part of utf16 surrogate pair, state not changed;
   0          - w is the first part of utf16 surrogate pair and it has been saved
                in state, no bytes written to s;
   >0         - number of bytes stored to s, state has been reset to zero. */
 size_t utf16_to_utf8_one(
-	utf8_char_t s[UTF8_MAX_LEN]/*out,!=NULL*/,
+	utf8_char_t *LIBUTF16_RESTRICT const s/*[UTF8_MAX_LEN],out,!=NULL*/,
 	const utf16_char_t w,
-	utf8_state_t *const ps/*in,out,!=NULL*/);
+	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* write one unicode character (code point) to utf8 string, returns:
   (size_t)-1 - if w is not a valid utf32 character (unicode code point)

@@ -15,7 +15,8 @@
 /* unsigned integer type must be at least of 32 bits */
 typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
 
-size_t utf16_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t w, utf8_state_t *const ps)
+size_t utf16_to_utf8_one(utf8_char_t *const LIBUTF16_RESTRICT s,
+	const utf16_char_t w, utf8_state_t *const LIBUTF16_RESTRICT ps)
 {
 	unsigned b;
 	unsigned c = w;
