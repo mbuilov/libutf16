@@ -25,9 +25,9 @@ typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)]
                n bytes of s have been consumed, state has been updated;
   >0         - number of bytes consumed from s, state contains read unicode character. */
 static size_t utf8_read_one_internal(
-	const utf8_char_t *LIBUTF16_RESTRICT s,
-	size_t n,
-	unsigned *const LIBUTF16_RESTRICT state,
+	const utf8_char_t *LIBUTF16_RESTRICT s/*[n],!=NULL if n>0*/,
+	size_t n/*>=0*/,
+	unsigned *const LIBUTF16_RESTRICT state/*in,out,!=NULL*/,
 	unsigned a)
 {
 	if (!n)
@@ -190,7 +190,7 @@ size_t utf8_to_utf32_one(
 }
 
 size_t utf8_len_one(
-	const utf8_char_t *LIBUTF16_RESTRICT const s,
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
 	const size_t n,
 	utf8_state_t *const LIBUTF16_RESTRICT ps)
 {
