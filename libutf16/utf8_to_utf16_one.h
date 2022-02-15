@@ -16,8 +16,8 @@ extern "C" {
 #endif
 
 /* read one unicode character (code point) from utf8 string, returns:
-  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
-  (size_t)-2 - s is too short to read complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
+  (size_t)-2 - s is too short (or n is zero) to read complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
   (size_t)-3 - second part of utf16 surrogate pair of unicode character has
@@ -26,37 +26,40 @@ extern "C" {
   >0         - number of bytes consumed from s, one utf16 character has been read:
                if it's a first part of utf16-surrogate pair, second part has been
                saved in state, otherwise state has been reset to zero;
-  0          - nul utf16 character has been read (one nul byte has been consumed from s). */
+  0          - nul utf16 character has been read (one nul byte has been consumed from s),
+               state has been reset to zero. */
 size_t utf8_to_utf16_one(
 	utf16_char_t *const LIBUTF16_RESTRICT pw/*out,!=NULL*/,
-	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!= NULL if n>0*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],!= NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* read one unicode character (code point) from utf8 string, returns:
-  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
-  (size_t)-2 - s is too short to read complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
+  (size_t)-2 - s is too short (or n is zero) to read complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
   >0         - number of bytes consumed from s, one utf32 character has been read,
                state has been reset to zero;
-  0          - nul utf32 character has been read (one nul byte has been consumed from s). */
+  0          - nul utf32 character has been read (one nul byte has been consumed from s),
+               state has been reset to zero. */
 size_t utf8_to_utf32_one(
 	utf32_char_t *const LIBUTF16_RESTRICT pw/*out,!=NULL*/,
-	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!=NULL if n>0*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],!=NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
 /* determine the length of one unicode character (code point) encoded in utf8 string, returns:
-  (size_t)-1 - s contains invalid/overlong utf8 byte sequence;
-  (size_t)-2 - s is too short to scan complete unicode character,
+  (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
+  (size_t)-2 - s is too short (or n is zero) to scan complete unicode character,
                n bytes of s have been consumed, state has been updated,
                need to repeat the call supplying more bytes;
   >0         - number of bytes consumed from s, one unicode character has been scanned,
                state has been reset to zero;
-  0          - nul unicode character has been scanned (one nul byte has been consumed from s). */
+  0          - nul unicode character has been scanned (one nul byte has been consumed from s),
+               state has been reset to zero. */
 size_t utf8_len_one(
-	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],in,!=NULL if n>0*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],!=NULL if n>0*/,
 	const size_t n/*>=0*/,
 	utf8_state_t *const LIBUTF16_RESTRICT ps/*in,out,!=NULL*/);
 
