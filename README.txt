@@ -2,7 +2,7 @@ Description.
 small library for converting between utf8/utf16/utf32 strings.
 
 Author.
-Copyright (C) 2018-2021 Michael M. Builov, https://github.com/mbuilov/libutf16
+Copyright (C) 2018-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
 
 License.
 Apache License v2.0, see LICENSE.TXT.
