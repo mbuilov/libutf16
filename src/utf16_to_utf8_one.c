@@ -20,11 +20,11 @@ size_t utf16_to_utf8_one(utf8_char_t *const LIBUTF16_RESTRICT s,
 {
 	unsigned b;
 	unsigned c = w;
-	unsigned a = *ps;
+	const unsigned a = *ps;
 	if (a) {
 		/* a is the first part of utf16 surrogate pair,
 		   c must be the second part */
-		if (0xDC00 != (c & 0xFC00))
+		if (!utf16_is_low_surrogate(c))
 			return (size_t)-1;
 		*ps = 0;
 		c = (a << 10) + c - 0x20DC00 + 0x800000 + 0x10000;
@@ -35,10 +35,12 @@ size_t utf16_to_utf8_one(utf8_char_t *const LIBUTF16_RESTRICT s,
 	}
 	if (c >= 0x80) {
 		if (c >= 0x800) {
-			if (0xD800 == (c & 0xFC00)) {
+			if (utf16_is_high_surrogate(c)) {
 				*ps = c;
 				return 0;
 			}
+			if (utf16_is_low_surrogate(c))
+				return (size_t)-1;
 			b = 3;
 			c += 0xE0000;
 b3:
@@ -65,14 +67,14 @@ size_t utf32_to_utf8_one(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t w)
 	if (c >= 0x80) {
 		if (c >= 0x800) {
 			if (c > 0xFFFF) {
-				if (c > 0x10FFFF)
+				if (c > UTF32_MAX_VALUE)
 					return (size_t)-1; /* out of range */
 				c += 0x3C00000;
 				b = 4;
 				s[b - 4] = (utf8_char_t)(c >> 18);
 				c = (c & 0x3FFFF) + 0x80000;
 			}
-			else if (0xD800 <= c && c <= 0xDFFF)
+			else if (utf32_is_surrogate(c))
 				return (size_t)-1; /* must not be a surrogate */
 			else {
 				b = 3;
