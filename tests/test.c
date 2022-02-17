@@ -1,9 +1,9 @@
 /* test.c */
 
 /* compile as:
-  gcc -Wall -pedantic -Wextra tests/test.c -I. libutf16.a -o test
+  gcc -g -O0 -I. -DCHECK_UTF8_LOCALE -DLIBC_GLIBC -Wall -pedantic -Wextra tests/test.c -o test libutf16.a
    or
-  cl /Wall /wd4820 /wd5045 /wd4711 /wd4710 /Fetest.exe tests\test.c /I. /link utf16.a
+  cl /Z7 /Od /I. /DCHECK_UTF8_LOCALE /DLIBC_UCRT /Wall /wd4820 /wd5045 /wd4711 /wd4710 tests\test.c /Fetest.exe /link utf16.a
 */
 
 #include <stdio.h>
