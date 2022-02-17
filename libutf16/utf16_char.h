@@ -55,13 +55,19 @@ typedef unsigned int utf8_state_t;
 #define utf16_is_surrogate(c) (((unsigned)(c) - 0xD800) <= (0xDFFF - 0xD800))
 
 /* h - high part of surrogate pair, l - low part */
-#define utf16_to_utf32_one(h, l) (((unsigned)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
+#define utf16_to_utf32_one(h, l) (((utf32_char_t)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
 
 /* get high part of utf16 surrogate pair from a utf32 character > 0xFFFF */
 #define utf32_get_high_surrogate(u) ((utf16_char_t)((((u) - 0x10000) >> 10) + 0xD800))
 
 /* get low part of utf16 surrogate pair from a utf32 character > 0xFFFF */
 #define utf32_get_low_surrogate(u) ((utf16_char_t)((((u) - 0x10000) & 0x3FF) + 0xDC00))
+
+/* maximum value of utf32_char_t */
+#define UTF32_MAX_VALUE 0x10FFFF
+
+/* check if utf32_char_t is in a range reserved for utf16 surrogates */
+#define utf32_is_surrogate(c) (((c) - 0xD800) <= (0xDFFF - 0xD800))
 
 /* check for unicode character with code point 0xFEFF (used as Byte Order Mark) */
 #define utf16_is_bom_le(a, b)       ((a) == 0xFF && (b) == 0xFE)
