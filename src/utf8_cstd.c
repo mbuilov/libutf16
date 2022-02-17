@@ -30,30 +30,31 @@
 /* unsigned integer type must be at least of 32 bits */
 typedef int check_unsigned_int_at_least_32_bits[1-2*((unsigned)-1 < 0xFFFFFFFF)];
 
-static int utf8_mblen_(const utf8_char_t *const s, const size_t n, utf8_state_t *const ps)
+static int utf8_mblen_(const utf8_char_t *const LIBUTF16_RESTRICT s, const size_t n)
 {
 	if (s) {
-		const size_t count = utf8_len_one(s, n, ps);
+		utf8_state_t state = 0;
+		const size_t count = utf8_len_one(s, n, &state);
 		if (count < (size_t)-2)
-			/* return 0 for nul character */
 			return (int)count; /* 0-4 */
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
-		else
-			errno = 0; /* incomplete unicode character */
-		return -1;
+		return -1; /* incomplete/invalid unicode character */
 	}
-	*ps = 0;
-	return 0; /* UTF8 is a stateless encoding.  */
+	return 0; /* UTF8 is a stateless encoding */
 }
 
-int utf8_mblen(const utf8_char_t *const s, const size_t n)
+int utf8_mblen(
+	const utf8_char_t *const s,
+	const size_t n)
 {
-	static utf8_state_t mblen_state = 0;
-	return utf8_mblen_(s, n, &mblen_state);
+	return utf8_mblen_(s, n);
 }
 
-size_t utf8_mbrlen(const utf8_char_t *const s, const size_t n, utf8_state_t *ps)
+size_t utf8_mbrlen(
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
+	const size_t n,
+	utf8_state_t *LIBUTF16_RESTRICT ps)
 {
 	static utf8_state_t mbrlen_state = 0;
 	if (!ps)
@@ -62,7 +63,6 @@ size_t utf8_mbrlen(const utf8_char_t *const s, const size_t n, utf8_state_t *ps)
 		const size_t count = utf8_len_one(s, n, ps);
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
-		/* return 0 for nul character */
 		return count; /* 0-4, (size_t)-2, (size_t)-1 */
 	}
 	if (!*ps)
@@ -71,19 +71,20 @@ size_t utf8_mbrlen(const utf8_char_t *const s, const size_t n, utf8_state_t *ps)
 	return (size_t)-1;
 }
 
-size_t utf8_mbrtoc16(utf16_char_t *const pwc, const utf8_char_t *const s,
-	const size_t n, utf8_state_t *ps)
+size_t utf8_mbrtoc16(
+	utf16_char_t *const LIBUTF16_RESTRICT pwc,
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
+	const size_t n,
+	utf8_state_t *LIBUTF16_RESTRICT ps)
 {
 	static utf8_state_t mbrtoc16_state = 0;
 	if (!ps)
 		ps = &mbrtoc16_state;
-	if (!pwc)
-		return utf8_mbrlen(s, n, ps);
 	if (s) {
-		const size_t count = utf8_to_utf16_one(pwc, s, n, ps);
+		utf16_char_t x;
+		const size_t count = utf8_to_utf16_one(pwc ? pwc : &x, s, n, ps);
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
-		/* return 0 for nul character */
 		return count; /* 0-4, (size_t)-3, (size_t)-2, (size_t)-1 */
 	}
 	if (!*ps)
@@ -92,19 +93,21 @@ size_t utf8_mbrtoc16(utf16_char_t *const pwc, const utf8_char_t *const s,
 	return (size_t)-1;
 }
 
-size_t utf8_mbrtoc32(utf32_char_t *const pwi, const utf8_char_t *const s,
-	const size_t n, utf8_state_t *ps)
+size_t utf8_mbrtoc32(
+	utf32_char_t *const LIBUTF16_RESTRICT pwi,
+	const utf8_char_t *const LIBUTF16_RESTRICT s,
+	const size_t n,
+	utf8_state_t *LIBUTF16_RESTRICT ps)
 {
 	static utf8_state_t mbrtoc32_state = 0;
 	if (!ps)
 		ps = &mbrtoc32_state;
-	if (!pwi)
-		return utf8_mbrlen(s, n, ps);
 	if (s) {
-		const size_t count = utf8_to_utf32_one(pwi, s, n, ps);
+		const size_t count = pwi ?
+			utf8_to_utf32_one(pwi, s, n, ps) :
+			utf8_len_one(s, n, ps);
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
-		/* return 0 for nul character */
 		return count; /* 0-4, (size_t)-2, (size_t)-1 */
 	}
 	if (!*ps)
@@ -113,7 +116,10 @@ size_t utf8_mbrtoc32(utf32_char_t *const pwi, const utf8_char_t *const s,
 	return (size_t)-1;
 }
 
-size_t utf8_c16rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc, utf8_state_t *ps)
+size_t utf8_c16rtomb(
+	utf8_char_t *const LIBUTF16_RESTRICT s,
+	const utf16_char_t wc,
+	utf8_state_t *LIBUTF16_RESTRICT ps)
 {
 	static utf8_state_t c16rtomb_state = 0;
 	if (!ps)
@@ -122,7 +128,6 @@ size_t utf8_c16rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc, utf8_st
 		const size_t count = utf16_to_utf8_one(s, wc, ps);
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
-		/* return 0 if high utf16-surrogate has been saved in state */
 		return count; /* 0-4, (size_t)-1 */
 	}
 	if (!*ps)
@@ -131,31 +136,36 @@ size_t utf8_c16rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf16_char_t wc, utf8_st
 	return (size_t)-1;
 }
 
-size_t utf8_c32rtomb(utf8_char_t s[UTF8_MAX_LEN], const utf32_char_t wi, utf8_state_t *ps)
+size_t utf8_c32rtomb(
+	utf8_char_t s[UTF8_MAX_LEN],
+	const utf32_char_t wi,
+	utf8_state_t *ps)
 {
+	(void)ps;
 	if (s) {
 		const size_t count = utf32_to_utf8_one(s, wi);
 		if ((size_t)-1 == count)
 			errno = EILSEQ;
 		return count; /* 1-4, (size_t)-1 */
 	}
-	if (!ps || !*ps)
-		return 1;
-	errno = EILSEQ;
-	return (size_t)-1;
+	return 1;
 }
 
-static int utf8_mbtowc_(const int is_wchar_16, void *const pwc,
-	const utf8_char_t *const s, const size_t n, utf8_state_t *const ps)
+static int utf8_mbtowc_(
+	const int is_wchar_16,
+	void *const pwc,
+	const utf8_char_t *const s,
+	const size_t n)
 {
 	if (!pwc)
-		return utf8_mblen_(s, n, ps);
+		return utf8_mblen_(s, n);
 	if (s) {
+		utf8_state_t state = 0;
 		const size_t count = is_wchar_16
-			? utf8_to_utf16_one((utf16_char_t*)pwc, s, n, ps)
-			: utf8_to_utf32_one((utf32_char_t*)pwc, s, n, ps);
+			? utf8_to_utf16_one((utf16_char_t*)pwc, s, n, &state)
+			: utf8_to_utf32_one((utf32_char_t*)pwc, s, n, &state);
 		if (count < (size_t)-2) {
-			if (is_wchar_16 && *ps) {
+			if (is_wchar_16 && state) {
 				/* A unicode character requires a utf16-surrogate
 				   pair, which cannot be stored in a single wchar_t.
 				   mbrtoc16/mbrtoc32 should be used in this case.  */
@@ -171,20 +181,23 @@ static int utf8_mbtowc_(const int is_wchar_16, void *const pwc,
 			errno = 0; /* incomplete unicode character */
 		return -1;
 	}
-	*ps = 0;
 	return 0; /* UTF8 is a stateless encoding.  */
 }
 
-int utf8_mbtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s, const size_t n)
+int utf8_mbtowc16_obsolete(
+	utf16_char_t *const pwc,
+	const utf8_char_t *const s,
+	const size_t n)
 {
-	static utf8_state_t mbtowc16_state = 0;
-	return utf8_mbtowc_(/*is_wchar_16:*/1, pwc, s, n, &mbtowc16_state);
+	return utf8_mbtowc_(/*is_wchar_16:*/1, pwc, s, n);
 }
 
-int utf8_mbtowc32(utf32_char_t *const pwc, const utf8_char_t *const s, const size_t n)
+int utf8_mbtowc32(
+	utf32_char_t *const pwc,
+	const utf8_char_t *const s,
+	const size_t n)
 {
-	static utf8_state_t mbtowc32_state = 0;
-	return utf8_mbtowc_(/*is_wchar_16:*/0, pwc, s, n, &mbtowc32_state);
+	return utf8_mbtowc_(/*is_wchar_16:*/0, pwc, s, n);
 }
 
 size_t utf8_mbrtowc16_obsolete(utf16_char_t *const pwc, const utf8_char_t *const s,
