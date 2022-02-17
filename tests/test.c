@@ -7,8 +7,15 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <memory.h>
+#include <errno.h>
+#ifdef CHECK_UTF8_LOCALE
+#include <locale.h>
+#include <wchar.h>
+#include <uchar.h>
+#endif
 
 #include "libutf16/utf16_to_utf8.h"
 #include "libutf16/utf32_to_utf8.h"
@@ -18,8 +25,17 @@
 #include "libutf16/utf32_to_utf16.h"
 #include "libutf16/utf8_to_utf16_one.h"
 #include "libutf16/utf16_to_utf8_one.h"
+#include "libutf16/utf8_cstd.h"
 
 static unsigned long long test_number = 0;
+
+#ifdef CHECK_UTF8_LOCALE
+#define LIBC_TEST(expr) do { \
+	if (!(expr)) { \
+		printf("libc test failed: after test %llu (at line = %d)\n", test_number, __LINE__); \
+	} \
+} while (0)
+#endif
 
 #define TEST(expr) do { \
 	if (!(expr)) { \
@@ -439,7 +455,7 @@ static int test_utf16_to_utf8_one(
 	const unsigned le = 1;
 	unsigned i = 0;
 	unsigned j = 0;
-	utf8_state_t ps = 0;
+	utf8_state_t state = 0;
 	const utf16_char_t *const src16 = (const utf16_char_t*)utf16_le_be[!*(const char*)&le] + 1/*BOM*/;
 	for (; i < utf16_sz - 1/*BOM*/; i++) {
 		utf8_char_t buf[UTF8_MAX_LEN + 5];
@@ -448,7 +464,7 @@ static int test_utf16_to_utf8_one(
 			buf[q] = (utf8_char_t)(q + 10);
 		{
 			const utf16_char_t w = src16[i];
-			const size_t sz = utf16_to_utf8_one(buf, w, &ps);
+			const size_t sz = utf16_to_utf8_one(buf, w, &state);
 			TEST(sz != (size_t)-1);
 			if (sz) {
 				TEST(sz <= utf8_sz - j);
@@ -501,24 +517,32 @@ static int test_utf8_to_utf16_one(
 	const utf8_char_t utf8[/*utf8_sz*/])
 {
 	const unsigned le = 1;
-	utf8_state_t ps = 0;
+	utf8_state_t state = 0;
 	const utf16_char_t *const src16 = (const utf16_char_t*)utf16_le_be[!*(const char*)&le] + 1/*BOM*/;
-	unsigned by = 1;
+	unsigned by = 0;
 	for (; by < 15; by++) {
 		unsigned i = 0;
 		unsigned j = 0;
+		unsigned y = by;
 		while (i < utf8_sz) {
 			utf16_char_t w;
-			const unsigned n = (by <= utf8_sz - i) ? by : (utf8_sz - i);
-			const size_t sz = utf8_to_utf16_one(&w, &utf8[i], n, &ps);
+			const unsigned n = (y <= utf8_sz - i) ? y : (utf8_sz - i);
+			const size_t sz = utf8_to_utf16_one(&w, &utf8[i], n, &state);
 			TEST(sz != (size_t)-1);
 			if (sz == (size_t)-2) {
+				const size_t sz_incomplete = utf8_to_utf16_one(&w, &utf8[i], 0, &state);
+				TEST(sz_incomplete == (size_t)-2);
 				TEST(i + n < utf8_sz);
-				i += n;
+				if (n)
+					i += n;
+				else
+					y = 1;
 				continue;
 			}
 			if (sz != (size_t)-3) {
 				if (sz) {
+					TEST(w);
+					TEST(sz <= n);
 					TEST(sz <= utf8_sz - i);
 					i += (unsigned)sz;
 				}
@@ -527,9 +551,12 @@ static int test_utf8_to_utf16_one(
 					i++;
 				}
 			}
+			else
+				TEST(w);
 			TEST(j < utf16_sz - 1/*BOM*/);
 			TEST(w == src16[j]);
 			j++;
+			y = by;
 		}
 		TEST(i == utf8_sz);
 		TEST(j == utf16_sz - 1/*BOM*/);
@@ -544,23 +571,31 @@ static int test_utf8_to_utf32_one(
 	const utf8_char_t utf8[/*utf8_sz*/])
 {
 	const unsigned le = 1;
-	utf8_state_t ps = 0;
+	utf8_state_t state = 0;
 	const utf32_char_t *const src32 = (const utf32_char_t*)utf32_le_be[!*(const char*)&le] + 1/*BOM*/;
-	unsigned by = 1;
+	unsigned by = 0;
 	for (; by < 15; by++) {
 		unsigned i = 0;
 		unsigned j = 0;
+		unsigned y = by;
 		while (i < utf8_sz) {
 			utf32_char_t w;
-			const unsigned n = (by <= utf8_sz - i) ? by : (utf8_sz - i);
-			const size_t sz = utf8_to_utf32_one(&w, &utf8[i], n, &ps);
+			const unsigned n = (y <= utf8_sz - i) ? y : (utf8_sz - i);
+			const size_t sz = utf8_to_utf32_one(&w, &utf8[i], n, &state);
 			TEST(sz != (size_t)-1);
 			if (sz == (size_t)-2) {
+				const size_t sz_incomplete = utf8_to_utf32_one(&w, &utf8[i], 0, &state);
+				TEST(sz_incomplete == (size_t)-2);
 				TEST(i + n < utf8_sz);
-				i += n;
+				if (n)
+					i += n;
+				else
+					y = 1;
 				continue;
 			}
 			if (sz) {
+				TEST(w);
+				TEST(sz <= n);
 				TEST(sz <= utf8_sz - i);
 				i += (unsigned)sz;
 			}
@@ -571,6 +606,7 @@ static int test_utf8_to_utf32_one(
 			TEST(j < utf32_sz - 1/*BOM*/);
 			TEST(w == src32[j]);
 			j++;
+			y = by;
 		}
 		TEST(i == utf8_sz);
 		TEST(j == utf32_sz - 1/*BOM*/);
@@ -579,30 +615,43 @@ static int test_utf8_to_utf32_one(
 }
 
 static int test_utf8_len_one(
+	const unsigned utf32_sz,
 	const unsigned utf8_sz,
 	const utf8_char_t utf8[/*utf8_sz*/])
 {
-	utf8_state_t ps = 0;
-	unsigned by = 1;
+	utf8_state_t state = 0;
+	unsigned by = 0;
 	for (; by < 15; by++) {
+		unsigned j = 0;
 		unsigned i = 0;
+		unsigned y = by;
 		while (i < utf8_sz) {
-			const unsigned n = (by <= utf8_sz - i) ? by : (utf8_sz - i);
-			const size_t sz = utf8_len_one(&utf8[i], n, &ps);
+			const unsigned n = (y <= utf8_sz - i) ? y : (utf8_sz - i);
+			const size_t sz = utf8_len_one(&utf8[i], n, &state);
 			TEST(sz != (size_t)-1);
 			if (sz == (size_t)-2) {
 				TEST(i + n < utf8_sz);
-				i += n;
+				if (n)
+					i += n;
+				else
+					y = 1;
 				continue;
 			}
 			if (sz) {
+				TEST(utf8[i]);
+				TEST(sz <= n);
 				TEST(sz <= utf8_sz - i);
 				i += (unsigned)sz;
 			}
-			else
+			else {
+				TEST(!utf8[i]);
 				i++;
+			}
+			j++;
+			y = by;
 		}
 		TEST(i == utf8_sz);
+		TEST(j == utf32_sz - 1/*BOM*/);
 	}
 	return 0;
 }
@@ -633,10 +682,595 @@ static int test_utf8_to_utf32_one_z(
 	return 0;
 }
 
+static int test_utf8_mblen(
+	const unsigned utf32_sz,
+	const unsigned utf8_sz,
+	const utf8_char_t utf8[/*utf8_sz*/])
+{
+	errno = 0;
+	TEST(0 == utf8_mblen(NULL, 0));
+	TEST(!errno);
+	TEST(0 == utf8_mblen(NULL, 1));
+	TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+	LIBC_TEST(0 == mblen(NULL, 0));
+	LIBC_TEST(!errno);
+	LIBC_TEST(0 == mblen(NULL, 1));
+	LIBC_TEST(!errno);
+#endif
+	{
+		unsigned by = 0;
+		for (; by < 15; by++) {
+			unsigned j = 0;
+			unsigned i = 0;
+			while (i < utf8_sz) {
+				unsigned n = (by <= utf8_sz - i) ? by : (utf8_sz - i);
+				for (;; n++) {
+					const int sz = utf8_mblen(&utf8[i], n);
+					TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+					{
+						const int sz1 = mblen((const char*)&utf8[i], n);
+#ifdef LIBC_UCRT /* if n == 0, ucrt checks (*s) and always returns 0 */
+						if (n)
+#endif
+							LIBC_TEST(sz == sz1);
+						LIBC_TEST(!errno);
+					}
+#endif
+					if (sz != -1) {
+						if (sz) {
+							TEST(utf8[i]);
+							TEST((unsigned)sz <= n);
+							TEST((unsigned)sz <= utf8_sz - i);
+							i += (unsigned)sz;
+						}
+						else {
+							TEST(!utf8[i]);
+							i++;
+						}
+						break;
+					}
+					TEST(i + n < utf8_sz);
+					TEST(-1 == utf8_mblen(&utf8[i], 0));
+					TEST(!errno);
+					TEST(0 == utf8_mblen(NULL, 0));
+					TEST(!errno);
+					TEST(0 == utf8_mblen(NULL, 1));
+					TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+#ifndef LIBC_UCRT /* if n == 0, ucrt checks (*s) and always returns 0 */
+					LIBC_TEST(-1 == mblen((const char*)&utf8[i], 0));
+#endif
+					LIBC_TEST(!errno);
+					LIBC_TEST(0 == mblen(NULL, 0));
+					LIBC_TEST(!errno);
+					LIBC_TEST(0 == mblen(NULL, 1));
+					LIBC_TEST(!errno);
+#endif
+				}
+				j++;
+			}
+			TEST(i == utf8_sz);
+			TEST(j == utf32_sz - 1/*BOM*/);
+		}
+	}
+	return 0;
+}
+
+static int test_utf8_mbrlen(
+	const unsigned utf32_sz,
+	const unsigned utf8_sz,
+	const utf8_char_t utf8[/*utf8_sz*/])
+{
+	errno = 0;
+	TEST(0 == utf8_mbrlen(NULL, 0, NULL));
+	TEST(!errno);
+	TEST(0 == utf8_mbrlen(NULL, 1, NULL));
+	TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+	LIBC_TEST(0 == mbrlen(NULL, 0, NULL));
+	LIBC_TEST(!errno);
+	LIBC_TEST(0 == mbrlen(NULL, 1, NULL));
+	LIBC_TEST(!errno);
+#endif
+	{
+		unsigned by = 0;
+		utf8_state_t state = 0;
+#ifdef CHECK_UTF8_LOCALE
+		mbstate_t state1;
+		memset(&state1, 0, sizeof(state1));
+#endif
+		for (; by < 15; by++) {
+			unsigned j = 0;
+			unsigned i = 0;
+			unsigned y = by;
+			while (i < utf8_sz) {
+				unsigned n = (y <= utf8_sz - i) ? y : (utf8_sz - i);
+				const size_t sz = utf8_mbrlen(&utf8[i], n, &state);
+				TEST(!errno);
+				TEST(sz != (size_t)-1);
+#ifdef CHECK_UTF8_LOCALE
+				{
+					const size_t sz1 = mbrlen((const char*)&utf8[i], n, &state1);
+#ifdef LIBC_UCRT /* if n == 0, ucrt always returns 0, even if state is not initial  */
+					if (n)
+#endif
+						LIBC_TEST(sz == sz1);
+					LIBC_TEST(!errno);
+				}
+#endif
+				if (sz == (size_t)-2) {
+					unsigned t = 0;
+					const utf8_state_t saved_state = state;
+#ifdef CHECK_UTF8_LOCALE
+					mbstate_t saved_state1;
+					memcpy(&saved_state1, &state1, sizeof(state1));
+#endif
+					TEST(i + n < utf8_sz);
+					for (; t < 2; t++) {
+						const size_t sz_incomplete = utf8_mbrlen(&utf8[i], 0, &state);
+						TEST(!errno);
+						TEST(sz_incomplete == (size_t)-2);
+						TEST(state == saved_state);
+#ifdef CHECK_UTF8_LOCALE
+						{
+							const size_t sz_incomplete1 = mbrlen((const char*)&utf8[i], 0, &state1);
+#ifdef LIBC_UCRT /* if n == 0, ucrt always returns 0, even if state is not initial */
+							(void)sz_incomplete1;
+#else
+							LIBC_TEST(sz_incomplete == sz_incomplete1);
+#endif
+							LIBC_TEST(!errno);
+							LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+						}
+#endif
+					}
+					for (t = 0; t < 2; t++) {
+						const size_t sz_incomplete = utf8_mbrlen(NULL, t, &state);
+						TEST(state == saved_state);
+						if (!saved_state) {
+							TEST(sz_incomplete == 0);
+							TEST(!errno);
+						}
+						else {
+							TEST(sz_incomplete == (size_t)-1);
+							TEST(errno);
+							errno = 0;
+						}
+#ifdef CHECK_UTF8_LOCALE
+						{
+							const size_t sz_incomplete1 = mbrlen(NULL, t, &state1);
+#ifdef LIBC_UCRT /* if s == NULL, ucrt always returns 0, even if state is not initial */
+							(void)sz_incomplete1;
+#else
+							LIBC_TEST(sz_incomplete == sz_incomplete1);
+#endif
+							LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+							if (sz_incomplete == 0)
+								LIBC_TEST(!errno);
+							else {
+#ifndef LIBC_UCRT /* if s == NULL, ucrt always returns 0, even if state is not initial */
+								LIBC_TEST(errno);
+								errno = 0;
+#endif
+							}
+						}
+#endif
+					}
+					if (n)
+						i += n;
+					else
+						y = 1;
+					continue;
+				}
+				TEST(n);
+				if (sz) {
+					TEST(utf8[i]);
+					TEST(sz <= n);
+					TEST(sz <= utf8_sz - i);
+					i += (unsigned)sz;
+				}
+				else {
+					TEST(!utf8[i]);
+					TEST(n == 1);
+					i++;
+				}
+				j++;
+				y = by;
+			}
+			TEST(i == utf8_sz);
+			TEST(j == utf32_sz - 1/*BOM*/);
+		}
+	}
+	return 0;
+}
+
+static int test_utf8_mbrtoc16_or_32(
+	const unsigned utf16_or_32_sz,
+	const unsigned utf8_sz,
+	const unsigned char *const utf16_or_32_le_be[2],
+	const utf8_char_t utf8[/*utf8_sz*/],
+	const int check_16)
+{
+	const unsigned le = 1;
+	const union {
+		const unsigned char *src;
+		const utf16_char_t *src16;
+		const utf32_char_t *src32;
+	} src = {utf16_or_32_le_be[!*(const char*)&le] + (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))/*BOM*/};
+	unsigned round = 0; /* will check with pwc == NULL on second round */
+	errno = 0;
+	for (; round < 2; round++) {
+		utf8_state_t state = 0;
+		unsigned by = 0;
+#ifdef CHECK_UTF8_LOCALE
+		mbstate_t state1;
+		memset(&state1, 0, sizeof(state1));
+#endif
+		if (round) {
+			if (check_16) {
+				TEST(0 == utf8_mbrtoc16(NULL, NULL, 0, NULL));
+				TEST(!errno);
+				TEST(0 == utf8_mbrtoc16(NULL, NULL, 1, NULL));
+				TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+				LIBC_TEST(0 == mbrtoc16(NULL, NULL, 0, NULL));
+				LIBC_TEST(!errno);
+				LIBC_TEST(0 == mbrtoc16(NULL, NULL, 1, NULL));
+				LIBC_TEST(!errno);
+#endif
+			}
+			else {
+				TEST(0 == utf8_mbrtoc32(NULL, NULL, 0, NULL));
+				TEST(!errno);
+				TEST(0 == utf8_mbrtoc32(NULL, NULL, 1, NULL));
+				TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+				LIBC_TEST(0 == mbrtoc32(NULL, NULL, 0, NULL));
+				LIBC_TEST(!errno);
+				LIBC_TEST(0 == mbrtoc32(NULL, NULL, 1, NULL));
+				LIBC_TEST(!errno);
+#endif
+			}
+		}
+		for (; by < 15; by++) {
+			unsigned i = 0;
+			unsigned j = 0;
+			unsigned y = by;
+			while (i < utf8_sz) {
+				const unsigned n = (y <= utf8_sz - i) ? y : (utf8_sz - i);
+				union {
+					utf32_char_t w32;
+					utf16_char_t w16;
+				} dst = {0};
+#ifdef CHECK_UTF8_LOCALE
+				union {
+					char32_t w32;
+					char16_t w16;
+				} dst1 = {0};
+#endif
+				const size_t sz = check_16 ?
+					utf8_mbrtoc16(round ? NULL : &dst.w16, &utf8[i], n, &state) :
+					utf8_mbrtoc32(round ? NULL : &dst.w32, &utf8[i], n, &state);
+				TEST(!errno);
+				TEST(sz != (size_t)-1);
+#ifdef CHECK_UTF8_LOCALE
+				{
+					const size_t sz1 = check_16 ?
+						mbrtoc16(round ? NULL : &dst1.w16, (const char*)&utf8[i], n, &state1) :
+						mbrtoc32(round ? NULL : &dst1.w32, (const char*)&utf8[i], n, &state1);
+					LIBC_TEST(sz == sz1);
+					LIBC_TEST(!errno);
+				}
+#endif
+				if (sz == (size_t)-2) {
+					unsigned t = 0;
+					const utf8_state_t saved_state = state;
+#ifdef CHECK_UTF8_LOCALE
+					mbstate_t saved_state1;
+					memcpy(&saved_state1, &state1, sizeof(state1));
+#endif
+					TEST(i + n < utf8_sz);
+					for (; t < 2; t++) {
+						const size_t sz_incomplete = check_16 ?
+							utf8_mbrtoc16(round ? NULL : &dst.w16, &utf8[i], 0, &state) :
+							utf8_mbrtoc32(round ? NULL : &dst.w32, &utf8[i], 0, &state);
+						TEST(!errno);
+						TEST(sz_incomplete == (size_t)-2);
+						TEST(state == saved_state);
+#ifdef CHECK_UTF8_LOCALE
+						{
+							const size_t sz_incomplete1 = check_16 ?
+								mbrtoc16(round ? NULL : &dst1.w16, (const char*)&utf8[i], 0, &state1) :
+								mbrtoc32(round ? NULL : &dst1.w32, (const char*)&utf8[i], 0, &state1);
+							LIBC_TEST(sz_incomplete == sz_incomplete1);
+							LIBC_TEST(!errno);
+							LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+						}
+#endif
+					}
+					for (t = 0; t < 2; t++) {
+						const size_t sz_incomplete = check_16 ?
+							utf8_mbrtoc16(round ? NULL : &dst.w16, NULL, t, &state) :
+							utf8_mbrtoc32(round ? NULL : &dst.w32, NULL, t, &state);
+						TEST(state == saved_state);
+						if (!saved_state) {
+							TEST(sz_incomplete == 0);
+							TEST(!errno);
+						}
+						else {
+							TEST(sz_incomplete == (size_t)-1);
+							TEST(errno);
+							errno = 0;
+						}
+#ifdef CHECK_UTF8_LOCALE
+						{
+#ifdef LIBC_UCRT
+							/* there is a bug in ucrt library: if state1 is not initial,
+							  mbrtoc16(NULL, NULL, 0, &state1) is not equivalent (returns (size_t)-2) to
+							  mbrtoc16(NULL, "", 1, &state1), which returns (size_t)-1 (which is correct),
+							  the same bug for mbrtoc32() */
+							const size_t sz_incomplete1 = check_16 ?
+								mbrtoc16(round ? NULL : &dst1.w16, "", 1, &state1) :
+								mbrtoc32(round ? NULL : &dst1.w32, "", 1, &state1);
+#else
+							const size_t sz_incomplete1 = check_16 ?
+								mbrtoc16(round ? NULL : &dst1.w16, NULL, t, &state1) :
+								mbrtoc32(round ? NULL : &dst1.w32, NULL, t, &state1);
+#endif
+							LIBC_TEST(sz_incomplete == sz_incomplete1);
+#ifdef LIBC_UCRT /* ucrt resets state on empty string */
+							if (sz_incomplete == (size_t)-1)
+								memcpy(&state1, &saved_state1, sizeof(state1));
+#endif
+							LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+							if (sz_incomplete == 0)
+								LIBC_TEST(!errno);
+							else {
+								LIBC_TEST(errno);
+								errno = 0;
+							}
+						}
+#endif
+					}
+					if (n)
+						i += n;
+					else
+						y = 1;
+					continue;
+				}
+				if (!check_16 || sz != (size_t)-3) {
+					TEST(n);
+					if (sz) {
+						if (!round) {
+							if (check_16)
+								TEST(dst.w16);
+							else
+								TEST(dst.w32);
+						}
+						TEST(sz <= n);
+						TEST(sz <= utf8_sz - i);
+						i += (unsigned)sz;
+					}
+					else {
+						if (!round) {
+							if (check_16)
+								TEST(!dst.w16);
+							else
+								TEST(!dst.w32);
+						}
+						i++;
+					}
+				}
+				else if (!round)
+					TEST(dst.w16); /* second surrogate */
+				TEST(j < utf16_or_32_sz - 1/*BOM*/);
+				if (!round) {
+					if (check_16)
+						TEST(dst.w16 == src.src16[j]);
+					else
+						TEST(dst.w32 == src.src32[j]);
+#ifdef CHECK_UTF8_LOCALE
+					{
+						if (check_16)
+							LIBC_TEST(dst.w16 == dst1.w16);
+						else
+							LIBC_TEST(dst.w32 == dst1.w32);
+					}
+#endif
+				}
+				j++;
+				y = by;
+			}
+			TEST(i == utf8_sz);
+			TEST(j == utf16_or_32_sz - 1/*BOM*/);
+		}
+	}
+	return 0;
+}
+
+static int test_utf8_c16_or_32rtomb(
+	const unsigned utf16_or_32_sz,
+	const unsigned utf8_sz,
+	const unsigned char *const utf16_or_32_le_be[2],
+	const utf8_char_t utf8[/*utf8_sz*/],
+	const int check_16)
+{
+	const unsigned le = 1;
+	const union {
+		const unsigned char *src;
+		const utf16_char_t *src16;
+		const utf32_char_t *src32;
+	} src = {utf16_or_32_le_be[!*(const char*)&le] + (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))/*BOM*/};
+	errno = 0;
+	if (check_16) {
+		TEST(1 == utf8_c16rtomb(NULL, 0, NULL));
+		TEST(!errno);
+		TEST(1 == utf8_c16rtomb(NULL, 1, NULL));
+		TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+		LIBC_TEST(1 == c16rtomb(NULL, 0, NULL));
+		LIBC_TEST(!errno);
+		LIBC_TEST(1 == c16rtomb(NULL, 1, NULL));
+		LIBC_TEST(!errno);
+#endif
+	}
+	else {
+		TEST(1 == utf8_c32rtomb(NULL, 0, NULL));
+		TEST(!errno);
+		TEST(1 == utf8_c32rtomb(NULL, 1, NULL));
+		TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+#ifndef LIBC_UCRT /* ucrt crashes is state pointer is NULL */
+		LIBC_TEST(1 == c32rtomb(NULL, 0, NULL));
+		LIBC_TEST(!errno);
+		LIBC_TEST(1 == c32rtomb(NULL, 1, NULL));
+		LIBC_TEST(!errno);
+#endif
+#endif
+	}
+	{
+		unsigned j = 0;
+		unsigned i = 0;
+		utf8_state_t state = 0;
+#ifdef CHECK_UTF8_LOCALE
+		mbstate_t state1;
+		memset(&state1, 0, sizeof(state1));
+#endif
+		while (i < utf16_or_32_sz - 1/*BOM*/) {
+			utf8_char_t s[UTF8_MAX_LEN] = {0};
+#ifdef CHECK_UTF8_LOCALE
+			char s1[UTF8_MAX_LEN] = {0};
+#endif
+			const size_t sz = check_16 ?
+				utf8_c16rtomb(s, src.src16[i], &state) :
+				utf8_c32rtomb(s, src.src32[i], &state);
+			TEST(!errno);
+			TEST(sz != (size_t)-1);
+#ifdef CHECK_UTF8_LOCALE
+			{
+				const size_t sz1 = check_16 ?
+					c16rtomb(s1, (char16_t)src.src16[i], &state1) :
+					c32rtomb(s1, (char32_t)src.src32[i], &state1);
+				LIBC_TEST(sz == sz1);
+				LIBC_TEST(!errno);
+			}
+#endif
+			TEST(sz || check_16);
+			if (!sz) {
+				const utf8_state_t saved_state = state;
+#ifdef CHECK_UTF8_LOCALE
+				mbstate_t saved_state1;
+				memcpy(&saved_state1, &state1, sizeof(state1));
+#endif
+				TEST(i + 1 < utf16_or_32_sz - 1/*BOM*/);
+				{
+					const size_t sz_incomplete = utf8_c16rtomb(s, 0, &state);
+					TEST(sz_incomplete == (size_t)-1);
+					TEST(errno);
+					TEST(state == saved_state);
+					errno = 0;
+#ifdef CHECK_UTF8_LOCALE
+					{
+						const size_t sz_incomplete1 = c16rtomb(s1, 0, &state1);
+						LIBC_TEST(sz_incomplete == sz_incomplete1);
+						LIBC_TEST(errno);
+#ifdef LIBC_UCRT /* ucrt resets state on invalid input */
+						if (sz_incomplete == (size_t)-1)
+							memcpy(&state1, &saved_state1, sizeof(state1));
+#endif
+						LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+						errno = 0;
+					}
+#endif
+				}
+				{
+					const size_t sz_incomplete = utf8_c16rtomb(NULL, 1, &state);
+					TEST(sz_incomplete == (size_t)-1);
+					TEST(errno);
+					TEST(state == saved_state);
+					errno = 0;
+#ifdef CHECK_UTF8_LOCALE
+					{
+						const size_t sz_incomplete1 = c16rtomb(NULL, 1, &state1);
+						LIBC_TEST(sz_incomplete == sz_incomplete1);
+						LIBC_TEST(errno);
+#ifdef LIBC_UCRT /* ucrt resets state on invalid input */
+						if (sz_incomplete == (size_t)-1)
+							memcpy(&state1, &saved_state1, sizeof(state1));
+#endif
+						LIBC_TEST(!memcmp(&state1, &saved_state1, sizeof(state1)));
+						errno = 0;
+					}
+#endif
+				}
+				i += 1;
+				continue;
+			}
+			TEST(sz <= sizeof(s));
+			TEST(j + sz <= utf8_sz);
+			TEST(!memcmp(s, &utf8[j], sz));
+#ifdef CHECK_UTF8_LOCALE
+			TEST(!memcmp(s, s1, sz));
+#endif
+			{
+				const size_t sz_incomplete = check_16 ?
+					utf8_c16rtomb(s, 0, &state) :
+					utf8_c32rtomb(s, 0, &state);
+				TEST(sz_incomplete == 1);
+				TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+				{
+					const size_t sz_incomplete1 = check_16 ?
+						c16rtomb(s1, 0, &state1) :
+						c32rtomb(s1, 0, &state1);
+					LIBC_TEST(sz_incomplete == sz_incomplete1);
+					LIBC_TEST(!errno);
+				}
+#endif
+			}
+			{
+				const size_t sz_incomplete = check_16 ?
+					utf8_c16rtomb(NULL, 1, &state) :
+					utf8_c32rtomb(NULL, 1, &state);
+				TEST(sz_incomplete == 1);
+				TEST(!errno);
+#ifdef CHECK_UTF8_LOCALE
+				{
+					const size_t sz_incomplete1 = check_16 ?
+						c16rtomb(NULL, 1, &state1) :
+						c32rtomb(NULL, 1, &state1);
+					LIBC_TEST(sz_incomplete == sz_incomplete1);
+					LIBC_TEST(!errno);
+				}
+#endif
+			}
+			i += 1;
+			j += (unsigned)sz;
+		}
+		TEST(i == utf16_or_32_sz - 1/*BOM*/);
+		TEST(j == utf8_sz);
+	}
+	return 0;
+}
+
 #include "test_data.inl"
 
 int main(int argc, char *argv[])
 {
+#ifdef CHECK_UTF8_LOCALE
+#ifdef _WIN32
+	const char *utf8_locale = ".utf8";
+#else
+	const char *utf8_locale = "C.UTF-8";
+#endif
+	const char *const locale = setlocale(LC_ALL, utf8_locale);
+	if (!locale) {
+		fprintf(stderr, "failed to set locale: %s\n", utf8_locale);
+		return -2;
+	}
+#endif /* CHECK_UTF8_LOCALE */
 	fill_test_bufs();
 	{
 		union {
@@ -755,6 +1389,7 @@ int main(int argc, char *argv[])
 				data[z].utf32_le_be,
 				data[z].utf8));
 			TEST(!test_utf8_len_one(
+				data[z].utf32_sz,
 				data[z].utf8_sz,
 				data[z].utf8));
 			TEST(!test_utf8_to_utf32_one_z(
@@ -762,6 +1397,38 @@ int main(int argc, char *argv[])
 				data[z].utf8_sz,
 				data[z].utf32_le_be,
 				data[z].utf8));
+			TEST(!test_utf8_mblen(
+				data[z].utf32_sz,
+				data[z].utf8_sz,
+				data[z].utf8));
+			TEST(!test_utf8_mbrlen(
+				data[z].utf32_sz,
+				data[z].utf8_sz,
+				data[z].utf8));
+			TEST(!test_utf8_mbrtoc16_or_32(
+				data[z].utf16_sz,
+				data[z].utf8_sz,
+				data[z].utf16_le_be,
+				data[z].utf8,
+				1));
+			TEST(!test_utf8_mbrtoc16_or_32(
+				data[z].utf32_sz,
+				data[z].utf8_sz,
+				data[z].utf32_le_be,
+				data[z].utf8,
+				0));
+			TEST(!test_utf8_c16_or_32rtomb(
+				data[z].utf16_sz,
+				data[z].utf8_sz,
+				data[z].utf16_le_be,
+				data[z].utf8,
+				1));
+			TEST(!test_utf8_c16_or_32rtomb(
+				data[z].utf32_sz,
+				data[z].utf8_sz,
+				data[z].utf32_le_be,
+				data[z].utf8,
+				0));
 		}
 	}
 	printf("All tests ok\n");
