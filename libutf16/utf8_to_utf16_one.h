@@ -18,7 +18,7 @@ extern "C" {
 /* read one unicode character (code point) from utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
   (size_t)-2 - s is too short (or n is zero) to read complete unicode character,
-               n bytes of s have been consumed, state has been updated,
+               n bytes of s have been consumed, state has been updated (if n is non-zero),
                need to repeat the call supplying more bytes;
   (size_t)-3 - second part of utf16 surrogate pair of unicode character has
                been read from state, no source bytes have been consumed,
@@ -37,7 +37,7 @@ size_t utf8_to_utf16_one(
 /* read one unicode character (code point) from utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
   (size_t)-2 - s is too short (or n is zero) to read complete unicode character,
-               n bytes of s have been consumed, state has been updated,
+               n bytes of s have been consumed, state has been updated (if n is non-zero),
                need to repeat the call supplying more bytes;
   >0         - number of bytes consumed from s, one utf32 character has been read,
                state has been reset to zero;
@@ -52,7 +52,7 @@ size_t utf8_to_utf32_one(
 /* determine the length of one unicode character (code point) encoded in utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
   (size_t)-2 - s is too short (or n is zero) to scan complete unicode character,
-               n bytes of s have been consumed, state has been updated,
+               n bytes of s have been consumed, state has been updated (if n is non-zero),
                need to repeat the call supplying more bytes;
   >0         - number of bytes consumed from s, one unicode character has been scanned,
                state has been reset to zero;
