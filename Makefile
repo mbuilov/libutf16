@@ -190,7 +190,7 @@ libutf16.a: $(OBJS)
 	ar -crs libutf16.a $(OBJS)
 
 test: tests/test.c libutf16.a
-	gcc -Wall -pedantic -Wextra tests/test.c -I. libutf16.a -o test
+	gcc -g -O2 -I. -DCHECK_UTF8_LOCALE -DLIBC_GLIBC -Wall -pedantic -Wextra tests/test.c -o test libutf16.a
 
 check: test
 	./test
