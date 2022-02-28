@@ -50,9 +50,10 @@ size_t utf8_mbrlen(
 /* returns:
  s != NULL:
   -1   on error (errno == EILSEQ, state not changed)
-  -2   on incomplete character (or n is zero) (n bytes consumed, state updated if n is non-zero)
+  -2   on incomplete character (or n is zero and state do not contains a second part
+       of utf16 surrogate pair) (n bytes consumed, state updated if n is non-zero)
   -3   second part of utf16 surrogate pair has been read from state
-       (no source bytes consumed, state was reset to zero)
+       (no source bytes consumed - n may be zero, state was reset to zero)
    0   for nul character (1 byte read, state is zero)
    1-4 bytes read (state may contain second part of utf16 surrogate pair)
  s == NULL:
@@ -103,83 +104,130 @@ size_t utf8_c16rtomb(
   -1   on error (errno == EILSEQ)
    1-4 bytes written
  s == NULL:
-   1   one byte needed to encode nul character */
-/* note: this function do not uses the state, state must be zero */
+   1   one byte is needed to encode nul character */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_c32rtomb(
 	utf8_char_t s[UTF8_MAX_LEN]/*NULL?*/,
 	const utf32_char_t wi,
 	utf8_state_t *ps/*NULL?,not used*/);
 
-/* mbtowc (3) for 16/32 bit wchar_t */
+/* mbtowc (3) for 16 bit wchar_t */
 /* returns:
-  -1   on incomplete character (errno == 0) or on error (errno == EILSEQ)
  s != NULL:
-   0   for nul character (1 byte read),
-   1-4 bytes read
+  -1   on incomplete character (or n is zero) (do not sets errno) or on error (errno == EILSEQ)
+   0   for nul character (1 byte read)
+   1-3 bytes read
  s == NULL:
    0   UTF8 is a stateless encoding */
-/* NOTE: do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
+/* note: this function do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
+/* note: if unicode character do not fits utf16_char_t, -1 is returned and errno is set to EILSEQ
+  indicating a decoding error, but (*pwc), if pwc is not NULL, will contain a high surrogate of
+  the unicode character (this is the only case when this function may store a surrogate in *pwc);
+  also, utf8_mblen() will return UTF8_MAX_LEN for the array s[n] */
 int utf8_mbtowc16_obsolete(
-	utf16_char_t *const pwc,
-	const utf8_char_t *const s,
-	const size_t n);
+	utf16_char_t *const LIBUTF16_RESTRICT pwc/*NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],NULL?*/,
+	const size_t n/*>=0*/);
 
-int utf8_mbtowc32(
-	utf32_char_t *const pwc,
-	const utf8_char_t *const s,
-	const size_t n);
-
-/* mbrtowc (3) for 16/32 bit wchar_t */
+/* mbtowc (3) for 32 bit wchar_t */
 /* returns:
-  -1   on error (errno == EILSEQ)
  s != NULL:
-  -2   on incomplete character,
-   0   for nul character (1 byte read),
+  -1   on incomplete character (or n is zero) (do not sets errno) or on error (errno == EILSEQ)
+   0   for nul character (1 byte read)
    1-4 bytes read
  s == NULL:
-   0   state is zero */
-/* NOTE: do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
-size_t utf8_mbrtowc16_obsolete(
-	utf16_char_t *const pwc,
-	const utf8_char_t *const s,
-	const size_t n,
-	utf8_state_t *ps);
+   0   UTF8 is a stateless encoding */
+int utf8_mbtowc32(
+	utf32_char_t *const LIBUTF16_RESTRICT pwc/*NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],NULL?*/,
+	const size_t n/*>=0*/);
 
-size_t utf8_mbrtowc32(
-	utf32_char_t *const pwc,
-	const utf8_char_t *const s,
-	const size_t n,
-	utf8_state_t *ps);
-
-/* wctomb (3) for 16/32 bit wchar_t */
+/* mbrtowc (3) for 16 bit wchar_t */
 /* returns:
-  -1   on error (errno == EILSEQ)
  s != NULL:
-   1-4 bytes written
+  -1   on error (errno == EILSEQ, state may be updated only if a unicode character do not fits
+       utf16_char_t - see notes, else state not changed)
+  -2   on incomplete character (or n is zero) (n bytes consumed, state updated if n is non-zero)
+   0   for nul character (1 byte read, state is zero)
+   1-3 bytes read (state is zero)
+ s == NULL:
+  -1   if state is non-zero (errno == EILSEQ, state not changed)
+   0   if state is zero */
+/* note: this function do not handles utf16 surrogate pairs! Use utf8_mbrtoc16 instead! */
+/* note: if ps is NULL, a private state is used; there is no way to reset it on error */
+/* note: if unicode character do not fits utf16_char_t, -1 is returned and errno is set to EILSEQ
+  indicating a decoding error, but (*pwc), if pwc is not NULL, will contain a high surrogate of
+  the unicode character (this is the only case when this function may store a surrogate in *pwc)
+  and the state will contain a low surrogate of the unicode character (also, this is the only
+  case when the state may contain a surrogate) */
+size_t utf8_mbrtowc16_obsolete(
+	utf16_char_t *const LIBUTF16_RESTRICT pwc/*NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],NULL?*/,
+	const size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?*/);
+
+/* mbrtowc (3) for 32 bit wchar_t */
+/* returns:
+ s != NULL:
+  -1   on error (errno == EILSEQ, state not changed)
+  -2   on incomplete character (or n is zero) (n bytes consumed, state updated if n is non-zero)
+   0   for nul character (1 byte read, state is zero)
+   1-4 bytes read (state is zero)
+ s == NULL:
+  -1   if state is non-zero (errno == EILSEQ, state not changed)
+   0   if state is zero */
+/* note: if ps is NULL, a private state is used; there is no way to reset it on error */
+size_t utf8_mbrtowc32(
+	utf32_char_t *const LIBUTF16_RESTRICT pwc/*NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT s/*[n],NULL?*/,
+	const size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?*/);
+
+/* wctomb (3) for 16 bit wchar_t */
+/* returns:
+ s != NULL:
+  -1   on error (errno is not set) (wc is a surrogate)
+   1-3 bytes written
  s == NULL:
    0   UTF8 is a stateless encoding */
-/* NOTE: do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
+/* note: this function do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
 int utf8_wc16tomb_obsolete(
-	utf8_char_t s[UTF8_MAX_LEN],
+	utf8_char_t s[3]/*NULL?*/,
 	const utf16_char_t wc);
 
-int utf8_wc32tomb(
-	utf8_char_t s[UTF8_MAX_LEN],
-	const utf32_char_t wc);
-
-/* wcrtomb (3) for 16/32 bit wchar_t */
+/* wctomb (3) for 32 bit wchar_t */
 /* returns:
-  -1   on error (errno == EILSEQ)
  s != NULL:
+  -1   on error (errno is not set)
    1-4 bytes written
  s == NULL:
-   1   one byte needed to encode nul character */
-/* NOTE: do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
-size_t utf8_wc16rtomb_obsolete(
-	utf8_char_t s[UTF8_MAX_LEN],
-	const utf16_char_t wc,
-	utf8_state_t *ps);
+   0   UTF8 is a stateless encoding */
+int utf8_wc32tomb(
+	utf8_char_t s[UTF8_MAX_LEN]/*NULL?*/,
+	const utf32_char_t wc);
 
+/* wcrtomb (3) for 16 bit wchar_t */
+/* returns:
+ s != NULL:
+  -1   on error (errno == EILSEQ) (wc is a surrogate)
+   1-3 bytes written
+ s == NULL:
+   1   one byte is needed to encode nul character */
+/* note: this function do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
+size_t utf8_wc16rtomb_obsolete(
+	utf8_char_t s[3]/*NULL?*/,
+	const utf16_char_t wc,
+	utf8_state_t *ps/*NULL?,not used*/);
+
+/* wcrtomb (3) for 32 bit wchar_t */
+/* returns:
+ s != NULL:
+  -1   on error (errno == EILSEQ)
+   1-4 bytes written
+ s == NULL:
+   1   one byte is needed to encode nul character */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 #define utf8_wc32rtomb utf8_c32rtomb
 
 /* ================ mbstowcs()/wcstombs() ============== */
@@ -188,16 +236,29 @@ size_t utf8_wc16rtomb_obsolete(
 /* returns:
   -1   on error (errno == EILSEQ)
  dst != NULL:
-   number of utf16 characters stored, not counting terminating nul, which is not written if buffer is too small.
-   Tip: if caller wants to check if terminating nul was written, caller should fill "check" zone at tail of
-   output buffer of at least 1 non-zero utf16 character bytes - if buffer is large enough, nul character
-   will be written after the last filled character, possibly to "check" zone.
+   number of utf16 characters stored, not counting terminating nul, which is not stored if buffer is too small.
+   Note: return value < n do not guarantees that output was not truncated and terminating nul was stored, due
+   to a surrogate pair - to be sure that terminating nul was written, caller should fill "check" zone at tail
+   of output buffer of at least 1 non-zero utf16 character bytes - if buffer is large enough, nul character
+   will be written over after the last filled character, possibly to "check" zone.
  dst == NULL:
    size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
 size_t utf8_mbstoc16s(
-	utf16_char_t dst[/*n*/],
-	const utf8_char_t *const src,
-	size_t n);
+	utf16_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
+
+/* mbstowcs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ)
+ dst != NULL:
+   number of utf32 characters stored, not counting terminating nul, which is not written if buffer is too small.
+ dst == NULL:
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
+size_t utf8_mbstoc32s(
+	utf32_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf8_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
 
 /* wcstombs (3) */
 /* returns:
@@ -212,18 +273,6 @@ size_t utf8_mbstoc16s(
 size_t utf8_c16stombs(
 	utf8_char_t dst[/*n*/],
 	const utf16_char_t *const src,
-	size_t n);
-
-/* mbstowcs (3) */
-/* returns:
-  -1   on error (errno == EILSEQ)
- dst != NULL:
-   number of utf32 characters stored, not counting terminating nul, which is not written if buffer is too small.
- dst == NULL:
-   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
-size_t utf8_mbstoc32s(
-	utf32_char_t dst[/*n*/],
-	const utf8_char_t *const src,
 	size_t n);
 
 /* wcstombs (3) */
