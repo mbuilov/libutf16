@@ -17,11 +17,12 @@ extern "C" {
 
 /* read one unicode character (code point) from utf8 string, returns:
   (size_t)-1 - s contains invalid/overlong utf8 byte sequence, state not changed;
-  (size_t)-2 - s is too short (or n is zero) to read complete unicode character,
+  (size_t)-2 - s is too short (or n is zero and state do not contains a second part
+               of utf16 surrogate pair) to read complete unicode character,
                n bytes of s have been consumed, state has been updated (if n is non-zero),
                need to repeat the call supplying more bytes;
   (size_t)-3 - second part of utf16 surrogate pair of unicode character has
-               been read from state, no source bytes have been consumed,
+               been read from state, no source bytes have been consumed (n may be zero),
                state has been reset to zero;
   >0         - number of bytes consumed from s, one utf16 character has been read:
                if it's a first part of utf16-surrogate pair, second part has been
