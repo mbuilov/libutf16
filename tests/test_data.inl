@@ -1,3 +1,9 @@
+/**********************************************************************************
+* libutf16 tests
+* Copyright (C) 2022 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
+
 /* test_data.inl */
 
 /*
@@ -5057,10 +5063,10 @@ static void fill_test_bufs(void)
 		};
 		for (; n < sizeof(sz)/sizeof(sz[0]); n++) {
 			unsigned i = 0;
-			for (; i < sz[n]/2; i++) {
-				dst[n][i*2 + 0] = src[n][i*2 + 1];
-				dst[n][i*2 + 1] = src[n][i*2 + 0];
-			}
+			utf16_char_t *const LIBUTF16_RESTRICT d = (utf16_char_t*)dst[n];
+			const utf16_char_t *const LIBUTF16_RESTRICT s = (const utf16_char_t*)src[n];
+			for (; i < sz[n]/2; i++)
+				d[i] = utf16_swap_bytes(s[i]);
 		}
 	}
 	{
@@ -5079,12 +5085,10 @@ static void fill_test_bufs(void)
 		};
 		for (; n < sizeof(sz)/sizeof(sz[0]); n++) {
 			unsigned i = 0;
-			for (; i < sz[n]/4; i++) {
-				dst[n][i*4 + 0] = src[n][i*4 + 3];
-				dst[n][i*4 + 1] = src[n][i*4 + 2];
-				dst[n][i*4 + 2] = src[n][i*4 + 1];
-				dst[n][i*4 + 3] = src[n][i*4 + 0];
-			}
+			utf32_char_t *const LIBUTF16_RESTRICT d = (utf32_char_t*)dst[n];
+			const utf32_char_t *const LIBUTF16_RESTRICT s = (const utf32_char_t*)src[n];
+			for (; i < sz[n]/4; i++)
+				d[i] = utf32_swap_bytes(s[i]);
 		}
 	}
 }
