@@ -1,9 +1,15 @@
+/**********************************************************************************
+* libutf16 tests
+* Copyright (C) 2022 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Licensed under Apache License v2.0, see LICENSE.TXT
+**********************************************************************************/
+
 /* test.c */
 
 /* compile as:
   gcc -g -O2 -I. -DCHECK_UTF8_LOCALE -DLIBC_GLIBC -Wall -pedantic -Wextra tests/test.c -o test libutf16.a
    or
-  cl /O2 /I. /DCHECK_UTF8_LOCALE /DLIBC_UCRT /Wall /wd4820 /wd5045 /wd4711 /wd4710 tests\test.c /Fetest.exe /link utf16.a
+  cl /O2 /I. /DCHECK_UTF8_LOCALE /DLIBC_UCRT /Wall /wd4820 /wd5045 /wd4711 /wd4710 /wd4996 tests\test.c /Fetest.exe /link utf16.a
 */
 
 #include <stdio.h>
@@ -26,6 +32,7 @@
 #include "libutf16/utf8_to_utf16_one.h"
 #include "libutf16/utf16_to_utf8_one.h"
 #include "libutf16/utf8_cstd.h"
+#include "libutf16/utf16_swap.h"
 
 static unsigned long long test_number = 0;
 
@@ -47,12 +54,6 @@ static unsigned long long test_number = 0;
 	test_number++; \
 } while (0)
 
-#define NULLSZ(f) \
-	{ \
-		const size_t sz = f(NULL, 0); \
-		TEST(!sz); \
-	}
-
 #define FUNC(f,a)  f a
 
 #define TESTSZ(sz,f,t,s,e,dst_sz) \
@@ -63,7 +64,7 @@ static unsigned long long test_number = 0;
 		TEST(w == s); \
 	}
 
-#define TESTCONV(sz,f,t,s,e,z,xt,dt,et,buf,buf_sz,dst_sz) \
+#define TESTCONV(sz,f,t,s/*const*/,e/*const*/,z,xt,dt,d,buf,buf_sz,dst_sz) \
 	{ \
 		unsigned i = 0, next_i = 0; \
 		unsigned j = 0, next_j = 0; \
@@ -73,7 +74,7 @@ static unsigned long long test_number = 0;
 			/* zero input buffer can't be passed to _z_-functions */ \
 			if (z && j == (size_t)(e - s)) \
 				break; \
-			for (next_j = 0; l <= buf_sz; l += ((step <= buf_sz - l) ? step++ : (step = 1))) { \
+			for (next_j = 0; l <= buf_sz; l += ((step <= buf_sz - l) ? step++ : 1)) { \
 				unsigned q = l; \
 				for (; q < buf_sz; q++) { \
 					const xt x = (xt)(q + 10); \
@@ -88,8 +89,8 @@ static unsigned long long test_number = 0;
 					TEST(w <= e); \
 					TEST(l < dst_sz || b == &buf[dst_sz]); \
 					TEST(l < dst_sz || w == e); \
-					TEST(!memcmp(buf + i, et + i, sizeof(*buf)*((size_t)(b - buf) - i))); \
-					for (q = l < dst_sz ? l : dst_sz;  q < buf_sz; q++) { \
+					TEST(!memcmp(buf + i, d + i, sizeof(*buf)*((size_t)(b - buf) - i))); \
+					for (q = l < dst_sz ? l : dst_sz; q < buf_sz; q++) { \
 						const xt x = (xt)(q + 10); \
 						TEST(!memcmp(&buf[q], &x, sizeof(x))); \
 					} \
@@ -111,8 +112,8 @@ static unsigned long long test_number = 0;
 					TEST(w <= e); \
 					TEST(l < dst_sz || b == &buf[dst_sz]); \
 					TEST(l < dst_sz || w == e); \
-					TEST(!memcmp(buf + i, et + i, sizeof(*buf)*((size_t)(b - buf) - i))); \
-					for (q = l < dst_sz ? l : dst_sz;  q < buf_sz; q++) { \
+					TEST(!memcmp(buf + i, d + i, sizeof(*buf)*((size_t)(b - buf) - i))); \
+					for (q = l < dst_sz ? l : dst_sz; q < buf_sz; q++) { \
 						const xt x = (xt)(q + 10); \
 						TEST(!memcmp(&buf[q], &x, sizeof(x))); \
 					} \
@@ -123,7 +124,7 @@ static unsigned long long test_number = 0;
 					dt *const b = (dt*)memset(buf + i, 0, sizeof(*buf)*(dst_sz - i)); \
 					const t *const w = s + j; \
 					FUNC(f##_unsafe, (w, b sz((size_t)(e - w)))); \
-					TEST(!memcmp(buf + i, et + i, sizeof(*buf)*(dst_sz - i))); \
+					TEST(!memcmp(buf + i, d + i, sizeof(*buf)*(dst_sz - i))); \
 					for (q = dst_sz;  q < buf_sz; q++) { \
 						const xt x = (xt)(q + 10); \
 						TEST(!memcmp(&buf[q], &x, sizeof(x))); \
@@ -160,10 +161,10 @@ static int test_utf16_to_utf8(
 	const utf16_char_t *const src16x_e = src16x + utf16_sz - 1/*BOM*/;
 	const utf16_char_unaligned_t *const src16ux = (const utf16_char_unaligned_t*)utf16_le_be[!!*(const char*)&le] + 1/*BOM*/;
 	const utf16_char_unaligned_t *const src16ux_e = src16ux + utf16_sz - 1/*BOM*/;
-	NULLSZ(utf16_to_utf8_size)
-	NULLSZ(utf16u_to_utf8_size)
-	NULLSZ(utf16x_to_utf8_size)
-	NULLSZ(utf16ux_to_utf8_size)
+	TEST(!utf16_to_utf8_size(NULL, 0));
+	TEST(!utf16u_to_utf8_size(NULL, 0));
+	TEST(!utf16x_to_utf8_size(NULL, 0));
+	TEST(!utf16ux_to_utf8_size(NULL, 0));
 	TEST(utf16_is_bom_be(utf16_le_be[1][0], utf16_le_be[1][1]));
 	TEST(utf16_is_bom_le(utf16_le_be[0][0], utf16_le_be[0][1]));
 	TESTSZ(SZ, utf16_to_utf8_size, utf16_char_t, src16, src16_e, utf8_sz)
@@ -203,10 +204,10 @@ static int test_utf32_to_utf8(
 	const utf32_char_t *const src32x_e = src32x + utf32_sz - 1/*BOM*/;
 	const utf32_char_unaligned_t *const src32ux = (const utf32_char_unaligned_t*)utf32_le_be[!!*(const char*)&le] + 1/*BOM*/;
 	const utf32_char_unaligned_t *const src32ux_e = src32ux + utf32_sz - 1/*BOM*/;
-	NULLSZ(utf32_to_utf8_size)
-	NULLSZ(utf32u_to_utf8_size)
-	NULLSZ(utf32x_to_utf8_size)
-	NULLSZ(utf32ux_to_utf8_size)
+	TEST(!utf32_to_utf8_size(NULL, 0));
+	TEST(!utf32u_to_utf8_size(NULL, 0));
+	TEST(!utf32x_to_utf8_size(NULL, 0));
+	TEST(!utf32ux_to_utf8_size(NULL, 0));
 	TEST(utf32_is_bom_be(utf32_le_be[1][0], utf32_le_be[1][1], utf32_le_be[1][2], utf32_le_be[1][3]));
 	TEST(utf32_is_bom_le(utf32_le_be[0][0], utf32_le_be[0][1], utf32_le_be[0][2], utf32_le_be[0][3]));
 	TESTSZ(SZ, utf32_to_utf8_size, utf32_char_t, src32, src32_e, utf8_sz)
@@ -241,10 +242,10 @@ static int test_utf8_to_utf16(
 	const utf16_char_t *const src16 = (const utf16_char_t*)utf16_le_be[!*(const char*)&le] + 1/*BOM*/;
 	const utf16_char_t *const src16x = (const utf16_char_t*)utf16_le_be[!!*(const char*)&le] + 1/*BOM*/;
 	const utf8_char_t *const utf8_e = &utf8[utf8_sz];
-	NULLSZ(utf8_to_utf16_size)
-	NULLSZ(utf8_to_utf16u_size)
-	NULLSZ(utf8_to_utf16x_size)
-	NULLSZ(utf8_to_utf16ux_size)
+	TEST(!utf8_to_utf16_size(NULL, 0));
+	TEST(!utf8_to_utf16u_size(NULL, 0));
+	TEST(!utf8_to_utf16x_size(NULL, 0));
+	TEST(!utf8_to_utf16ux_size(NULL, 0));
 	TEST(utf16_is_bom_be(utf16_le_be[1][0], utf16_le_be[1][1]));
 	TEST(utf16_is_bom_le(utf16_le_be[0][0], utf16_le_be[0][1]));
 	TESTSZ(SZ, utf8_to_utf16_size, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
@@ -279,10 +280,10 @@ static int test_utf8_to_utf32(
 	const utf32_char_t *const src32 = (const utf32_char_t*)utf32_le_be[!*(const char*)&le] + 1/*BOM*/;
 	const utf32_char_t *const src32x = (const utf32_char_t*)utf32_le_be[!!*(const char*)&le] + 1/*BOM*/;
 	const utf8_char_t *const utf8_e = &utf8[utf8_sz];
-	NULLSZ(utf8_to_utf32_size)
-	NULLSZ(utf8_to_utf32u_size)
-	NULLSZ(utf8_to_utf32x_size)
-	NULLSZ(utf8_to_utf32ux_size)
+	TEST(!utf8_to_utf32_size(NULL, 0));
+	TEST(!utf8_to_utf32u_size(NULL, 0));
+	TEST(!utf8_to_utf32x_size(NULL, 0));
+	TEST(!utf8_to_utf32ux_size(NULL, 0));
 	TEST(utf32_is_bom_be(utf32_le_be[1][0], utf32_le_be[1][1], utf32_le_be[1][2], utf32_le_be[1][3]));
 	TEST(utf32_is_bom_le(utf32_le_be[0][0], utf32_le_be[0][1], utf32_le_be[0][2], utf32_le_be[0][3]));
 	TESTSZ(SZ, utf8_to_utf32_size, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
@@ -324,10 +325,10 @@ static int test_utf16_to_utf32(
 	const utf16_char_unaligned_t *const src16ux_e = src16ux + utf16_sz - 1/*BOM*/;
 	const utf32_char_t *const src32 = (const utf32_char_t*)utf32_le_be[!*(const char*)&le] + 1/*BOM*/;
 	const utf32_char_t *const src32x = (const utf32_char_t*)utf32_le_be[!!*(const char*)&le] + 1/*BOM*/;
-	NULLSZ(utf16_to_utf32_size)
-	NULLSZ(utf16u_to_utf32_size)
-	NULLSZ(utf16x_to_utf32_size)
-	NULLSZ(utf16ux_to_utf32_size)
+	TEST(!utf16_to_utf32_size(NULL, 0));
+	TEST(!utf16u_to_utf32_size(NULL, 0));
+	TEST(!utf16x_to_utf32_size(NULL, 0));
+	TEST(!utf16ux_to_utf32_size(NULL, 0));
 	TEST(utf16_is_bom_be(utf16_le_be[1][0], utf16_le_be[1][1]));
 	TEST(utf16_is_bom_le(utf16_le_be[0][0], utf16_le_be[0][1]));
 	TEST(utf32_is_bom_be(utf32_le_be[1][0], utf32_le_be[1][1], utf32_le_be[1][2], utf32_le_be[1][3]));
@@ -395,10 +396,10 @@ static int test_utf32_to_utf16(
 	const utf32_char_unaligned_t *const src32ux_e = src32ux + utf32_sz - 1/*BOM*/;
 	const utf16_char_t *const src16 = (const utf16_char_t*)utf16_le_be[!*(const char*)&le] + 1/*BOM*/;
 	const utf16_char_t *const src16x = (const utf16_char_t*)utf16_le_be[!!*(const char*)&le] + 1/*BOM*/;
-	NULLSZ(utf32_to_utf16_size)
-	NULLSZ(utf32u_to_utf16_size)
-	NULLSZ(utf32x_to_utf16_size)
-	NULLSZ(utf32ux_to_utf16_size)
+	TEST(!utf32_to_utf16_size(NULL, 0));
+	TEST(!utf32u_to_utf16_size(NULL, 0));
+	TEST(!utf32x_to_utf16_size(NULL, 0));
+	TEST(!utf32ux_to_utf16_size(NULL, 0));
 	TEST(utf16_is_bom_be(utf16_le_be[1][0], utf16_le_be[1][1]));
 	TEST(utf16_is_bom_le(utf16_le_be[0][0], utf16_le_be[0][1]));
 	TEST(utf32_is_bom_be(utf32_le_be[1][0], utf32_le_be[1][1], utf32_le_be[1][2], utf32_le_be[1][3]));
@@ -1498,7 +1499,7 @@ static int test_utf8_wc16_or_wc32_or_c16_or_c32_r_or_not_r_tomb(
 			if ((!check_wc && !check_wcr) ||
 				sizeof(wchar_t) == (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t)))
 			{
-				TEST(!memcmp(s, s1, sz));
+				LIBC_TEST(!memcmp(s, s1, sz));
 			}
 #endif
 			{
@@ -1758,99 +1759,297 @@ static int test_utf8_mbtowc16_obsolete_or_32(
 	return 0;
 }
 
-static int test_utf8_mbstoc16_or_32s(
-	const unsigned char *const utf16_or_32_le_be[2],
-	const unsigned utf16_or_32_sz,
+static int test_utf8_mbstocs_or_cstombs(
 	const utf8_char_t *const utf8,
-	const unsigned utf16_or_32_buf_sz/*>=utf16_or_32_sz*/,
-	void *const utf16_or_32_buf/*utf16_or_32_buf_sz*/,
-	const int check_16)
+	const unsigned char *const utf16_le_be[2],
+	const unsigned char *const utf32_le_be[2],
+	const unsigned dst_sz,
+	const unsigned buf_sz/*>=dst_sz*/,
+	void *const buf/*[buf_sz]*/,
+	const int from/*8,16,32*/,
+	const int to/*8,16,32*/)
 {
 	const unsigned le = 1;
-	const unsigned char *src = utf16_or_32_le_be[!*(const char*)&le] + (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))/*BOM*/;
-	{
-		const size_t sz = check_16 ?
-			utf8_mbstoc16s(NULL, utf8, 0) :
-			utf8_mbstoc32s(NULL, utf8, 0);
-		TEST(sz == utf16_or_32_sz - 1/*BOM*/ - 1/*nul*/);
+	const unsigned char *const s =
+		(from == 8) ? (const unsigned char*)utf8 :
+		(from == 16) ? (utf16_le_be[!*(const char*)&le] + sizeof(utf16_char_t)/*BOM*/) :
+		(utf32_le_be[!*(const char*)&le] + sizeof(utf32_char_t)/*BOM*/);
+	const unsigned char *const d =
+		(to == 8) ? (const unsigned char*)utf8 :
+		(to == 16) ? (utf16_le_be[!*(const char*)&le] + sizeof(utf16_char_t)/*BOM*/) :
+		(utf32_le_be[!*(const char*)&le] + sizeof(utf32_char_t)/*BOM*/);
+	const unsigned dst_sz_bom = dst_sz - (to != 8)/*BOM*/;
+	size_t i = 0;
+	for (; i < 2; i++) {
+		const size_t sz =
+			from == 8 ?
+				to == 16 ?
+					utf8_mbstoc16s(NULL, (const utf8_char_t*)s, i) :
+					utf8_mbstoc32s(NULL, (const utf8_char_t*)s, i) :
+			from == 16 ?
+				to == 8 ?
+					utf8_c16stombs(NULL, (const utf16_char_t*)s, i) :
+					utf8_c16stoc32s(NULL, (const utf16_char_t*)s, i) :
+			to == 8 ?
+				utf8_c32stombs(NULL, (const utf32_char_t*)s, i) :
+				utf8_c32stoc16s(NULL, (const utf32_char_t*)s, i);
+		TEST(sz == dst_sz_bom - 1/*nul*/);
 #ifdef CHECK_UTF8_LOCALE
-		if (sizeof(wchar_t) == (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) {
-			const size_t sz1 = mbstowcs(NULL, (const char*)utf8, 0);
+		if ((from == 8 && sizeof(wchar_t) == ((to == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) ||
+			(to == 8 && sizeof(wchar_t) == ((from == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))))
+		{
+			const size_t sz1 = (from == 8) ?
+				mbstowcs(NULL, (const char*)s, i) :
+				wcstombs(NULL, (const wchar_t*)s, i);
 			LIBC_TEST(sz == sz1);
-			LIBC_TEST(!errno);
 		}
 #endif
 	}
-	{
-		const size_t sz = check_16 ?
-			utf8_mbstoc16s(NULL, utf8, 1) :
-			utf8_mbstoc32s(NULL, utf8, 1);
-		TEST(sz == utf16_or_32_sz - 1/*BOM*/ - 1/*nul*/);
-#ifdef CHECK_UTF8_LOCALE
-		if (sizeof(wchar_t) == (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) {
-			const size_t sz1 = mbstowcs(NULL, (const char*)utf8, 1);
-			LIBC_TEST(sz == sz1);
-			LIBC_TEST(!errno);
-		}
-#endif
-	}
-	{
-		unsigned i = 0;
-		for (; i < utf16_or_32_buf_sz; i++) {
-			memset(utf16_or_32_buf, 0xfd, utf16_or_32_buf_sz*(check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t)));
-			{
-				const size_t sz = check_16 ?
-					utf8_mbstoc16s((utf16_char_t*)utf16_or_32_buf, utf8, i) :
-					utf8_mbstoc32s((utf32_char_t*)utf16_or_32_buf, utf8, i);
-				TEST((size_t)-1 != sz);
-				TEST(!errno);
-				if (i <= utf16_or_32_sz - 1/*BOM*/ - 1/*nul*/) {
-					TEST(sz == i || (check_16 && sz + 1 == i));
-					if (check_16)
-						TEST(((utf16_char_t*)utf16_or_32_buf)[sz]);
-					else
-						TEST(((utf32_char_t*)utf16_or_32_buf)[sz]);
-				}
-				else {
-					TEST(sz == utf16_or_32_sz - 1/*BOM*/ - 1/*nul*/);
-					if (check_16)
-						TEST(!((utf16_char_t*)utf16_or_32_buf)[sz]);
-					else
-						TEST(!((utf32_char_t*)utf16_or_32_buf)[sz]);
-				}
-				TEST(!memcmp(src, utf16_or_32_buf, (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))*sz));
-#ifdef CHECK_UTF8_LOCALE
-				if (sizeof(wchar_t) == (check_16 ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) {
-					memset(utf16_or_32_buf, 0xfd, utf16_or_32_buf_sz*sizeof(wchar_t));
-					{
-						const size_t sz1 = mbstowcs((wchar_t*)utf16_or_32_buf, (const char*)utf8, i);
-						LIBC_TEST(sz == sz1);
-						LIBC_TEST(!errno);
-						if (i <= utf16_or_32_sz - 1/*BOM*/ - 1/*nul*/)
-							LIBC_TEST(((wchar_t*)utf16_or_32_buf)[sz]);
-						else
-							LIBC_TEST(!((wchar_t*)utf16_or_32_buf)[sz]);
-						LIBC_TEST(!memcmp(src, utf16_or_32_buf, sizeof(wchar_t)*sz));
-					}
-				}
-#endif
+	for (i = 0; i < buf_sz; i++) {
+		void *const b = memset(buf, 0xfd, buf_sz*(to >> 3));
+		const size_t sz =
+			from == 8 ?
+				to == 16 ?
+					utf8_mbstoc16s((utf16_char_t*)b, (const utf8_char_t*)s, i) :
+					utf8_mbstoc32s((utf32_char_t*)b, (const utf8_char_t*)s, i) :
+			from == 16 ?
+				to == 8 ?
+					utf8_c16stombs((utf8_char_t*)b, (const utf16_char_t*)s, i) :
+					utf8_c16stoc32s((utf32_char_t*)b, (const utf16_char_t*)s, i) :
+			to == 8 ?
+				utf8_c32stombs((utf8_char_t*)b, (const utf32_char_t*)s, i) :
+				utf8_c32stoc16s((utf16_char_t*)b, (const utf32_char_t*)s, i);
+		TEST((size_t)-1 != sz);
+		TEST(sz <= i);
+		if (i <= dst_sz_bom - 1/*nul*/) {
+			if (to == 32) {
+				TEST(sz == i);
+				TEST(((const utf32_char_t*)b)[sz]);
+			}
+			else if (to == 16) {
+				TEST(sz == i || sz + 1 == i);
+				TEST(((const utf16_char_t*)b)[sz]);
+			}
+			else {
+				TEST(sz == i || sz + 1 == i || sz + 2 == i || sz + 3 == i);
+				TEST(((const utf8_char_t*)b)[sz]);
 			}
 		}
+		else {
+			TEST(sz == dst_sz_bom - 1/*nul*/);
+			if (to == 32)
+				TEST(!((const utf32_char_t*)b)[sz]);
+			else if (to == 16)
+				TEST(!((const utf16_char_t*)b)[sz]);
+			else
+				TEST(!((const utf8_char_t*)b)[sz]);
+		}
+		TEST(!memcmp(d, b, sz*(to >> 3)));
+#ifdef CHECK_UTF8_LOCALE
+		if ((from == 8 && sizeof(wchar_t) == ((to == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) ||
+			(to == 8 && sizeof(wchar_t) == ((from == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))))
+		{
+			memset(b, 0xfd, buf_sz*(to >> 3));
+			{
+				const size_t sz1 = (from == 8) ?
+					mbstowcs((wchar_t*)b, (const char*)s, i) :
+					wcstombs((char*)b, (const wchar_t*)s, i);
+				LIBC_TEST(sz == sz1);
+				if (i <= dst_sz_bom - 1/*nul*/) {
+					if (to == 8)
+						LIBC_TEST(((const char*)b)[sz]);
+					else
+						LIBC_TEST(((const wchar_t*)b)[sz]);
+				}
+				else if (to == 8)
+					LIBC_TEST(!((const char*)b)[sz]);
+				else
+					LIBC_TEST(!((const wchar_t*)b)[sz]);
+				LIBC_TEST(!memcmp(d, b, sz*(to >> 3)));
+			}
+		}
+#endif
 	}
 	return 0;
 }
 
-#if 0
-static int test_utf8_c16_or_32stombs(
-	const unsigned char *const utf16_or_32_le_be[2],
-	const unsigned utf8_sz,
+static int test_utf8_mbrstocs_or_csrtombs(
 	const utf8_char_t *const utf8,
-	const unsigned utf8_buf_sz/*>=utf8_sz*/,
-	void *const utf8_buf/*utf8_buf_sz*/,
-	const int check_16)
+	const unsigned char *const utf16_le_be[2],
+	const unsigned char *const utf32_le_be[2],
+	const unsigned dst_sz,
+	const unsigned buf_sz/*>=dst_sz*/,
+	void *const buf/*[buf_sz]*/,
+	const int from/*8,16,32*/,
+	const int to/*8,16,32*/)
 {
-}
+	const unsigned le = 1;
+	const unsigned char *const s =
+		(from == 8) ? (const unsigned char*)utf8 :
+		(from == 16) ? (utf16_le_be[!*(const char*)&le] + sizeof(utf16_char_t)/*BOM*/) :
+		(utf32_le_be[!*(const char*)&le] + sizeof(utf32_char_t)/*BOM*/);
+	const unsigned char *const d =
+		(to == 8) ? (const unsigned char*)utf8 :
+		(to == 16) ? (utf16_le_be[!*(const char*)&le] + sizeof(utf16_char_t)/*BOM*/) :
+		(utf32_le_be[!*(const char*)&le] + sizeof(utf32_char_t)/*BOM*/);
+	const unsigned dst_sz_bom = dst_sz - (to != 8)/*BOM*/;
+	{
+		size_t i = 0;
+		for (; i < 2; i++) {
+			utf8_state_t state = 0;
+			const unsigned char *w = s;
+			const size_t sz =
+				from == 8 ?
+					to == 16 ?
+						utf8_mbsrtoc16s(NULL, (const utf8_char_t**)&w, i, &state) :
+						utf8_mbsrtoc32s(NULL, (const utf8_char_t**)&w, i, &state) :
+				from == 16 ?
+					to == 8 ?
+						utf8_c16srtombs(NULL, (const utf16_char_t**)&w, i, &state) :
+						utf8_c16srtoc32s(NULL, (const utf16_char_t**)&w, i, &state) :
+				to == 8 ?
+					utf8_c32srtombs(NULL, (const utf32_char_t**)&w, i, &state) :
+					utf8_c32srtoc16s(NULL, (const utf32_char_t**)&w, i, &state);
+			TEST(sz == dst_sz_bom - 1/*nul*/);
+			TEST(w == s);
+			TEST(!state);
+#ifdef CHECK_UTF8_LOCALE
+			if ((from == 8 && sizeof(wchar_t) == ((to == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) ||
+				(to == 8 && sizeof(wchar_t) == ((from == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))))
+			{
+				mbstate_t state1, state2;
+				memset(&state1, 0, sizeof(state1));
+				memset(&state2, 0, sizeof(state2));
+				{
+					const unsigned char *w1 = s;
+					const size_t sz1 = (from == 8) ?
+						mbsrtowcs(NULL, (const char**)&w1, i, &state1) :
+						wcsrtombs(NULL, (const wchar_t**)&w1, i, &state1);
+					LIBC_TEST(sz == sz1);
+					LIBC_TEST(w1 == s);
+					LIBC_TEST(!memcmp(&state1, &state2, sizeof(state1)));
+				}
+			}
 #endif
+		}
+	}
+	{
+		const size_t l = (size_t)buf_sz*(to >> 3);
+		unsigned by = 0;
+		for (; by < 15; by++) {
+			unsigned i = 0;
+			unsigned y = by;
+			int z = 0;
+			const unsigned char *w = s;
+			utf8_state_t state = 0;
+#ifdef CHECK_UTF8_LOCALE
+			const unsigned char *w1 = s;
+			mbstate_t state1, state2;
+			memset(&state1, 0, sizeof(state1));
+			memset(&state2, 0, sizeof(state2));
+#endif
+			while (i < buf_sz) {
+				const unsigned n = (y <= buf_sz - i) ? y : (buf_sz - i);
+				size_t q = (size_t)(i + n)*(to >> 3);
+				for (; q < l; q++)
+					((unsigned char*)buf)[q] = (unsigned char)((q & 0xFF) | 1);
+				{
+					void *const b = memset((char*)buf + (size_t)i*(to >> 3), 0xfd, (size_t)n*(to >> 3));
+					const size_t sz =
+						from == 8 ?
+							to == 16 ?
+								utf8_mbsrtoc16s((utf16_char_t*)b, (const utf8_char_t**)&w, n, &state) :
+								utf8_mbsrtoc32s((utf32_char_t*)b, (const utf8_char_t**)&w, n, &state) :
+						from == 16 ?
+							to == 8 ?
+								utf8_c16srtombs((utf8_char_t*)b, (const utf16_char_t**)&w, n, &state) :
+								utf8_c16srtoc32s((utf32_char_t*)b, (const utf16_char_t**)&w, n, &state) :
+						to == 8 ?
+							utf8_c32srtombs((utf8_char_t*)b, (const utf32_char_t**)&w, n, &state) :
+							utf8_c32srtoc16s((utf16_char_t*)b, (const utf32_char_t**)&w, n, &state);
+					if (i + n >= dst_sz_bom) {
+						TEST(sz == dst_sz_bom - i - 1/*nul*/);
+						TEST(!w);
+						if (to == 8)
+							TEST(!((const utf8_char_t*)b)[sz]);
+						else if (to == 16)
+							TEST(!((const utf16_char_t*)b)[sz]);
+						else
+							TEST(!((const utf32_char_t*)b)[sz]);
+					}
+					else {
+						if (to == 8) {
+							TEST(sz == n || sz == n - 1 || sz == n - 2 || sz == n - 3);
+							TEST(((const utf8_char_t*)b)[sz]);
+						}
+						else if (to == 16) {
+							TEST(sz == n || sz == n - 1);
+							TEST(((const utf16_char_t*)b)[sz]);
+						}
+						else {
+							TEST(sz == n);
+							TEST(((const utf32_char_t*)b)[sz]);
+						}
+						TEST(w);
+					}
+					TEST(!memcmp(b, d + (size_t)i*(to >> 3), sz*(to >> 3)));
+					for (q = (size_t)(i + n)*(to >> 3); q < l; q++)
+						TEST(((unsigned char*)buf)[q] == (unsigned char)((q & 0xFF) | 1));
+					TEST(!sz || n);
+#ifdef CHECK_UTF8_LOCALE
+					if ((from == 8 && sizeof(wchar_t) == ((to == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))) ||
+						(to == 8 && sizeof(wchar_t) == ((from == 16) ? sizeof(utf16_char_t) : sizeof(utf32_char_t))))
+					{
+						void *const b1 = memset((char*)buf + (size_t)i*(to >> 3), 0xfd, (size_t)n*(to >> 3));
+						const size_t sz1 = (from == 8) ?
+							mbsrtowcs((wchar_t*)b1, (const char**)&w1, n, &state1) :
+							wcsrtombs((char*)b1, (const wchar_t**)&w1, n, &state1);
+						LIBC_TEST(sz1 == sz);
+						LIBC_TEST(w == w1);
+						if (!w) {
+							if (to == 8)
+								LIBC_TEST(!((const char*)b1)[sz]);
+							else
+								LIBC_TEST(!((const wchar_t*)b1)[sz]);
+						}
+						else {
+							if (to == 8)
+								LIBC_TEST(((const char*)b1)[sz]);
+							else
+								LIBC_TEST(((const wchar_t*)b1)[sz]);
+						}
+						LIBC_TEST(!memcmp(b1, d + (size_t)i*(to >> 3), sz*(to >> 3)));
+						for (q = (size_t)(i + n)*(to >> 3); q < l; q++)
+							LIBC_TEST(((unsigned char*)buf)[q] == (unsigned char)((q & 0xFF) | 1));
+					}
+#endif
+					if (!n)
+						y = 1;
+					else if (w) {
+						if (!sz) {
+							TEST(n < buf_sz - i);
+							if (!z)
+								z = 1;
+							else {
+								z = 0;
+								y++;
+							}
+						}
+						else
+							i += (unsigned)sz;
+					}
+					else
+						break;
+				}
+			}
+			TEST(!state);
+#ifdef CHECK_UTF8_LOCALE
+			LIBC_TEST(!memcmp(&state1, &state2, sizeof(state1)));
+#endif
+		}
+	}
+	return 0;
+}
 
 #include "test_data.inl"
 
@@ -2074,20 +2273,102 @@ int main(int argc, char *argv[])
 				data[z].utf32_le_be,
 				data[z].utf8,
 				0));
-			TEST(!test_utf8_mbstoc16_or_32s(
-				data[z].utf16_le_be,
-				data[z].utf16_sz,
+			TEST(!test_utf8_mbstocs_or_cstombs(
 				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf16_sz,
 				data[z].utf16_sz + 10,
 				data[z].utf16_buf,
-				1));
-			TEST(!test_utf8_mbstoc16_or_32s(
+				8, 16));
+			TEST(!test_utf8_mbstocs_or_cstombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf8_sz,
+				data[z].utf8_sz + 10,
+				data[z].utf8_buf,
+				16, 8));
+			TEST(!test_utf8_mbstocs_or_cstombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
 				data[z].utf32_le_be,
 				data[z].utf32_sz,
-				data[z].utf8,
 				data[z].utf32_sz + 10,
 				data[z].utf32_buf,
-				0));
+				8, 32));
+			TEST(!test_utf8_mbstocs_or_cstombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf8_sz,
+				data[z].utf8_sz + 10,
+				data[z].utf8_buf,
+				32, 8));
+			TEST(!test_utf8_mbstocs_or_cstombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf32_sz,
+				data[z].utf32_sz + 10,
+				data[z].utf32_buf,
+				16, 32));
+			TEST(!test_utf8_mbstocs_or_cstombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf16_sz,
+				data[z].utf16_sz + 10,
+				data[z].utf16_buf,
+				32, 16));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf16_sz,
+				data[z].utf16_sz + 10,
+				data[z].utf16_buf,
+				8, 16));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf8_sz,
+				data[z].utf8_sz + 10,
+				data[z].utf8_buf,
+				16, 8));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf32_sz,
+				data[z].utf32_sz + 10,
+				data[z].utf32_buf,
+				8, 32));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf8_sz,
+				data[z].utf8_sz + 10,
+				data[z].utf8_buf,
+				32, 8));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf32_sz,
+				data[z].utf32_sz + 10,
+				data[z].utf32_buf,
+				16, 32));
+			TEST(!test_utf8_mbrstocs_or_csrtombs(
+				data[z].utf8,
+				data[z].utf16_le_be,
+				data[z].utf32_le_be,
+				data[z].utf16_sz,
+				data[z].utf16_sz + 10,
+				data[z].utf16_buf,
+				32, 16));
 		}
 	}
 	printf("All tests ok\n");
