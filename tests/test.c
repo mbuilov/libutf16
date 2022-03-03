@@ -2057,13 +2057,14 @@ int main(int argc, char *argv[])
 {
 #ifdef CHECK_UTF8_LOCALE
 #ifdef _WIN32
-	const char *utf8_locale = ".utf8";
+	const char *utf8_locale = (argc > 1) ? argv[1] : ".utf8";
 #else
-	const char *utf8_locale = "C.UTF-8";
+	const char *utf8_locale = (argc > 1) ? argv[1] : "C.UTF-8";
 #endif
 	const char *const locale = setlocale(LC_ALL, utf8_locale);
 	if (!locale) {
-		fprintf(stderr, "failed to set locale: %s\n", utf8_locale);
+		fprintf(stderr, "failed to set locale: \"%s\", "
+			"try to specify UTF-8 locale name explicitly as the command line argument\n", utf8_locale);
 		return -2;
 	}
 #endif /* CHECK_UTF8_LOCALE */
