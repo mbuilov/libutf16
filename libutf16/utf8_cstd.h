@@ -107,9 +107,9 @@ size_t utf8_c16rtomb(
    1   one byte is needed to encode nul character */
 /* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_c32rtomb(
-	utf8_char_t s[UTF8_MAX_LEN]/*NULL?*/,
+	utf8_char_t *const LIBUTF16_RESTRICT s/*[UTF8_MAX_LEN],NULL?*/,
 	const utf32_char_t wi,
-	utf8_state_t *ps/*NULL?,not used*/);
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* mbtowc (3) for 16 bit wchar_t */
 /* returns:
@@ -216,9 +216,9 @@ int utf8_wc32tomb(
 /* note: this function do not handles utf16 surrogate pairs! Use utf8_c16rtomb instead! */
 /* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_wc16rtomb_obsolete(
-	utf8_char_t s[3]/*NULL?*/,
+	utf8_char_t *const LIBUTF16_RESTRICT s/*[3],*NULL?*/,
 	const utf16_char_t wc,
-	utf8_state_t *ps/*NULL?,not used*/);
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* wcrtomb (3) for 32 bit wchar_t */
 /* returns:
@@ -228,7 +228,10 @@ size_t utf8_wc16rtomb_obsolete(
  s == NULL:
    1   one byte is needed to encode nul character */
 /* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
-#define utf8_wc32rtomb utf8_c32rtomb
+size_t utf8_wc32rtomb(
+	utf8_char_t *const LIBUTF16_RESTRICT s/*[UTF8_MAX_LEN],NULL?*/,
+	const utf32_char_t wi,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* ================ mbstowcs()/wcstombs() ============== */
 
@@ -239,7 +242,7 @@ size_t utf8_wc16rtomb_obsolete(
    number of utf16 characters stored, not counting terminating nul, which is not stored if buffer is too small.
    Note: return value < n do not guarantees that output was not truncated and terminating nul was stored, due
    to a surrogate pair - to be sure that terminating nul was written, caller should fill "check" zone at tail
-   of output buffer of at least 1 non-zero utf16 character bytes - if buffer is large enough, nul character
+   of output buffer of at least 1 non-zero utf16 character bytes - if the buffer is large enough, nul character
    will be written over after the last filled character, possibly to "check" zone.
  dst == NULL:
    size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
@@ -248,11 +251,27 @@ size_t utf8_mbstoc16s(
 	const utf8_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
 	size_t n/*>=0*/);
 
+/* wcstombs (3) */
+/* returns:
+  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long)
+ dst != NULL:
+   number of utf8 bytes stored, not counting terminating nul, which is not stored if buffer is too small.
+   Note: return value < n do not guarantees that output was not truncated and terminating nul was stored, due
+   to variable-length utf8 characters - to be sure that terminating nul was written, caller should fill "check"
+   zone at tail of output buffer of at least (UTF8_MAX_LEN - 1) non-zero utf8 bytes - if the buffer is large
+   enough, nul character will be written over after the last filled character, possibly to "check" zone.
+ dst == NULL:
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
+size_t utf8_c16stombs(
+	utf8_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf16_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
+
 /* mbstowcs (3) */
 /* returns:
   -1   on error (errno == EILSEQ)
  dst != NULL:
-   number of utf32 characters stored, not counting terminating nul, which is not written if buffer is too small.
+   number of utf32 characters stored, not counting terminating nul, which is not stored if buffer is too small.
  dst == NULL:
    size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
 size_t utf8_mbstoc32s(
@@ -262,253 +281,154 @@ size_t utf8_mbstoc32s(
 
 /* wcstombs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long)
- dst != NULL:
-   number of utf8 bytes stored, not counting terminating nul, which is not written if buffer is too small.
-   Tip: if caller wants to check if terminating nul was written, caller should fill "check" zone at tail of
-   output buffer of at least (UTF8_MAX_LEN - 1) non-zero utf8 bytes - if buffer is large enough, nul character
-   will be written after the last filled character, possibly to "check" zone.
- dst == NULL:
-   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
-size_t utf8_c16stombs(
-	utf8_char_t dst[/*n*/],
-	const utf16_char_t *const src,
-	size_t n);
-
-/* wcstombs (3) */
-/* returns:
   -1   on error (errno == EILSEQ)
  dst != NULL:
-   number of utf8 bytes stored, not counting terminating nul, which is not written if buffer is too small.
-   Tip: if caller wants to check if terminating nul was written, caller should fill "check" zone at tail of
-   output buffer of at least (UTF8_MAX_LEN - 1) non-zero utf8 bytes - if buffer is large enough, nul character
-   will be written after the last filled character, possibly to "check" zone.
+   number of utf8 bytes stored, not counting terminating nul, which is not stored if buffer is too small.
+   Note: return value < n do not guarantees that output was not truncated and terminating nul was stored, due
+   to variable-length utf8 characters - to be sure that terminating nul was written, caller should fill "check"
+   zone at tail of output buffer of at least (UTF8_MAX_LEN - 1) non-zero utf8 bytes - if the buffer is large
+   enough, nul character will be written over after the last filled character, possibly to "check" zone.
  dst == NULL:
    size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
 size_t utf8_c32stombs(
-	utf8_char_t dst[/*n*/],
-	const utf32_char_t *const src,
-	size_t n);
+	utf8_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf32_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
 
 /* mbstowcs (3) */
 /* returns:
   -1   on error (errno == EILSEQ)
  dst != NULL:
-   number of utf32 characters stored, not counting terminating nul, which is not written if buffer is too small.
+   number of utf32 characters stored, not counting terminating nul, which is not stored if buffer is too small.
  dst == NULL:
    size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
 size_t utf8_c16stoc32s(
-	utf32_char_t dst[/*n*/],
-	const utf16_char_t *const src,
-	size_t n);
+	utf32_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf16_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
 
 /* wcstombs (3) */
 /* returns:
   -1   on error (errno == EILSEQ)
  dst != NULL:
-   number of utf16 characters stored, not counting terminating nul, which is not written if buffer is too small.
-   Tip: if caller wants to check if terminating nul was written, caller should fill "check" zone at tail of
-   output buffer of at least 1 non-zero utf16 character bytes - if buffer is large enough, nul character
-   will be written after the last filled character, possibly to "check" zone.
+   number of utf16 characters stored, not counting terminating nul, which is not stored if buffer is too small.
+   Note: return value < n do not guarantees that output was not truncated and terminating nul was stored, due
+   to a surrogate pair - to be sure that terminating nul was written, caller should fill "check" zone at tail
+   of output buffer of at least 1 non-zero utf16 character bytes - if the buffer is large enough, nul character
+   will be written over after the last filled character, possibly to "check" zone.
  dst == NULL:
    size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
 size_t utf8_c32stoc16s(
-	utf16_char_t dst[/*n*/],
-	const utf32_char_t *const src,
-	size_t n);
+	utf16_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf32_char_t *const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/);
 
 /* ================ mbsrtowcs()/wcsrtombs() ============== */
 
 /* mbsrtowcs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+  -1   on error (errno == EILSEQ), *src will point to the first found invalid utf8 multibyte sequence,
  dst != NULL:
-   number of utf16 characters stored, not counting terminating nul:
-   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
-   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+   number of utf16 characters of unicode code points stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the utf8 multibyte sequence to retry to process.
  dst == NULL:
-   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_mbsrtoc16s(
-	utf16_char_t dst[/*n*/],
-	const utf8_char_t **const src,
-	size_t n,
-	utf8_state_t *ps);
+	utf16_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf8_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* wcsrtombs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long),
-   *src will point beyond the last successfully converted utf16 character (nul if E2BIG),
+  -1   on error (errno == EILSEQ on invalid utf16 character or errno == E2BIG if utf16 string is too long),
+       *src will point beyond the last successfully processed utf16 character (beyond nul if E2BIG),
  dst != NULL:
-   number of utf8 bytes stored, not counting terminating nul:
-   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
-   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+   number of utf8 bytes of unicode code points stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the utf16 character to retry to process.
  dst == NULL:
-   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
+/* note: E2BIG error is an extension: 2 bytes per utf16 char may require 3 bytes per utf8 multibyte char
+  and so may exceed the limit of size_t */
 size_t utf8_c16srtombs(
-	utf8_char_t dst[/*n*/],
-	const utf16_char_t **const src,
-	size_t n,
-	utf8_state_t *ps);
+	utf8_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf16_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* mbsrtowcs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
+  -1   on error (errno == EILSEQ), *src will point to the first found invalid utf8 multibyte sequence,
  dst != NULL:
-   number of utf32 characters stored, not counting terminating nul:
+   number of utf32 characters of unicode code points stored, not counting terminating nul:
    a) if terminating nul was stored, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
+   b) else (output buffer is too small), *src will point to the utf8 multibyte sequence to retry to process.
  dst == NULL:
-   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_mbsrtoc32s(
-	utf32_char_t dst[/*n*/],
-	const utf8_char_t **const src,
-	size_t n);
+	utf32_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf8_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* wcsrtombs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+  -1   on error (errno == EILSEQ), *src will point to the first found invalid utf32 character,
  dst != NULL:
-   number of utf8 bytes stored, not counting terminating nul:
-   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
-   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+   number of utf8 bytes of unicode code points stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the utf32 character to retry to process.
  dst == NULL:
-   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul */
+   size of buffer (in bytes) required to store all utf8 bytes, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_c32srtombs(
-	utf8_char_t dst[/*n*/],
-	const utf32_char_t **const src,
-	size_t n,
-	utf8_state_t *ps);
+	utf8_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf32_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* mbsrtowcs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf16 character,
+  -1   on error (errno == EILSEQ), *src will point to the first found invalid utf16 character,
  dst != NULL:
-   number of utf32 characters stored, not counting terminating nul:
+   number of utf32 characters of unicode code points stored, not counting terminating nul:
    a) if terminating nul was stored, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
+   b) else (output buffer is too small), *src will point to the utf16 character to retry to process.
  dst == NULL:
-   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul */
+   size of buffer (in utf32-chars) required to store all utf32 characters, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_c16srtoc32s(
-	utf32_char_t dst[/*n*/],
-	const utf16_char_t **const src,
-	size_t n);
+	utf32_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf16_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 /* wcsrtombs (3) */
 /* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
+  -1   on error (errno == EILSEQ), *src will point to the first found invalid utf32 character,
  dst != NULL:
-   number of utf16 characters stored, not counting terminating nul:
-   a) if terminating nul was stored, *src will be set to NULL, *ps - to initial state,
-   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
+   number of utf16 characters of unicode code points stored, not counting terminating nul:
+   a) if terminating nul was stored, *src will be set to NULL,
+   b) else (output buffer is too small), *src will point to the utf32 character to retry to process.
  dst == NULL:
-   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul */
+   size of buffer (in utf16-chars) required to store all utf16 characters, not counting terminating nul,
+   *src pointer not changed */
+/* note: this function do not uses state, *ps must be zero (if ps is not NULL) */
 size_t utf8_c32srtoc16s(
-	utf16_char_t dst[/*n*/],
-	const utf32_char_t **const src,
-	size_t n,
-	utf8_state_t *ps);
-
-/* ================ non-standard extension ============== */
-
-/* like utf8_mbsrtoc16s(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
- dst != NULL:
-   number of utf16 characters stored (including any nul characters):
-   a) if the last source utf8 multibyte sequence was processed, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
- dst == NULL:
-   size of buffer (in utf16-chars) required to store all utf16 characters (including any nul characters) */
-/* note: *ps == 0 if it's in initial state */
-size_t utf8_mbsrtoc16s_nz(
-	utf16_char_t dst[/*n*/],
-	const utf8_char_t **const src,
-	size_t nsrc,
-	size_t n,
-	utf8_state_t *ps/*!=NULL*/);
-
-/* like utf8_c16srtombs(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ or errno == E2BIG if utf16 string is too long),
-   *src will point beyond the last successfully converted utf16 character (last character if E2BIG),
- dst != NULL:
-   number of utf8 bytes stored (including any nul characters):
-   a) if the last source utf16 character was converted, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
- dst == NULL:
-   size of buffer (in bytes) required to store all utf8 bytes (including any nul characters) */
-/* note: *ps == 0 if it's in initial state */
-size_t utf8_c16srtombs_nz(
-	utf8_char_t dst[/*n*/],
-	const utf16_char_t **const src,
-	size_t nsrc,
-	size_t n,
-	utf8_state_t *ps/*!=NULL*/);
-
-/* like utf8_mbsrtoc32s(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf8 multibyte sequence,
- dst != NULL:
-   number of utf32 characters stored (including any nul characters):
-   a) if the last source utf8 multibyte sequence was processed, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf8 multibyte sequence to process.
- dst == NULL:
-   size of buffer (in utf32-chars) required to store all utf32 characters (including any nul characters) */
-size_t utf8_mbsrtoc32s_nz(
-	utf32_char_t dst[/*n*/],
-	const utf8_char_t **const src,
-	size_t nsrc,
-	size_t n);
-
-/* like utf8_c32srtombs(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
- dst != NULL:
-   number of utf8 bytes stored (including any nul characters):
-   a) if the last source utf32 character was converted, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
- dst == NULL:
-   size of buffer (in bytes) required to store all utf8 bytes (including any nul characters) */
-/* note: *ps == 0 if it's in initial state */
-size_t utf8_c32srtombs_nz(
-	utf8_char_t dst[/*n*/],
-	const utf32_char_t **const src,
-	size_t nsrc,
-	size_t n,
-	utf8_state_t *ps/*!=NULL*/);
-
-/* like utf8_c16srtoc32s(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf16 character,
- dst != NULL:
-   number of utf32 characters stored (including any nul characters):
-   a) if the last source utf16 character was converted, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf16 character to convert.
- dst == NULL:
-   size of buffer (in utf32-chars) required to store all utf32 characters (including any nul characters) */
-/* note: *ps == 0 if it's in initial state */
-size_t utf8_c16srtoc32s_nz(
-	utf32_char_t dst[/*n*/],
-	const utf16_char_t **const src,
-	size_t nsrc,
-	size_t n);
-
-/* like utf8_c32srtoc16s(), but do not treats nul characters specially */
-/* returns:
-  -1   on error (errno == EILSEQ), *src will point to invalid utf32 character,
- dst != NULL:
-   number of utf16 characters stored (including any nul characters):
-   a) if the last source utf32 character was converted, *src will be set to NULL,
-   b) else (output buffer is too small), *src will point to the next utf32 character to convert.
- dst == NULL:
-   size of buffer (in utf16-chars) required to store all utf16 characters (including any nul characters) */
-/* note: *ps == 0 if it's in initial state */
-size_t utf8_c32srtoc16s_nz(
-	utf16_char_t dst[/*n*/],
-	const utf32_char_t **const src,
-	size_t nsrc,
-	size_t n,
-	utf8_state_t *ps);
+	utf16_char_t *const LIBUTF16_RESTRICT dst/*[n],NULL?*/,
+	const utf32_char_t **const LIBUTF16_RESTRICT src/*!=NULL,nul-terminated*/,
+	size_t n/*>=0*/,
+	utf8_state_t *LIBUTF16_RESTRICT ps/*NULL?,not used*/);
 
 #ifdef __cplusplus
 }
