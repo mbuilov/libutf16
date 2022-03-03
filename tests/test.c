@@ -1506,8 +1506,8 @@ static int test_utf8_wc16_or_wc32_or_c16_or_c32_r_or_not_r_tomb(
 				const size_t sz_incomplete =
 					check_wc ?
 						check_16 ?
-							utf8_wc16tomb_obsolete(s, 0) :
-							utf8_wc32tomb(s, 0) :
+							(size_t)utf8_wc16tomb_obsolete(s, 0) :
+							(size_t)utf8_wc32tomb(s, 0) :
 					check_wcr ?
 						check_16 ?
 							utf8_wc16rtomb_obsolete(s, 0, &state) :
@@ -1554,7 +1554,7 @@ static int test_utf8_wc16_or_wc32_or_c16_or_c32_r_or_not_r_tomb(
 				{
 					const size_t sz_incomplete1 =
 						check_wc ?
-							wctomb(NULL, 1) :
+							(size_t)wctomb(NULL, 1) :
 						check_wcr ?
 							wcrtomb(NULL, 1, &state1) :
 						check_16 ?
