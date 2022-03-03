@@ -1,6 +1,6 @@
 all: libutf16.a
 
-CFLAGS = -g -O2 -I. -Wall -pedantic -Wextra
+CFLAGS = -g -O2 -I. -Wall -pedantic -Wextra -DNDEBUG
 
 TEST_FLAGS = -DCHECK_UTF8_LOCALE -DLIBC_GLIBC
 
@@ -193,7 +193,7 @@ OBJS = \
 libutf16.a: $(OBJS)
 	ar -crs libutf16.a $(OBJS)
 
-test: tests/test.c libutf16.a
+test: tests/test.c tests/test_data.inl libutf16.a
 	gcc $(CFLAGS) $(TEST_FLAGS) tests/test.c -o test libutf16.a
 
 check: test
