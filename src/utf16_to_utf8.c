@@ -60,7 +60,7 @@ size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, s
 						if (0xDC00 != (r & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
 							*b = d;
-							return 0; /* bad utf16 surrogate pair: no lower surrogate */
+							return 0; /* bad utf16 surrogate pair: expecting lower surrogate */
 						}
 						s++;
 						if ((size_t)(e - d) < 4) {
@@ -82,7 +82,7 @@ size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, s
 					else if (0xDC00 == (c & 0xFC00)) {
 						*w = s - 1; /* (**w) != 0 */
 						*b = d;
-						return 0; /* bad utf16 surrogate pair: no high surrogate */
+						return 0; /* bad utf16 surrogate pair: missing high surrogate */
 					}
 					else if ((size_t)(e - d) < 3) {
 						m = 2;
@@ -153,13 +153,13 @@ size_t UTF_FORM_NAME(_z_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, s
 						c = UTF16_GET(s);
 						if (0xDC00 != (c & 0xFC00)) {
 							*w = s - 1; /* (**w) != 0 */
-							return 0; /* bad utf16 surrogate pair: no lower surrogate */
+							return 0; /* bad utf16 surrogate pair: expecting lower surrogate */
 						}
 						s++;
 					}
 					else if (0xDC00 == (c & 0xFC00)) {
 						*w = s - 1; /* (**w) != 0 */
-						return 0; /* bad utf16 surrogate pair: no high surrogate */
+						return 0; /* bad utf16 surrogate pair: missing high surrogate */
 					}
 					m++;
 				}
@@ -222,7 +222,7 @@ size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, siz
 							if (0xDC00 != (r & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
 								*b = d;
-								return 0; /* bad utf16 surrogate pair: no lower surrogate */
+								return 0; /* bad utf16 surrogate pair: expecting lower surrogate */
 							}
 							s++;
 							if ((size_t)(e - d) < 4) {
@@ -237,7 +237,7 @@ size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, siz
 						else if (0xDC00 == (c & 0xFC00)) {
 							*w = s - 1; /* (*w) < se */
 							*b = d;
-							return 0; /* bad utf16 surrogate pair: no high surrogate */
+							return 0; /* bad utf16 surrogate pair: missing high surrogate */
 						}
 						else if ((size_t)(e - d) < 3) {
 							m = 2;
@@ -308,13 +308,13 @@ size_t UTF_FORM_NAME(_)(const UTF16_CHAR_T **const w, utf8_char_t **const b, siz
 							c = (s != se) ? UTF16_GET(s) : 0u;
 							if (0xDC00 != (c & 0xFC00)) {
 								*w = s - 1; /* (*w) < se */
-								return 0; /* bad utf16 surrogate pair: no lower surrogate */
+								return 0; /* bad utf16 surrogate pair: expecting lower surrogate */
 							}
 							s++;
 						}
 						else if (0xDC00 == (c & 0xFC00)) {
 							*w = s - 1; /* (*w) < se */
-							return 0; /* bad utf16 surrogate pair: no high surrogate */
+							return 0; /* bad utf16 surrogate pair: missing high surrogate */
 						}
 						m++;
 					}
