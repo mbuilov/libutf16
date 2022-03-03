@@ -114,7 +114,7 @@ TEMPL_UTF16_TO_UTF8_Z_(utf16ux_to_utf8_z_, utf16_char_unaligned_t);
   sz - free space in output buffer, in utf8_char_t's, if zero - output buffer is not used, b may be not valid,
   n  - number of utf16_char_t's to convert, if zero - input and output buffers are not used.
  returns number of stored utf8_char_t's:
-  0     - if 'n' is zero, an invalid utf16 character is encountered or utf16 string is too long,
+  0     - if 'n' is zero, an invalid/incomplete utf16 character is encountered or utf16 string is too long,
   <= sz - all 'n' utf16_char_t's were successfully converted to utf8 ones and stored in the output buffer,
   > sz  - output buffer is too small:
    . if sz == 0 or determ_req_size != 0, then return value is the required buffer size to store whole converted
