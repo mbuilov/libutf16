@@ -1,6 +1,6 @@
 all: utf16.a
 
-CFLAGS = /O2 /I. /Wall
+CFLAGS = /O2 /I. /Wall /DNDEBUG
 
 LFLAGS =
 
@@ -195,7 +195,7 @@ OBJS = \
 utf16.a: $(OBJS)
 	lib /out:utf16.a $(OBJS)
 
-test.exe: tests\test.c utf16.a
+test.exe: tests\test.c tests\test_data.inl utf16.a
 	cl $(CFLAGS) $(TEST_FLAGS) /wd4820 /wd5045 /wd4711 /wd4710 /wd4996 tests\test.c /Fetest.exe /link $(LFLAGS) utf16.a
 
 check: test.exe
