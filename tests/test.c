@@ -1873,7 +1873,7 @@ static int test_utf8_mbstocs_or_cstombs(
 	return 0;
 }
 
-static int test_utf8_mbrstocs_or_csrtombs(
+static int test_utf8_mbsrtocs_or_csrtombs(
 	const utf8_char_t *const utf8,
 	const unsigned char *const utf16_le_be[2],
 	const unsigned char *const utf32_le_be[2],
@@ -2044,7 +2044,9 @@ static int test_utf8_mbrstocs_or_csrtombs(
 			}
 			TEST(!state);
 #ifdef CHECK_UTF8_LOCALE
+#ifndef LIBC_GLIBC /* for glibc, final state may be not initial */
 			LIBC_TEST(!memcmp(&state1, &state2, sizeof(state1)));
+#endif
 #endif
 		}
 	}
@@ -2057,14 +2059,16 @@ int main(int argc, char *argv[])
 {
 #ifdef CHECK_UTF8_LOCALE
 #ifdef _WIN32
-	const char *utf8_locale = (argc > 1) ? argv[1] : ".utf8";
+	const char def_utf8[] = ".utf8";
 #else
-	const char *utf8_locale = (argc > 1) ? argv[1] : "C.UTF-8";
+	const char def_utf8[] = "C.UTF-8";
 #endif
+	const char *const utf8_locale = (argc > 1) ? argv[1] : def_utf8;
 	const char *const locale = setlocale(LC_ALL, utf8_locale);
 	if (!locale) {
 		fprintf(stderr, "failed to set locale: \"%s\", "
-			"try to specify UTF-8 locale name explicitly as the command line argument\n", utf8_locale);
+			"try to specify UTF-8 locale name explicitly as the command line argument, e.g.:\n"
+			"%s ru_RU.UTF-8\n", utf8_locale, argv[0]);
 		return -2;
 	}
 #endif /* CHECK_UTF8_LOCALE */
@@ -2322,7 +2326,7 @@ int main(int argc, char *argv[])
 				data[z].utf16_sz + 10,
 				data[z].utf16_buf,
 				32, 16));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
@@ -2330,7 +2334,7 @@ int main(int argc, char *argv[])
 				data[z].utf16_sz + 10,
 				data[z].utf16_buf,
 				8, 16));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
@@ -2338,7 +2342,7 @@ int main(int argc, char *argv[])
 				data[z].utf8_sz + 10,
 				data[z].utf8_buf,
 				16, 8));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
@@ -2346,7 +2350,7 @@ int main(int argc, char *argv[])
 				data[z].utf32_sz + 10,
 				data[z].utf32_buf,
 				8, 32));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
@@ -2354,7 +2358,7 @@ int main(int argc, char *argv[])
 				data[z].utf8_sz + 10,
 				data[z].utf8_buf,
 				32, 8));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
@@ -2362,7 +2366,7 @@ int main(int argc, char *argv[])
 				data[z].utf32_sz + 10,
 				data[z].utf32_buf,
 				16, 32));
-			TEST(!test_utf8_mbrstocs_or_csrtombs(
+			TEST(!test_utf8_mbsrtocs_or_csrtombs(
 				data[z].utf8,
 				data[z].utf16_le_be,
 				data[z].utf32_le_be,
