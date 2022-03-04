@@ -66,8 +66,8 @@ extern "C" {
 
 #define TEMPL_UTF8_TO_UTF32_Z_(name, ot) \
 size_t name( \
-	const utf8_char_t **const q/*in,out,!=NULL*/, \
-	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const b/*in,out,!=NULL if sz>0*/, \
+	const utf8_char_t **const LIBUTF16_RESTRICT q/*in,out,!=NULL*/, \
+	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
@@ -133,8 +133,8 @@ TEMPL_UTF8_TO_UTF32_Z_(utf8_to_utf32ux_z_, utf32_char_unaligned_t);
 
 #define TEMPL_UTF8_TO_UTF32_(name, ot) \
 size_t name( \
-	const utf8_char_t **const q/*in,out,!=NULL if n>0*/, \
-	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const b/*in,out,!=NULL if n>0 && sz>0*/, \
+	const utf8_char_t **const LIBUTF16_RESTRICT q/*in,out,!=NULL if n>0*/, \
+	ot/*utf32_char_t,utf32_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if n>0 && sz>0*/, \
 	size_t sz/*0?*/, \
 	const size_t n/*0?*/, \
 	const int determ_req_size)
@@ -181,8 +181,8 @@ TEMPL_UTF8_TO_UTF32_(utf8_to_utf32ux_, utf32_char_unaligned_t);
 
 #define TEMPL_UTF8_TO_UTF32_Z_UNSAFE(name, ot) \
 const utf8_char_t *name( \
-	const utf8_char_t *q/*!=NULL,0-terminated*/, \
-	ot/*utf32_char_t,utf32_char_unaligned_t*/ buf[]/*out,!=NULL*/)
+	const utf8_char_t *LIBUTF16_RESTRICT q/*!=NULL,0-terminated*/, \
+	ot/*utf32_char_t,utf32_char_unaligned_t*/ *const LIBUTF16_RESTRICT buf/*out,!=NULL*/)
 
 TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32_z_unsafe, utf32_char_t);
 TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32x_z_unsafe, utf32_char_t);
@@ -200,8 +200,8 @@ TEMPL_UTF8_TO_UTF32_Z_UNSAFE(utf8_to_utf32ux_z_unsafe, utf32_char_unaligned_t);
 
 #define TEMPL_UTF8_TO_UTF32_UNSAFE(name, ot) \
 void name( \
-	const utf8_char_t *q/*!=NULL*/, \
-	ot/*utf32_char_t,utf32_char_unaligned_t*/ buf[]/*out,!=NULL*/, \
+	const utf8_char_t *LIBUTF16_RESTRICT q/*!=NULL*/, \
+	ot/*utf32_char_t,utf32_char_unaligned_t*/ *const LIBUTF16_RESTRICT buf/*out,!=NULL*/, \
 	const size_t n/*>0*/)
 
 TEMPL_UTF8_TO_UTF32_UNSAFE(utf8_to_utf32_unsafe, utf32_char_t);

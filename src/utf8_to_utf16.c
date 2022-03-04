@@ -43,16 +43,19 @@
  utf8_to_utf16u_z_
  utf8_to_utf16ux_z_
 */
-size_t UTF_FORM_NAME(_z_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, size_t sz, const int determ_req_size)
+size_t UTF_FORM_NAME(_z_)(
+	const utf8_char_t **const LIBUTF16_RESTRICT q,
+	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
+	size_t sz, const int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-	const utf8_char_t *s = *q;
+	const utf8_char_t *LIBUTF16_RESTRICT s = *q;
 	const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 	if (!sz)
 		t = s;
 	else {
-		UTF16_CHAR_T *d = *b;
+		UTF16_CHAR_T *LIBUTF16_RESTRICT d = *b;
 		const UTF16_CHAR_T *const e = (const UTF16_CHAR_T*)d + sz;
 		do {
 			unsigned a = s[0];
@@ -184,18 +187,21 @@ bad_utf8_s:
  utf8_to_utf16x_
  utf8_to_utf16ux_
 */
-size_t UTF_FORM_NAME(_)(const utf8_char_t **const q, UTF16_CHAR_T **const b, size_t sz, const size_t n, const int determ_req_size)
+size_t UTF_FORM_NAME(_)(
+	const utf8_char_t **const LIBUTF16_RESTRICT q,
+	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
+	size_t sz, const size_t n, const int determ_req_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
 		size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
-		const utf8_char_t *s = *q;
+		const utf8_char_t *LIBUTF16_RESTRICT s = *q;
 		const utf8_char_t *const se = s + n;
 		const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 		if (!sz)
 			t = s;
 		else {
-			UTF16_CHAR_T *d = *b;
+			UTF16_CHAR_T *LIBUTF16_RESTRICT d = *b;
 			const UTF16_CHAR_T *const e = (const UTF16_CHAR_T*)d + sz;
 			do {
 				unsigned a = s[0];
@@ -360,10 +366,12 @@ bad_utf8_s:
  utf8_to_utf16u_z_unsafe
  utf8_to_utf16ux_z_unsafe
 */
-const utf8_char_t *UTF_FORM_NAME(_z_unsafe)(const utf8_char_t *q, UTF16_CHAR_T buf[])
+const utf8_char_t *UTF_FORM_NAME(_z_unsafe)(
+	const utf8_char_t *LIBUTF16_RESTRICT q,
+	UTF16_CHAR_T *const LIBUTF16_RESTRICT buf)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	UTF16_CHAR_T *b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	UTF16_CHAR_T *LIBUTF16_RESTRICT b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	for (;;) {
 		unsigned a = q[0];
 		if (a >= 0x80) {
@@ -403,10 +411,13 @@ const utf8_char_t *UTF_FORM_NAME(_z_unsafe)(const utf8_char_t *q, UTF16_CHAR_T b
  utf8_to_utf16u_unsafe
  utf8_to_utf16ux_unsafe
 */
-void UTF_FORM_NAME(_unsafe)(const utf8_char_t *q, UTF16_CHAR_T buf[], const size_t n/*>0*/)
+void UTF_FORM_NAME(_unsafe)(
+	const utf8_char_t *LIBUTF16_RESTRICT q,
+	UTF16_CHAR_T *const LIBUTF16_RESTRICT buf,
+	const size_t n/*>0*/)
 {
 	/* unsigned integer type must be at least of 32 bits */
-	UTF16_CHAR_T *b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
+	UTF16_CHAR_T *LIBUTF16_RESTRICT b = buf + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *const qe = q + n;
 	do {
 		unsigned a = q[0];

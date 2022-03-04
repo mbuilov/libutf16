@@ -67,8 +67,8 @@ extern "C" {
 
 #define TEMPL_UTF16_TO_UTF8_Z_(name, it) \
 size_t name( \
-	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const w/*in,out,!=NULL*/, \
-	utf8_char_t **const b/*in,out,!=NULL if sz>0*/, \
+	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT w/*in,out,!=NULL*/, \
+	utf8_char_t **const LIBUTF16_RESTRICT b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
@@ -136,8 +136,8 @@ TEMPL_UTF16_TO_UTF8_Z_(utf16ux_to_utf8_z_, utf16_char_unaligned_t);
 
 #define TEMPL_UTF16_TO_UTF8_(name, it) \
 size_t name( \
-	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const w/*in,out,!=NULL if n>0*/, \
-	utf8_char_t **const b/*in,out,!=NULL if n>0 && sz>0*/, \
+	const it/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT w/*in,out,!=NULL if n>0*/, \
+	utf8_char_t **const LIBUTF16_RESTRICT b/*in,out,!=NULL if n>0 && sz>0*/, \
 	size_t sz/*0?*/, \
 	const size_t n/*0?*/, \
 	const int determ_req_size)
@@ -185,8 +185,8 @@ TEMPL_UTF16_TO_UTF8_(utf16ux_to_utf8_, utf16_char_unaligned_t);
 
 #define TEMPL_UTF16_TO_UTF8_Z_UNSAFE(name, it) \
 const it/*utf16_char_t,utf16_char_unaligned_t*/ *name( \
-	const it/*utf16_char_t,utf16_char_unaligned_t*/ *w/*!=NULL,0-terminated*/, \
-	utf8_char_t buf[]/*out,!=NULL*/)
+	const it/*utf16_char_t,utf16_char_unaligned_t*/ *LIBUTF16_RESTRICT w/*!=NULL,0-terminated*/, \
+	utf8_char_t *const LIBUTF16_RESTRICT buf/*out,!=NULL*/)
 
 TEMPL_UTF16_TO_UTF8_Z_UNSAFE(utf16_to_utf8_z_unsafe, utf16_char_t);
 TEMPL_UTF16_TO_UTF8_Z_UNSAFE(utf16x_to_utf8_z_unsafe, utf16_char_t);
@@ -204,8 +204,8 @@ TEMPL_UTF16_TO_UTF8_Z_UNSAFE(utf16ux_to_utf8_z_unsafe, utf16_char_unaligned_t);
 
 #define TEMPL_UTF16_TO_UTF8_UNSAFE(name, it) \
 void name( \
-	const it/*utf16_char_t,utf16_char_unaligned_t*/ *w/*!=NULL*/, \
-	utf8_char_t buf[]/*out,!=NULL*/, \
+	const it/*utf16_char_t,utf16_char_unaligned_t*/ *LIBUTF16_RESTRICT w/*!=NULL*/, \
+	utf8_char_t *const LIBUTF16_RESTRICT buf/*out,!=NULL*/, \
 	const size_t n/*>0*/)
 
 TEMPL_UTF16_TO_UTF8_UNSAFE(utf16_to_utf8_unsafe, utf16_char_t);

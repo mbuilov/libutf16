@@ -66,8 +66,8 @@ extern "C" {
 
 #define TEMPL_UTF32_TO_UTF16_Z_(name, it, ot) \
 size_t name( \
-	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const w/*in,out,!=NULL*/, \
-	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const b/*in,out,!=NULL if sz>0*/, \
+	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const LIBUTF16_RESTRICT w/*in,out,!=NULL*/, \
+	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
 	const int determ_req_size)
 
@@ -169,8 +169,8 @@ TEMPL_UTF32_TO_UTF16_Z_(utf32ux_to_utf16ux_z_, utf32_char_unaligned_t, utf16_cha
 
 #define TEMPL_UTF32_TO_UTF16_(name, it, ot) \
 size_t name( \
-	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const w/*in,out,!=NULL if n>0*/, \
-	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const b/*in,out,!=NULL if n>0 && sz>0*/, \
+	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const LIBUTF16_RESTRICT w/*in,out,!=NULL if n>0*/, \
+	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if n>0 && sz>0*/, \
 	size_t sz/*0?*/, \
 	const size_t n/*0?*/, \
 	const int determ_req_size)
@@ -253,8 +253,8 @@ TEMPL_UTF32_TO_UTF16_(utf32ux_to_utf16ux_, utf32_char_unaligned_t, utf16_char_un
 
 #define TEMPL_UTF32_TO_UTF16_Z_UNSAFE(name, it, ot) \
 const it/*utf32_char_t,utf32_char_unaligned_t*/ *name( \
-	const it/*utf32_char_t,utf32_char_unaligned_t*/ *w/*!=NULL,0-terminated*/, \
-	ot/*utf16_char_t,utf16_char_unaligned_t*/ buf[]/*out,!=NULL*/)
+	const it/*utf32_char_t,utf32_char_unaligned_t*/ *LIBUTF16_RESTRICT w/*!=NULL,0-terminated*/, \
+	ot/*utf16_char_t,utf16_char_unaligned_t*/ *const LIBUTF16_RESTRICT buf/*out,!=NULL*/)
 
 TEMPL_UTF32_TO_UTF16_Z_UNSAFE(utf32_to_utf16_z_unsafe, utf32_char_t, utf16_char_t);
 TEMPL_UTF32_TO_UTF16_Z_UNSAFE(utf32_to_utf16x_z_unsafe, utf32_char_t, utf16_char_t);
@@ -284,8 +284,8 @@ TEMPL_UTF32_TO_UTF16_Z_UNSAFE(utf32ux_to_utf16ux_z_unsafe, utf32_char_unaligned_
 
 #define TEMPL_UTF32_TO_UTF16_UNSAFE(name, it, ot) \
 void name( \
-	const it/*utf32_char_t,utf32_char_unaligned_t*/ *w/*!=NULL*/, \
-	ot/*utf16_char_t,utf16_char_unaligned_t*/ buf[]/*out,!=NULL*/, \
+	const it/*utf32_char_t,utf32_char_unaligned_t*/ *LIBUTF16_RESTRICT w/*!=NULL*/, \
+	ot/*utf16_char_t,utf16_char_unaligned_t*/ *const LIBUTF16_RESTRICT buf/*out,!=NULL*/, \
 	const size_t n/*>0*/)
 
 TEMPL_UTF32_TO_UTF16_UNSAFE(utf32_to_utf16_unsafe, utf32_char_t, utf16_char_t);
