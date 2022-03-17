@@ -1249,8 +1249,8 @@ static int test_utf8_mbrto_wc_or_c16_or_c32(
 							LIBC_TEST(dst.w16 == dst1.w16);
 						else
 							LIBC_TEST(dst.w32 == dst1.w32);
-#endif
 					}
+#endif
 				}
 				j++;
 				y = by;
