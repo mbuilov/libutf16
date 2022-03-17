@@ -1,6 +1,12 @@
 all: utf16.a
 
+CC = cl
+
 CFLAGS = /O2 /I. /Wall /DNDEBUG
+
+AR = lib
+
+ARFLAGS =
 
 LFLAGS =
 
@@ -37,107 +43,107 @@ UTF8_CSTD = src\utf8_cstd.c libutf16\utf8_cstd.h libutf16\utf16_char.h \
   libutf16\utf8_to_utf16_one.h libutf16\utf16_to_utf8_one.h
 
 .\src\utf32_to_utf16.obj:     $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16.obj
 .\src\utf32x_to_utf16.obj:    $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                                                      /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16.obj
+	$(CC) $(CFLAGS) /c                                                                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16.obj
 .\src\utf32_to_utf16x.obj:    $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16x.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16x.obj
 .\src\utf32x_to_utf16x.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16x.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16x.obj
 .\src\utf32_to_utf16u.obj:    $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16u.obj
 .\src\utf32x_to_utf16u.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16u.obj
 .\src\utf32_to_utf16ux.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32_to_utf16ux.obj
 .\src\utf32x_to_utf16ux.obj:  $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32x_to_utf16ux.obj
 .\src\utf32u_to_utf16.obj:    $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16.obj
 .\src\utf32ux_to_utf16.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16.obj
 .\src\utf32u_to_utf16x.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16x.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16x.obj
 .\src\utf32ux_to_utf16x.obj:  $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16x.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16x.obj
 .\src\utf32u_to_utf16u.obj:   $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16u.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16u.obj
 .\src\utf32ux_to_utf16u.obj:  $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16u.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16u.obj
 .\src\utf32u_to_utf16ux.obj:  $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16ux.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf32_to_utf16.c    /Fo.\src\utf32u_to_utf16ux.obj
 .\src\utf32ux_to_utf16ux.obj: $(UTF32_TO_UTF16)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16ux.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf32_to_utf16.c    /Fo.\src\utf32ux_to_utf16ux.obj
 .\src\utf16_to_utf32.obj:     $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32.obj
 .\src\utf16_to_utf32x.obj:    $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                                                      /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32x.obj
+	$(CC) $(CFLAGS) /c                                                                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32x.obj
 .\src\utf16x_to_utf32.obj:    $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32.obj
 .\src\utf16x_to_utf32x.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32x.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32x.obj
 .\src\utf16_to_utf32u.obj:    $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32u.obj
 .\src\utf16_to_utf32ux.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16_to_utf32ux.obj
 .\src\utf16x_to_utf32u.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32u.obj
 .\src\utf16x_to_utf32ux.obj:  $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16x_to_utf32ux.obj
 .\src\utf16u_to_utf32.obj:    $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32.obj
 .\src\utf16u_to_utf32x.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32x.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32x.obj
 .\src\utf16ux_to_utf32.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32.obj
 .\src\utf16ux_to_utf32x.obj:  $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32x.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                     /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32x.obj
 .\src\utf16u_to_utf32u.obj:   $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32u.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED                           .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32u.obj
 .\src\utf16u_to_utf32ux.obj:  $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32ux.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16u_to_utf32ux.obj
 .\src\utf16ux_to_utf32u.obj:  $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32u.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32u.obj
 .\src\utf16ux_to_utf32ux.obj: $(UTF16_TO_UTF32)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32ux.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED /DUTF_PUT_UNALIGNED /DSWAP_UTF16 /DSWAP_UTF32 .\src\utf16_to_utf32.c    /Fo.\src\utf16ux_to_utf32ux.obj
 .\src\utf32_to_utf8.obj:      $(UTF32_TO_UTF8)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf32_to_utf8.c     /Fo.\src\utf32_to_utf8.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf32_to_utf8.c     /Fo.\src\utf32_to_utf8.obj
 .\src\utf32x_to_utf8.obj:     $(UTF32_TO_UTF8)
-	cl $(CFLAGS) /c                                                                                      /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32x_to_utf8.obj
+	$(CC) $(CFLAGS) /c                                                                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32x_to_utf8.obj
 .\src\utf32u_to_utf8.obj:     $(UTF32_TO_UTF8)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo.\src\utf32u_to_utf8.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                               .\src\utf32_to_utf8.c     /Fo.\src\utf32u_to_utf8.obj
 .\src\utf32ux_to_utf8.obj:    $(UTF32_TO_UTF8)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32ux_to_utf8.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                  /DSWAP_UTF32 .\src\utf32_to_utf8.c     /Fo.\src\utf32ux_to_utf8.obj
 .\src\utf8_to_utf32.obj:      $(UTF8_TO_UTF32)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32.obj
 .\src\utf8_to_utf32x.obj:     $(UTF8_TO_UTF32)
-	cl $(CFLAGS) /c                                                                                      /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32x.obj
+	$(CC) $(CFLAGS) /c                                                                                  /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32x.obj
 .\src\utf8_to_utf32u.obj:     $(UTF8_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32u.obj
 .\src\utf8_to_utf32ux.obj:    $(UTF8_TO_UTF32)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED              /DSWAP_UTF32 .\src\utf8_to_utf32.c     /Fo.\src\utf8_to_utf32ux.obj
 .\src\utf16_to_utf8.obj:      $(UTF16_TO_UTF8)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf16_to_utf8.c     /Fo.\src\utf16_to_utf8.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf16_to_utf8.c     /Fo.\src\utf16_to_utf8.obj
 .\src\utf16x_to_utf8.obj:     $(UTF16_TO_UTF8)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16x_to_utf8.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16x_to_utf8.obj
 .\src\utf16u_to_utf8.obj:     $(UTF16_TO_UTF8)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo.\src\utf16u_to_utf8.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                                               .\src\utf16_to_utf8.c     /Fo.\src\utf16u_to_utf8.obj
 .\src\utf16ux_to_utf8.obj:    $(UTF16_TO_UTF8)
-	cl $(CFLAGS) /c                                 /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16ux_to_utf8.obj
+	$(CC) $(CFLAGS) /c                             /DUTF_GET_UNALIGNED                     /DSWAP_UTF16              .\src\utf16_to_utf8.c     /Fo.\src\utf16ux_to_utf8.obj
 .\src\utf8_to_utf16.obj:      $(UTF8_TO_UTF16)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16.obj
 .\src\utf8_to_utf16x.obj:     $(UTF8_TO_UTF16)
-	cl $(CFLAGS) /c                                                                         /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16x.obj
+	$(CC) $(CFLAGS) /c                                                                     /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16x.obj
 .\src\utf8_to_utf16u.obj:     $(UTF8_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16u.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED                           .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16u.obj
 .\src\utf8_to_utf16ux.obj:    $(UTF8_TO_UTF16)
-	cl $(CFLAGS) /c                                                     /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16ux.obj
+	$(CC) $(CFLAGS) /c                                                 /DUTF_PUT_UNALIGNED /DSWAP_UTF16              .\src\utf8_to_utf16.c     /Fo.\src\utf8_to_utf16ux.obj
 .\src\utf8_to_utf16_one.obj:  $(UTF8_TO_UTF16_ONE)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf8_to_utf16_one.c /Fo.\src\utf8_to_utf16_one.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf8_to_utf16_one.c /Fo.\src\utf8_to_utf16_one.obj
 .\src\utf16_to_utf8_one.obj:  $(UTF16_TO_UTF8_ONE)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf16_to_utf8_one.c /Fo.\src\utf16_to_utf8_one.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf16_to_utf8_one.c /Fo.\src\utf16_to_utf8_one.obj
 .\src\utf8_cstd.obj:          $(UTF8_CSTD)
-	cl $(CFLAGS) /c                                                                                                   .\src\utf8_cstd.c         /Fo.\src\utf8_cstd.obj
+	$(CC) $(CFLAGS) /c                                                                                               .\src\utf8_cstd.c         /Fo.\src\utf8_cstd.obj
 
 OBJS = \
 	.\src\utf32_to_utf16.obj      \
@@ -193,10 +199,10 @@ OBJS = \
 	.\src\utf8_cstd.obj
 
 utf16.a: $(OBJS)
-	lib /out:utf16.a $(OBJS)
+	$(AR) $(ARFLAGS) /out:utf16.a $(OBJS)
 
 test.exe: tests\test.c tests\test_data.inl utf16.a
-	cl $(CFLAGS) $(TEST_FLAGS) /wd4820 /wd5045 /wd4711 /wd4710 /wd4996 tests\test.c /Fetest.exe /link $(LFLAGS) utf16.a
+	$(CC) $(CFLAGS) $(TEST_FLAGS) /wd4820 /wd5045 /wd4711 /wd4710 /wd4996 tests\test.c /Fetest.exe /link $(LFLAGS) utf16.a
 
 check: test.exe
 	.\test.exe
