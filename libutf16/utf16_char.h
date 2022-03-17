@@ -69,14 +69,35 @@ typedef unsigned int utf8_state_t;
 /* check if utf32_char_t is in a range reserved for utf16 surrogates */
 #define utf32_is_surrogate(c) (((c) - 0xD800) <= (0xDFFF - 0xD800))
 
-/* check for unicode character with code point 0xFEFF (used as Byte Order Mark) */
-#define utf16_is_bom_le(a, b)       ((a) == 0xFF && (b) == 0xFE)
-#define utf16_is_bom_be(a, b)       ((a) == 0xFE && (b) == 0xFF)
-#define utf32_is_bom_le(a, b, c, d) ((a) == 0xFF && (b) == 0xFE && (c) == 0 && (d) == 0)
-#define utf32_is_bom_be(a, b, c, d) ((a) == 0 && (b) == 0 && (c) == 0xFE && (d) == 0xFF)
+/* utf16/utf32 character used as Byte Order Mark (BOM) */
+#define UTF16_BOM 0xFEFF
+
+/* check for BOM in array of bytes */
+#define UTF16_BYTES_IS_BOM_LE(a,b)       ((a) == 0xFF && (b) == 0xFE)
+#define UTF16_BYTES_IS_BOM_BE(a,b)       ((a) == 0xFE && (b) == 0xFF)
+#define UTF32_BYTES_IS_BOM_LE(a,b,c,d)   ((a) == 0xFF && (b) == 0xFE && (c) == 0 && (d) == 0)
+#define UTF32_BYTES_IS_BOM_BE(a,b,c,d)   ((a) == 0 && (b) == 0 && (c) == 0xFE && (d) == 0xFF)
+
+/* check if p points to bytes of BOM */
+/* note: p is used multiple times! */
+#define UTF16_IS_BOM_LE(p)   UTF16_BYTES_IS_BOM_LE(((const unsigned char*)(p))[0], \
+                                                   ((const unsigned char*)(p))[1])
+
+#define UTF16_IS_BOM_BE(p)   UTF16_BYTES_IS_BOM_BE(((const unsigned char*)(p))[0], \
+                                                   ((const unsigned char*)(p))[1])
+
+#define UTF32_IS_BOM_LE(p)   UTF32_BYTES_IS_BOM_LE(((const unsigned char*)(p))[0], \
+                                                   ((const unsigned char*)(p))[1], \
+                                                   ((const unsigned char*)(p))[2], \
+                                                   ((const unsigned char*)(p))[3])
+
+#define UTF32_IS_BOM_BE(p)   UTF32_BYTES_IS_BOM_BE(((const unsigned char*)(p))[0], \
+                                                   ((const unsigned char*)(p))[1], \
+                                                   ((const unsigned char*)(p))[2], \
+                                                   ((const unsigned char*)(p))[3])
 
 /* check for BOM in a valid utf8 string: b and c are evaluated only when needed */
-#define UTF8_IS_BOM(a, b, c)        ((a) == 0xEF && (b) == 0xBB && (c) == 0xBF)
+#define UTF8_IS_BOM(a,b,c)   ((a) == 0xEF && (b) == 0xBB && (c) == 0xBF)
 
 /* try to workaround gcc bug
   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81631 */
