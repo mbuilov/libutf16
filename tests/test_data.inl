@@ -5049,11 +5049,11 @@ static void fill_test_bufs(void)
 {
 	{
 		unsigned n = 0;
-		const unsigned char *const src[] = {
+		const void *const src[] = {
 			utf16_be_1,
 			utf16_be_2
 		};
-		unsigned char *const dst[] = {
+		void *const dst[] = {
 			utf16_le_1,
 			utf16_le_2
 		};
@@ -5071,11 +5071,11 @@ static void fill_test_bufs(void)
 	}
 	{
 		unsigned n = 0;
-		const unsigned char *const src[] = {
+		const void *const src[] = {
 			utf32_be_1,
 			utf32_be_2
 		};
-		unsigned char *const dst[] = {
+		void *const dst[] = {
 			utf32_le_1,
 			utf32_le_2
 		};
