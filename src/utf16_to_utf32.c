@@ -64,7 +64,7 @@
 size_t UTF_FORM_NAME(_z_)(
 	const UTF16_CHAR_T **const LIBUTF16_RESTRICT q,
 	UTF32_CHAR_T **const LIBUTF16_RESTRICT b,
-	size_t sz, const int determ_req_size)
+	size_t sz, int determ_req_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -111,6 +111,10 @@ size_t UTF_FORM_NAME(_z_)(
 			return sz + 1; /* ok, >0, but > dst buffer size */
 		}
 	}
+	else if (!determ_req_size)
+		return 1;
+	else if (2 == determ_req_size)
+		determ_req_size = 0;
 	{
 		const UTF16_CHAR_T *const t = s; /* points beyond the last converted non-0 utf16_char_t */
 		for (;;) {
@@ -132,7 +136,7 @@ size_t UTF_FORM_NAME(_z_)(
 				break;
 		}
 		sz += (size_t)(s - t) - m;
-		*q = t; /* points after the last successfully converted non-0 utf16_char_t */
+		*q = !determ_req_size ? s : t/* points after the last successfully converted non-0 utf16_char_t */;
 		return sz; /* ok, >0, but > dst buffer size */
 	}
 }
@@ -201,6 +205,8 @@ size_t UTF_FORM_NAME(_)(
 				return sz + 1; /* ok, >0, but > dst buffer size */
 			}
 		}
+		else if (!determ_req_size)
+			return 1;
 		{
 			const UTF16_CHAR_T *const t = s; /* points beyond the last converted utf16_char_t, t < se */
 			do {

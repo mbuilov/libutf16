@@ -64,6 +64,14 @@ static unsigned long long test_number = 0;
 		TEST(w == s); \
 	}
 
+#define TESTSZE(f,t,s,e,dst_sz) \
+	{ \
+		const t *w = s; \
+		const size_t sz = FUNC(f, (&w)); \
+		TEST(sz == dst_sz); \
+		TEST(w == e); \
+	}
+
 #define TESTCONV(sz,f,t,s/*const*/,e/*const*/,z,xt,dt,d,buf,buf_sz,dst_sz) \
 	{ \
 		unsigned i = 0, next_i = 0; \
@@ -175,6 +183,10 @@ static int test_utf16_to_utf8(
 	TESTSZ(EMPTY, utf16u_to_utf8_z_size, utf16_char_unaligned_t, src16u, src16u_e, utf8_sz)
 	TESTSZ(EMPTY, utf16x_to_utf8_z_size, utf16_char_t, src16x, src16x_e, utf8_sz)
 	TESTSZ(EMPTY, utf16ux_to_utf8_z_size, utf16_char_unaligned_t, src16ux, src16ux_e, utf8_sz)
+	TESTSZE(utf16_to_utf8_z_size_e, utf16_char_t, src16, src16_e, utf8_sz)
+	TESTSZE(utf16u_to_utf8_z_size_e, utf16_char_unaligned_t, src16u, src16u_e, utf8_sz)
+	TESTSZE(utf16x_to_utf8_z_size_e, utf16_char_t, src16x, src16x_e, utf8_sz)
+	TESTSZE(utf16ux_to_utf8_z_size_e, utf16_char_unaligned_t, src16ux, src16ux_e, utf8_sz)
 	TESTCONV(SZ, utf16_to_utf8, utf16_char_t, src16, src16_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
 	TESTCONV(SZ, utf16u_to_utf8, utf16_char_unaligned_t, src16u, src16u_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
 	TESTCONV(SZ, utf16x_to_utf8, utf16_char_t, src16x, src16x_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
@@ -218,6 +230,10 @@ static int test_utf32_to_utf8(
 	TESTSZ(EMPTY, utf32u_to_utf8_z_size, utf32_char_unaligned_t, src32u, src32u_e, utf8_sz)
 	TESTSZ(EMPTY, utf32x_to_utf8_z_size, utf32_char_t, src32x, src32x_e, utf8_sz)
 	TESTSZ(EMPTY, utf32ux_to_utf8_z_size, utf32_char_unaligned_t, src32ux, src32ux_e, utf8_sz)
+	TESTSZE(utf32_to_utf8_z_size_e, utf32_char_t, src32, src32_e, utf8_sz)
+	TESTSZE(utf32u_to_utf8_z_size_e, utf32_char_unaligned_t, src32u, src32u_e, utf8_sz)
+	TESTSZE(utf32x_to_utf8_z_size_e, utf32_char_t, src32x, src32x_e, utf8_sz)
+	TESTSZE(utf32ux_to_utf8_z_size_e, utf32_char_unaligned_t, src32ux, src32ux_e, utf8_sz)
 	TESTCONV(SZ, utf32_to_utf8, utf32_char_t, src32, src32_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
 	TESTCONV(SZ, utf32u_to_utf8, utf32_char_unaligned_t, src32u, src32u_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
 	TESTCONV(SZ, utf32x_to_utf8, utf32_char_t, src32x, src32x_e, z(), utf8_char_t, utf8_char_t, utf8, utf8_buf, utf8_buf_sz, utf8_sz)
@@ -256,6 +272,10 @@ static int test_utf8_to_utf16(
 	TESTSZ(EMPTY, utf8_to_utf16u_z_size, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf8_to_utf16x_z_size, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf8_to_utf16ux_z_size, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf16_z_size_e, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf16u_z_size_e, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf16x_z_size_e, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf16ux_z_size_e, utf8_char_t, utf8, utf8_e, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf16, utf8_char_t, utf8, utf8_e, z(), utf16_char_t, utf16_char_t, src16, utf16_buf, utf16_buf_sz, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf16u, utf8_char_t, utf8, utf8_e, z(), utf16_char_t, utf16_char_unaligned_t, src16, ((utf16_char_unaligned_t*)utf16_buf), utf16_buf_sz, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf16x, utf8_char_t, utf8, utf8_e, z(), utf16_char_t, utf16_char_t, src16x, utf16_buf, utf16_buf_sz, utf16_sz - 1/*BOM*/)
@@ -294,6 +314,10 @@ static int test_utf8_to_utf32(
 	TESTSZ(EMPTY, utf8_to_utf32u_z_size, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf8_to_utf32x_z_size, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf8_to_utf32ux_z_size, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf32_z_size_e, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf32u_z_size_e, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf32x_z_size_e, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf8_to_utf32ux_z_size_e, utf8_char_t, utf8, utf8_e, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf32, utf8_char_t, utf8, utf8_e, z(), utf32_char_t, utf32_char_t, src32, utf32_buf, utf32_buf_sz, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf32u, utf8_char_t, utf8, utf8_e, z(), utf32_char_t, utf32_char_unaligned_t, src32, ((utf32_char_unaligned_t*)utf32_buf), utf32_buf_sz, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf8_to_utf32x, utf8_char_t, utf8, utf8_e, z(), utf32_char_t, utf32_char_t, src32x, utf32_buf, utf32_buf_sz, utf32_sz - 1/*BOM*/)
@@ -341,6 +365,10 @@ static int test_utf16_to_utf32(
 	TESTSZ(EMPTY, utf16u_to_utf32_z_size, utf16_char_unaligned_t, src16u, src16u_e, utf32_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf16x_to_utf32_z_size, utf16_char_t, src16x, src16x_e, utf32_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf16ux_to_utf32_z_size, utf16_char_unaligned_t, src16ux, src16ux_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf16_to_utf32_z_size_e, utf16_char_t, src16, src16_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf16u_to_utf32_z_size_e, utf16_char_unaligned_t, src16u, src16u_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf16x_to_utf32_z_size_e, utf16_char_t, src16x, src16x_e, utf32_sz - 1/*BOM*/)
+	TESTSZE(utf16ux_to_utf32_z_size_e, utf16_char_unaligned_t, src16ux, src16ux_e, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf16_to_utf32, utf16_char_t, src16, src16_e, z(), utf32_char_t, utf32_char_t, src32, utf32_buf, utf32_buf_sz, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf16_to_utf32u, utf16_char_t, src16, src16_e, z(), utf32_char_t, utf32_char_unaligned_t, src32, ((utf32_char_unaligned_t*)utf32_buf), utf32_buf_sz, utf32_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf16_to_utf32x, utf16_char_t, src16, src16_e, z(), utf32_char_t, utf32_char_t, src32x, utf32_buf, utf32_buf_sz, utf32_sz - 1/*BOM*/)
@@ -412,6 +440,10 @@ static int test_utf32_to_utf16(
 	TESTSZ(EMPTY, utf32u_to_utf16_z_size, utf32_char_unaligned_t, src32u, src32u_e, utf16_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf32x_to_utf16_z_size, utf32_char_t, src32x, src32x_e, utf16_sz - 1/*BOM*/)
 	TESTSZ(EMPTY, utf32ux_to_utf16_z_size, utf32_char_unaligned_t, src32ux, src32ux_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf32_to_utf16_z_size_e, utf32_char_t, src32, src32_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf32u_to_utf16_z_size_e, utf32_char_unaligned_t, src32u, src32u_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf32x_to_utf16_z_size_e, utf32_char_t, src32x, src32x_e, utf16_sz - 1/*BOM*/)
+	TESTSZE(utf32ux_to_utf16_z_size_e, utf32_char_unaligned_t, src32ux, src32ux_e, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf32_to_utf16, utf32_char_t, src32, src32_e, z(), utf16_char_t, utf16_char_t, src16, utf16_buf, utf16_buf_sz, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf32_to_utf16u, utf32_char_t, src32, src32_e, z(), utf16_char_t, utf16_char_unaligned_t, src16, ((utf16_char_unaligned_t*)utf16_buf), utf16_buf_sz, utf16_sz - 1/*BOM*/)
 	TESTCONV(SZ, utf32_to_utf16x, utf32_char_t, src32, src32_e, z(), utf16_char_t, utf16_char_t, src16x, utf16_buf, utf16_buf_sz, utf16_sz - 1/*BOM*/)

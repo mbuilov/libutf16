@@ -18,7 +18,7 @@ extern "C" {
 /*
   group of functions for converting utf32 string to utf8 string:
 
-  utf32{,u}{,x}_to_utf8{,_z}{,_size,_partial,_unsafe}
+  utf32{,u}{,x}_to_utf8{{,_z}{,_size,_partial,_unsafe},_z_size_e}
 
   such as:
 
@@ -30,6 +30,7 @@ extern "C" {
   utf32_to_utf8_z_size
   utf32_to_utf8_z_partial
   utf32_to_utf8_z_unsafe
+  utf32_to_utf8_z_size_e
   ...
 
   functions modifiers:
@@ -42,13 +43,13 @@ extern "C" {
 /* convert utf32 0-terminated string to utf8 0-terminated one,
  input:
   w  - address of the pointer to the beginning of input 0-terminated utf32 string,
-  b  - optional address of the pointer to the beginning of output buffer,
+  b  - optional address of the pointer to the beginning of output buffer (not used if sz == 0),
   sz - free space in output buffer, in utf8_char_t's, if zero - output buffer is not used, b may be not valid.
  returns number of stored utf8_char_t's, including terminating 0:
   0     - if utf32 string is invalid,
   <= sz - 0-terminated utf8 string was successfully stored in the output buffer,
   > sz  - output buffer is too small:
-   . if sz == 0 or determ_req_size != 0, then return value is the required buffer size to store whole
+   . if determ_req_size != 0, then return value is the required buffer size to store whole
    converted utf8 0-terminated string, including the part that was already converted and stored
    in the output buffer, including 0-terminator, in utf8_char_t's;
    . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
@@ -56,8 +57,10 @@ extern "C" {
   (*w) - points beyond the 0-terminator of input utf32 string,
   (*b) - points beyond the 0-terminator stored in the output buffer;
  - if output buffer is too small (return > sz):
-  (*w) - if sz == 0, not changed, else - points beyond last converted (non-0) utf32_char_t,
-  (*b) - if sz == 0, not changed, else - points beyond last stored (non-0) utf8_char_t;
+  (*w):
+   . if sz == 0 and determ_req_size == 2, then points beyond the 0-terminator of input utf32 string,
+   . else - if sz == 0, not changed, else - points beyond last converted (non-0) utf32_char_t,
+  (*b) - if sz > 0, points beyond last stored (non-0) utf8_char_t;
  - if input utf32 string is invalid (return == 0):
   (*w) - points beyond last valid utf32_char_t (to first invalid bytes),
    . if output buffer is too small (e.g. sz == 0), last valid utf32_char_t may be beyond last converted one,
@@ -69,7 +72,7 @@ size_t name( \
 	const it/*utf32_char_t,utf32_char_unaligned_t*/ **const LIBUTF16_RESTRICT w/*in,out,!=NULL*/, \
 	utf8_char_t **const LIBUTF16_RESTRICT b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
-	const int determ_req_size)
+	int determ_req_size)
 
 TEMPL_UTF32_TO_UTF8_Z_(utf32_to_utf8_z_, utf32_char_t);
 TEMPL_UTF32_TO_UTF8_Z_(utf32x_to_utf8_z_, utf32_char_t);
@@ -103,19 +106,26 @@ TEMPL_UTF32_TO_UTF8_Z_(utf32ux_to_utf8_z_, utf32_char_unaligned_t);
 #define utf32u_to_utf8_z_size(w/*in,out,!=NULL*/)  utf32u_to_utf8_z(w, /*b:*/NULL, /*sz:*/0)
 #define utf32ux_to_utf8_z_size(w/*in,out,!=NULL*/) utf32ux_to_utf8_z(w, /*b:*/NULL, /*sz:*/0)
 
+/* same as utf32_to_utf8_z_size(), but changes (*w) on success:
+  (*w) - points beyond the 0-terminator of input utf32 string */
+#define utf32_to_utf8_z_size_e(w/*in,out,!=NULL*/)   utf32_to_utf8_z_(w, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
+#define utf32x_to_utf8_z_size_e(w/*in,out,!=NULL*/)  utf32x_to_utf8_z_(w, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
+#define utf32u_to_utf8_z_size_e(w/*in,out,!=NULL*/)  utf32u_to_utf8_z_(w, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
+#define utf32ux_to_utf8_z_size_e(w/*in,out,!=NULL*/) utf32ux_to_utf8_z_(w, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
+
 /* ------------------------------------------------------------------------------------------ */
 
 /* convert 'n' utf32_char_t's to utf8 ones,
  input:
   w  - address of the pointer to the beginning of input utf32 string,
-  b  - optional address of the pointer to the beginning of output buffer,
+  b  - optional address of the pointer to the beginning of output buffer (not used if sz == 0),
   sz - free space in output buffer, in utf8_char_t's, if zero - output buffer is not used, b may be not valid,
   n  - number of utf32_char_t's to convert, if zero - input and output buffers are not used.
  returns number of stored utf8_char_t's:
   0     - if 'n' is zero or an invalid utf32 character is encountered,
   <= sz - all 'n' utf32_char_t's were successfully converted to utf8 ones and stored in the output buffer,
   > sz  - output buffer is too small:
-   . if sz == 0 or determ_req_size != 0, then return value is the required buffer size to store whole converted
+   . if determ_req_size != 0, then return value is the required buffer size to store whole converted
    utf8 string, including the part that was already converted and stored in the output buffer, in utf8_char_t's;
    . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
  - on success (0 < return <= sz):
@@ -123,7 +133,7 @@ TEMPL_UTF32_TO_UTF8_Z_(utf32ux_to_utf8_z_, utf32_char_unaligned_t);
   (*b) - points beyond last converted utf8_char_t stored in the output buffer;
  - if output buffer is too small (return > sz):
   (*w) - if sz == 0, not changed, else - points beyond last converted utf32_char_t,
-  (*b) - if sz == 0, not changed, else - points beyond last stored utf8_char_t;
+  (*b) - if sz > 0, points beyond last stored utf8_char_t;
  - if input utf32 string is invalid (return == 0):
   (*w) - points beyond last valid utf32_char_t (to first invalid bytes),
    . if output buffer is too small (e.g. sz == 0), last valid utf32_char_t may be beyond last converted one,
