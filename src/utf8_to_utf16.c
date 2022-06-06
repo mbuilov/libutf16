@@ -46,17 +46,17 @@
 size_t UTF_FORM_NAME(_z_)(
 	const utf8_char_t **const LIBUTF16_RESTRICT q,
 	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
-	size_t sz, int determ_req_size)
+	size_t sz, int determ_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
 	const utf8_char_t *LIBUTF16_RESTRICT s = *q;
 	const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 	if (!sz) {
-		if (!determ_req_size)
+		if (!determ_size)
 			return 1;
-		if (2 == determ_req_size)
-			determ_req_size = 0;
+		if (2 == determ_size)
+			determ_size = 0;
 		t = s;
 	}
 	else {
@@ -122,7 +122,7 @@ bad_utf8:
 small_buf:
 		sz = (size_t)(d - *b);
 		*b = d;
-		if (!determ_req_size) {
+		if (!determ_size) {
 			*q = t; /* points after the last successfully converted non-0 utf8_char_t */
 			return sz + 1 + m; /* ok, >0, but > dst buffer size */
 		}
@@ -179,7 +179,7 @@ bad_utf8_s:
 				 1 utf8_char_t   -> 1 utf16_char_t. */
 				/* append a number of utf16_char_t's in utf8 string started from 't' */
 				sz += (size_t)(s - t) - m;
-				*q = !determ_req_size ? s : t/* points after the last successfully converted non-0 utf8_char_t */;
+				*q = !determ_size ? s : t/* points after the last successfully converted non-0 utf8_char_t */;
 				return sz; /* ok, >0, but > dst buffer size */
 			}
 		}
@@ -195,7 +195,7 @@ bad_utf8_s:
 size_t UTF_FORM_NAME(_)(
 	const utf8_char_t **const LIBUTF16_RESTRICT q,
 	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
-	size_t sz, const size_t n, const int determ_req_size)
+	size_t sz, const size_t n, const int determ_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -204,7 +204,7 @@ size_t UTF_FORM_NAME(_)(
 		const utf8_char_t *const se = s + n;
 		const utf8_char_t *t; /* points beyond the last converted utf8_char_t */
 		if (!sz) {
-			if (!determ_req_size)
+			if (!determ_size)
 				return 1;
 			t = s;
 		}
@@ -288,7 +288,7 @@ bad_utf8:
 small_buf:
 			sz = (size_t)(d - *b);
 			*b = d;
-			if (!determ_req_size) {
+			if (!determ_size) {
 				*q = t; /* points after the last successfully converted utf8_char_t, (*q) < se */
 				return sz + 1 + m; /* ok, >0, but > dst buffer size */
 			}

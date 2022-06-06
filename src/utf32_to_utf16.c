@@ -64,7 +64,7 @@
 size_t UTF_FORM_NAME(_z_)(
 	const UTF32_CHAR_T **const LIBUTF16_RESTRICT w,
 	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
-	size_t sz, int determ_req_size)
+	size_t sz, int determ_size)
 {
 	/* unsigned integer type must be at least of 32 bits */
 	size_t m = 0 + 0*sizeof(int[1-2*((unsigned)-1 < 0xFFFFFFFF)]);
@@ -103,15 +103,15 @@ size_t UTF_FORM_NAME(_z_)(
 		/* too small output buffer */
 		sz = (size_t)(d - *b);
 		*b = d;
-		if (!determ_req_size) {
+		if (!determ_size) {
 			*w = s - m; /* points beyond the last converted non-0 utf32_char_t */
 			return sz + 1 + m; /* ok, >0, but > dst buffer size */
 		}
 	}
-	else if (!determ_req_size)
+	else if (!determ_size)
 		return 1;
-	else if (2 == determ_req_size)
-		determ_req_size = 0;
+	else if (2 == determ_size)
+		determ_size = 0;
 	/* NOTE: assume total size in bytes of input utf32 string, including terminating 0,
 	  may be stored in a variable of size_t type without loss, so for each utf32_char_t may
 	  safely increment 'm' at least by 2 without integer overflow */
@@ -134,7 +134,7 @@ size_t UTF_FORM_NAME(_z_)(
 				break;
 		}
 		sz += m + (size_t)(s - t);
-		*w = !determ_req_size ? s : t/* points after the last successfully converted non-0 utf32_char_t */;
+		*w = !determ_size ? s : t/* points after the last successfully converted non-0 utf32_char_t */;
 		return sz; /* ok, >0, but > dst buffer size */
 	}
 }
@@ -160,7 +160,7 @@ size_t UTF_FORM_NAME(_z_)(
 size_t UTF_FORM_NAME(_)(
 	const UTF32_CHAR_T **const LIBUTF16_RESTRICT w,
 	UTF16_CHAR_T **const LIBUTF16_RESTRICT b,
-	size_t sz, const size_t n, const int determ_req_size)
+	size_t sz, const size_t n, const int determ_size)
 {
 	if (n) {
 		/* unsigned integer type must be at least of 32 bits */
@@ -201,12 +201,12 @@ size_t UTF_FORM_NAME(_)(
 			/* too small output buffer */
 			sz = (size_t)(d - *b);
 			*b = d;
-			if (!determ_req_size) {
+			if (!determ_size) {
 				*w = s - m; /* points beyond the last converted utf32_char_t, (*w) < se */
 				return sz + 1 + m; /* ok, >0, but > dst buffer size */
 			}
 		}
-		else if (!determ_req_size)
+		else if (!determ_size)
 			return 1;
 		/* NOTE: assume total size in bytes of input utf32 string,
 		  may be stored in a variable of size_t type without loss, so for each utf32_char_t may

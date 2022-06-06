@@ -49,7 +49,7 @@ extern "C" {
   0     - if utf8 string is invalid,
   <= sz - 0-terminated utf16 string was successfully stored in the output buffer,
   > sz  - output buffer is too small:
-   . if determ_req_size != 0, then return value is the required buffer size to store whole
+   . if determ_size != 0, then return value is the required buffer size to store whole
    converted utf16 0-terminated string, including the part that was already converted and stored
    in the output buffer, including 0-terminator, in utf16_char_t's;
    . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
@@ -58,7 +58,7 @@ extern "C" {
   (*b) - points beyond the 0-terminator stored in the output buffer;
  - if output buffer is too small (return > sz):
   (*q):
-   . if sz == 0 and determ_req_size == 2, then points beyond the 0-terminator of input utf8 string,
+   . if sz == 0 and determ_size == 2, then points beyond the 0-terminator of input utf8 string,
    . else - if sz == 0, not changed, else - points beyond last converted (non-0) utf8_char_t,
   (*b) - if sz > 0, points beyond last stored (non-0) utf16_char_t;
  - if input utf8 string is invalid (return == 0):
@@ -72,7 +72,7 @@ size_t name( \
 	const utf8_char_t **const LIBUTF16_RESTRICT q/*in,out,!=NULL*/, \
 	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if sz>0*/, \
 	size_t sz/*0?*/, \
-	int determ_req_size)
+	int determ_size)
 
 TEMPL_UTF8_TO_UTF16_Z_(utf8_to_utf16_z_, utf16_char_t);
 TEMPL_UTF8_TO_UTF16_Z_(utf8_to_utf16x_z_, utf16_char_t);
@@ -81,15 +81,15 @@ TEMPL_UTF8_TO_UTF16_Z_(utf8_to_utf16ux_z_, utf16_char_unaligned_t);
 
 #undef TEMPL_UTF8_TO_UTF16_Z_
 
-#define utf8_to_utf16_z(q, b, sz)             utf8_to_utf16_z_(q, b, sz, /*determ_req_size:*/1)
-#define utf8_to_utf16x_z(q, b, sz)            utf8_to_utf16x_z_(q, b, sz, /*determ_req_size:*/1)
-#define utf8_to_utf16u_z(q, b, sz)            utf8_to_utf16u_z_(q, b, sz, /*determ_req_size:*/1)
-#define utf8_to_utf16ux_z(q, b, sz)           utf8_to_utf16ux_z_(q, b, sz, /*determ_req_size:*/1)
+#define utf8_to_utf16_z(q, b, sz)             utf8_to_utf16_z_(q, b, sz, /*determ_size:*/1)
+#define utf8_to_utf16x_z(q, b, sz)            utf8_to_utf16x_z_(q, b, sz, /*determ_size:*/1)
+#define utf8_to_utf16u_z(q, b, sz)            utf8_to_utf16u_z_(q, b, sz, /*determ_size:*/1)
+#define utf8_to_utf16ux_z(q, b, sz)           utf8_to_utf16ux_z_(q, b, sz, /*determ_size:*/1)
 
-#define utf8_to_utf16_z_partial(q, b, sz)     utf8_to_utf16_z_(q, b, sz, /*determ_req_size:*/0)
-#define utf8_to_utf16x_z_partial(q, b, sz)    utf8_to_utf16x_z_(q, b, sz, /*determ_req_size:*/0)
-#define utf8_to_utf16u_z_partial(q, b, sz)    utf8_to_utf16u_z_(q, b, sz, /*determ_req_size:*/0)
-#define utf8_to_utf16ux_z_partial(q, b, sz)   utf8_to_utf16ux_z_(q, b, sz, /*determ_req_size:*/0)
+#define utf8_to_utf16_z_partial(q, b, sz)     utf8_to_utf16_z_(q, b, sz, /*determ_size:*/0)
+#define utf8_to_utf16x_z_partial(q, b, sz)    utf8_to_utf16x_z_(q, b, sz, /*determ_size:*/0)
+#define utf8_to_utf16u_z_partial(q, b, sz)    utf8_to_utf16u_z_(q, b, sz, /*determ_size:*/0)
+#define utf8_to_utf16ux_z_partial(q, b, sz)   utf8_to_utf16ux_z_(q, b, sz, /*determ_size:*/0)
 
 /* determine the size (in utf16_char_t's) of resulting converted from
   utf8 to utf16 0-terminated string, including terminating 0,
@@ -108,10 +108,10 @@ TEMPL_UTF8_TO_UTF16_Z_(utf8_to_utf16ux_z_, utf16_char_unaligned_t);
 
 /* same as utf8_to_utf16_z_size(), but changes (*q) on success:
   (*q) - points beyond the 0-terminator of input utf8 string */
-#define utf8_to_utf16_z_size_e(q/*in,out,!=NULL*/)   utf8_to_utf16_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
-#define utf8_to_utf16x_z_size_e(q/*in,out,!=NULL*/)  utf8_to_utf16x_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
-#define utf8_to_utf16u_z_size_e(q/*in,out,!=NULL*/)  utf8_to_utf16u_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
-#define utf8_to_utf16ux_z_size_e(q/*in,out,!=NULL*/) utf8_to_utf16ux_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_req_size:*/2)
+#define utf8_to_utf16_z_size_e(q/*in,out,!=NULL*/)   utf8_to_utf16_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_size:*/2)
+#define utf8_to_utf16x_z_size_e(q/*in,out,!=NULL*/)  utf8_to_utf16x_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_size:*/2)
+#define utf8_to_utf16u_z_size_e(q/*in,out,!=NULL*/)  utf8_to_utf16u_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_size:*/2)
+#define utf8_to_utf16ux_z_size_e(q/*in,out,!=NULL*/) utf8_to_utf16ux_z_(q, /*b:*/NULL, /*sz:*/0, /*determ_size:*/2)
 
 /* ------------------------------------------------------------------------------------------ */
 
@@ -125,7 +125,7 @@ TEMPL_UTF8_TO_UTF16_Z_(utf8_to_utf16ux_z_, utf16_char_unaligned_t);
   0     - if 'n' is zero or an invalid/incomplete utf8 character is encountered,
   <= sz - all 'n' utf8_char_t's were successfully converted to utf16 ones and stored in the output buffer,
   > sz  - output buffer is too small:
-   . if determ_req_size != 0, then return value is the required buffer size to store whole converted
+   . if determ_size != 0, then return value is the required buffer size to store whole converted
    utf16 string, including the part that was already converted and stored in the output buffer, in utf16_char_t's;
    . else - do not determine required size of output buffer - return value is an arbitrary number > sz;
  - on success (0 < return <= sz):
@@ -147,7 +147,7 @@ size_t name( \
 	ot/*utf16_char_t,utf16_char_unaligned_t*/ **const LIBUTF16_RESTRICT b/*in,out,!=NULL if n>0 && sz>0*/, \
 	size_t sz/*0?*/, \
 	const size_t n/*0?*/, \
-	const int determ_req_size)
+	const int determ_size)
 
 TEMPL_UTF8_TO_UTF16_(utf8_to_utf16_, utf16_char_t);
 TEMPL_UTF8_TO_UTF16_(utf8_to_utf16x_, utf16_char_t);
@@ -156,15 +156,15 @@ TEMPL_UTF8_TO_UTF16_(utf8_to_utf16ux_, utf16_char_unaligned_t);
 
 #undef TEMPL_UTF8_TO_UTF16_
 
-#define utf8_to_utf16(q, b, sz, n)             utf8_to_utf16_(q, b, sz, n, /*determ_req_size:*/1)
-#define utf8_to_utf16x(q, b, sz, n)            utf8_to_utf16x_(q, b, sz, n, /*determ_req_size:*/1)
-#define utf8_to_utf16u(q, b, sz, n)            utf8_to_utf16u_(q, b, sz, n, /*determ_req_size:*/1)
-#define utf8_to_utf16ux(q, b, sz, n)           utf8_to_utf16ux_(q, b, sz, n, /*determ_req_size:*/1)
+#define utf8_to_utf16(q, b, sz, n)             utf8_to_utf16_(q, b, sz, n, /*determ_size:*/1)
+#define utf8_to_utf16x(q, b, sz, n)            utf8_to_utf16x_(q, b, sz, n, /*determ_size:*/1)
+#define utf8_to_utf16u(q, b, sz, n)            utf8_to_utf16u_(q, b, sz, n, /*determ_size:*/1)
+#define utf8_to_utf16ux(q, b, sz, n)           utf8_to_utf16ux_(q, b, sz, n, /*determ_size:*/1)
 
-#define utf8_to_utf16_partial(q, b, sz, n)     utf8_to_utf16_(q, b, sz, n, /*determ_req_size:*/0)
-#define utf8_to_utf16x_partial(q, b, sz, n)    utf8_to_utf16x_(q, b, sz, n, /*determ_req_size:*/0)
-#define utf8_to_utf16u_partial(q, b, sz, n)    utf8_to_utf16u_(q, b, sz, n, /*determ_req_size:*/0)
-#define utf8_to_utf16ux_partial(q, b, sz, n)   utf8_to_utf16ux_(q, b, sz, n, /*determ_req_size:*/0)
+#define utf8_to_utf16_partial(q, b, sz, n)     utf8_to_utf16_(q, b, sz, n, /*determ_size:*/0)
+#define utf8_to_utf16x_partial(q, b, sz, n)    utf8_to_utf16x_(q, b, sz, n, /*determ_size:*/0)
+#define utf8_to_utf16u_partial(q, b, sz, n)    utf8_to_utf16u_(q, b, sz, n, /*determ_size:*/0)
+#define utf8_to_utf16ux_partial(q, b, sz, n)   utf8_to_utf16ux_(q, b, sz, n, /*determ_size:*/0)
 
 /* determine the size (in utf16_char_t's) of resulting buffer needed for converting 'n' utf8_char_t's to utf16 ones,
  input:
