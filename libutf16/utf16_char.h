@@ -120,8 +120,9 @@ typedef unsigned int utf8_state_t;
 /* check if utf16_char_t is a part of utf16-surrogate pair */
 #define utf16_is_surrogate(c) (((unsigned)(c) - 0xD800) <= (0xDFFF - 0xD800))
 
-/* h - high part of surrogate pair, l - low part */
-#define utf16_to_utf32_one(h, l) (((utf32_char_t)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
+/* convert utf16 surrogate pair to a utf32 character,
+  h - high part of surrogate pair, l - low part */
+#define utf16_pair_to_utf32_one(h, l) (((utf32_char_t)(h) << 10) + (unsigned)(l) - 0x360DC00 + 0x10000)
 
 /* get high part of utf16 surrogate pair from a utf32 character > 0xFFFF */
 #define utf32_get_high_surrogate(u) ((utf16_char_t)((((u) - 0x10000) >> 10) + 0xD800))
