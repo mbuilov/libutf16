@@ -136,6 +136,31 @@ typedef unsigned int utf8_state_t;
 /* check if utf32_char_t is in a range reserved for utf16 surrogates */
 #define utf32_is_surrogate(c) (((c) - 0xD800) <= (0xDFFF - 0xD800))
 
+/* try to decode one utf32 character from a string of utf16 characters,
+  if successful, saves utf32 character to (*d) and advances (*k) by 1 or 2,
+  if failed (utf16 string is invalid or too short), sets (*k) to 0 */
+#define utf16_read_utf32_one(d/*out*/, s/*in,[len]*/, k/*in:(*k)<len,out*/, len/*in,>0*/) \
+do {                                                         \
+	utf32_char_t *const d_ = d;                              \
+	const utf16_char_t *const s_ = s;                        \
+	size_t *const k_ = k;                                    \
+	const size_t n_ = *k_;                                   \
+	const utf16_char_t a_ = s_[n_];                          \
+	if (!utf16_is_surrogate(a_)) {                           \
+		*d_ = (utf32_char_t)a_;                              \
+		*k_ = n_ + 1;                                        \
+	}                                                        \
+	else if (utf16_is_high_surrogate(a_) &&                  \
+		n_ + 1 < (len) &&                                    \
+		utf16_is_low_surrogate(s_[n_ + 1]))                  \
+	{                                                        \
+		*d_ = utf16_pair_to_utf32_one(a_, s_[n_ + 1]);       \
+		*k_ = n_ + 2;                                        \
+	}                                                        \
+	else                                                     \
+		*k_ = 0; /* incomplete/invalid utf16 character */    \
+} while (0)
+
 /* utf16/utf32 character used as Byte Order Mark (BOM) */
 #define UTF16_BOM 0xFEFF
 

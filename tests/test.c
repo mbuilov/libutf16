@@ -495,6 +495,30 @@ static int test_utf8_decode_len(
 	return 0;
 }
 
+static int test_utf16_read_utf32_one(
+	const utf32_char_t *const utf32_le_be[2],
+	const utf16_char_t *const utf16_le_be[2],
+	const unsigned utf32_sz,
+	const unsigned utf16_sz)
+{
+	const unsigned le = 1;
+	const utf32_char_t *const src32 = (const utf32_char_t*)utf32_le_be[!*(const char*)&le] + 1/*BOM*/;
+	const utf16_char_t *const src16 = (const utf16_char_t*)utf16_le_be[!*(const char*)&le] + 1/*BOM*/;
+	const size_t len = utf16_sz - 1/*BOM*/;
+	size_t i = 0, k = 0;
+	for (; k < len; i++) {
+		utf32_char_t d;
+		utf16_read_utf32_one(&d, src16, &k, len);
+		if (k == 0)
+			return 1;
+		if (d != src32[i])
+			return 1;
+	}
+	TEST(k == len);
+	TEST(i == utf32_sz - 1/*BOM*/);
+	return 0;
+}
+
 static int test_utf16_to_utf8_one(
 	const unsigned utf16_sz,
 	const unsigned utf8_sz,
@@ -2256,6 +2280,11 @@ int main(int argc, char *argv[])
 				data[z].utf8_sz,
 				data[z].utf8,
 				data[z].utf32_sz));
+			TEST(!test_utf16_read_utf32_one(
+				data[z].utf32_le_be,
+				data[z].utf16_le_be,
+				data[z].utf32_sz,
+				data[z].utf16_sz));
 			TEST(!test_utf16_to_utf8_one(
 				data[z].utf16_sz,
 				data[z].utf8_sz,
