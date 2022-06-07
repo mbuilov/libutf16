@@ -97,6 +97,11 @@ typedef unsigned char utf32_char_unaligned_t[sizeof(utf32_char_t)];
 /* utf8 <-> utf16 conversion state */
 typedef unsigned int utf8_state_t;
 
+/* decode length of utf8 character encoded in first byte */
+/* note: assume given byte is valid, valid ranges for the first byte are: [0..0x7F] or [0xC2..0xF4] */
+/* note: c is used multiple times! */
+#define utf8_decode_len(c) (1 + ((c) >= 0xC0) + ((c) >= 0xE0) + ((c) >= 0xF0))
+
 /* check if given utf8_char_t completes a unicode character */
 #define utf8_is_one_byte(c) ((c) < 0x80)
 
