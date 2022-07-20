@@ -161,6 +161,26 @@ do {                                                         \
 		*k_ = 0; /* incomplete/invalid utf16 character */    \
 } while (0)
 
+/* decode one utf32 character from a previously checked valid string of utf16 characters:
+  saves utf32 character to (*d) and advances (*s) by 1 or 2 */
+#define utf16_read_utf32_one_unsafe(d/*out*/, s/*in*/)       \
+do {                                                         \
+	utf32_char_t *const d_ = d;                              \
+	const utf16_char_t **const s_ = s;                       \
+	const utf16_char_t *const p_ = *s_;                      \
+	const utf16_char_t a_ = *p_;                             \
+	if (!utf16_is_high_surrogate(a_)) {                      \
+		/* also, must not be a low surrogate */              \
+		*d_ = (utf32_char_t)a_;                              \
+		*s_ = p_ + 1;                                        \
+	}                                                        \
+	else {                                                   \
+		/* high surrogate + low surrogate */                 \
+		*d_ = utf16_pair_to_utf32_one(a_, p_[1]);            \
+		*s_ = p_ + 2;                                        \
+	}                                                        \
+} while (0)
+
 /* utf16/utf32 character used as Byte Order Mark (BOM) */
 #define UTF16_BOM 0xFEFF
 
