@@ -3,7 +3,7 @@
 
 /**********************************************************************************
 * UTF-16 -> UTF-8 characters conversion
-* Copyright (C) 2018-2022 Michael M. Builov, https://github.com/mbuilov/libutf16
+* Copyright (C) 2018-2023 Michael M. Builov, https://github.com/mbuilov/libutf16
 * Licensed under Apache License v2.0, see LICENSE.TXT
 **********************************************************************************/
 
@@ -63,7 +63,7 @@ extern "C" {
   (*b) - if sz > 0, points beyond last stored (non-0) utf8_char_t;
  - if input utf16 string is invalid or too long (return == 0):
   (*w) - points beyond last valid utf16_char_t (to first invalid bytes or past the end of string),
-   . if output buffer is too small (e.g. sz == 0), last valid utf16_char_t may be beyond last converted one,
+   . if output buffer is too small and determ_size != 0, last valid utf16_char_t may be beyond last converted one,
    . if input utf16 string is too long, last valid utf16_char_t is the 0-terminator,
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ 0;
   (*b) - if sz > 0, points beyond last successfully converted and stored (non-0) utf8_char_t */
@@ -138,7 +138,7 @@ TEMPL_UTF16_TO_UTF8_Z_(utf16ux_to_utf8_z_, utf16_char_unaligned_t);
   (*b) - if sz > 0, points beyond last stored utf8_char_t;
  - if input utf16 string is invalid or too long (return == 0):
   (*w) - points beyond last valid utf16_char_t (to first invalid bytes or past the end of string),
-   . if output buffer is too small, last valid utf16_char_t may be beyond last converted one,
+   . if output buffer is too small and determ_size != 0, last valid utf16_char_t may be beyond last converted one,
    . if input utf16 string is too long, last valid utf16_char_t is the last character of utf16 string,
    . if input utf16 string is invalid, last valid utf16_char_t is _not_ the last character of utf16 string;
   (*b) - if sz > 0, points beyond last successfully converted and stored utf8_char_t */
